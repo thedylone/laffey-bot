@@ -22,7 +22,7 @@ bot = commands.Bot(command_prefix=config['prefix'], intents=disnake.Intents.defa
 async def on_ready():
     print(f"logged in {bot.user.name}")
     #set activity of the bot
-    await bot.change_presence(activity=disnake.Game(f"with lolis | {config['prefix']}ping"))
+    await bot.change_presence(activity=disnake.Game(f"with lolis | {config['prefix']}help"))
 
 # removes default help command
 # bot.remove_command("help")
