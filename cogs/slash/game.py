@@ -142,6 +142,9 @@ class Game(commands.Cog):
             title="valorant waitlist",
             description="waitlist of watched users"
         )
+        embed.set_thumbnail(
+            url="https://cdn.vox-cdn.com/uploads/chorus_image/image/66615355/VALORANT_Jett_Red_crop.0.jpg"
+        )
         for user_id in self.waitlist:
             embed.add_field(
                 name="user",
@@ -190,7 +193,7 @@ class Game(commands.Cog):
                                         if playerData[member_id]['lastTime'] < recentTime: playerData[member_id]['lastTime'] = recentTime
                                         if member_id in self.waitlist:
                                             combined_waiters += self.waitlist.pop(member_id)
-                                    if combined_waiters: await channel.send(f"<@{'> <@'.join(combined_waiters)}> removing from waitlist") # pings waiters
+                                    if combined_waiters: await channel.send(f"<@{'> <@'.join(list(set(combined_waiters)))}> removing from waitlist") # pings waiters
                                     json_helper.save(playerData)
             await asyncio.sleep(0.5) # sleeps for number of seconds (avoid rate limit)
                           
