@@ -47,12 +47,12 @@ class Background(commands.Cog):
                                     # detects if multiple watched users are in the same game
                                     embed = disnake.Embed(
                                         title="valorant watch",
-                                        description=f"<@{'> and <@'.join(party)}> just finished a game!"
+                                        description=f"<@{'> and <@'.join(party)}> just finished a game at <t:{int(recentTime)}>!"
                                     )
                                     await channel.send(embed=embed)
                                     for member_id in party:
-                                        # sets party members to update last updated time
-                                        playerData[member_id]['lastTime'] = recentTime
+                                        # sets party members to update last updated time if more recent
+                                        if playerData[member_id]['lastTime'] < recentTime: playerData[member_id]['lastTime'] = recentTime
                                     json_helper.save(playerData)
             await asyncio.sleep(0.5) # sleeps for number of seconds (avoid rate limit)
         
