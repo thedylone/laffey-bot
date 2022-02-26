@@ -2,3 +2,4 @@ __pycache__/
 .env
 config.json
 playerData.json
+.replit

@@ -13,7 +13,6 @@ else:
     with open("config.json") as file:
         config = json.load(file)
 
-# cock and ball torture
 # creating a commands.Bot() instance, and assigning it to "bot"
 bot = commands.Bot(command_prefix=config['prefix'], intents=disnake.Intents.default())
 

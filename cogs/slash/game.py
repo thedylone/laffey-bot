@@ -39,13 +39,16 @@ class Game(commands.Cog):
                             description='ping jewels role',
                             guild_ids=config['guilds'])
     async def jewelsPing(self, inter: disnake.ApplicationCommandInteraction):
+        await inter.response.defer()
         """pings @jewels role and sends image"""
-        await inter.response.send_message("<@&943511061447987281>", file=disnake.File('jewelsignal.jpg'))
+        await inter.edit_original_message(content="<@&943511061447987281>", file=disnake.File('jewelsignal.jpg'))
 
     @commands.slash_command(name='valorant-info',
                             description='view valorant data in database',
                             guild_ids=config['guilds'])
     async def valorantinfo(self, inter: disnake.ApplicationCommandInteraction):
+        await inter.response.defer()
+        """returns user's valorant info from the database"""
         playerData = loadData()
         user_id = str(inter.user.id)
         if user_id in playerData:
@@ -71,14 +74,16 @@ class Game(commands.Cog):
                 name="last updated",
                 value=f"<t:{int(user_data['lastTime'])}>"
             )
-            await inter.response.send_message(embed=embed)
+            await inter.edit_original_message(embed=embed)
         else:
-            await inter.response.send_message(f"<@{user_id}> not in database! do /valorant-watch first")
+            await inter.edit_original_message(content=f"<@{user_id}> not in database! do /valorant-watch first")
 
     @commands.slash_command(name='valorant-watch',
                             description='adds user into database',
                             guild_ids=config['guilds'])
     async def valorantwatch(self, inter: disnake.ApplicationCommandInteraction, name: str, tag: str):
+        await inter.response.defer()
+        """add user's valorant info to the database"""
         playerData = loadData()
         user_id = str(inter.user.id)
         async with aiohttp.ClientSession() as session:
@@ -93,23 +98,25 @@ class Game(commands.Cog):
                         'puuid': data['data']['puuid'],
                         'lastTime': time.time()
                     }
-                    await inter.response.send_message(f"<@{user_id}> database updated, user added. remove using /valorant-unwatch")
+                    await inter.edit_original_message(content=f"<@{user_id}> database updated, user added. remove using /valorant-unwatch")
                     saveData(playerData)
                 else:
-                    await inter.response.send_message(f"<@{user_id}> error connecting, database not updated. please try again")
+                    await inter.edit_original_message(content=f"<@{user_id}> error connecting, database not updated. please try again")
 
     @commands.slash_command(name='valorant-unwatch',
                             description='removes user from database',
                             guild_ids=config['guilds'])
     async def valorantunwatch(self, inter: disnake.ApplicationCommandInteraction):
+        await inter.response.defer()
+        """removes user's valorant info from the database"""
         playerData = loadData()
         user_id = str(inter.user.id)
         if user_id in playerData:
             del playerData[user_id]
             saveData(playerData)
-            await inter.response.send_message(f"<@{user_id}> database updated, user removed. add again using /valorant-watch")
+            await inter.edit_original_message(content=f"<@{user_id}> database updated, user removed. add again using /valorant-watch")
         else:
-            await inter.response.send_message(f"<@{user_id}> error updating, user not in database")
+            await inter.edit_original_message(content=f"<@{user_id}> error updating, user not in database")
 
     @tasks.loop(seconds=30)
     async def valorantcycle(self):
