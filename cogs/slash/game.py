@@ -36,13 +36,15 @@ class Game(commands.Cog):
         self.valorantcycle.start()
 
     @commands.slash_command(name='jewels',
-                            description='ping jewels role')
+                            description='ping jewels role',
+                            guild_ids=config['guilds'])
     async def jewelsPing(self, inter: disnake.ApplicationCommandInteraction):
         """pings @jewels role and sends image"""
         await inter.response.send_message("<@&943511061447987281>", file=disnake.File('jewelsignal.jpg'))
 
     @commands.slash_command(name='valorant-info',
-                            description='view valorant data in database')
+                            description='view valorant data in database',
+                            guild_ids=config['guilds'])
     async def valorantinfo(self, inter: disnake.ApplicationCommandInteraction):
         playerData = loadData()
         user_id = str(inter.user.id)
@@ -67,44 +69,47 @@ class Game(commands.Cog):
             )
             embed.add_field(
                 name="last updated",
-                value=f"<t:{user_data['lastTime']}>"
+                value=f"<t:{int(user_data['lastTime'])}>"
             )
             await inter.response.send_message(embed=embed)
         else:
             await inter.response.send_message(f"<@{user_id}> not in database! do /valorant-watch first")
 
     @commands.slash_command(name='valorant-watch',
-                            description='adds user into database')
-    async def valorantwatch(self, inter: disnake.ApplicationCommandInteraction, name: str, tag: str, region: str='asia'):
+                            description='adds user into database',
+                            guild_ids=config['guilds'])
+    async def valorantwatch(self, inter: disnake.ApplicationCommandInteraction, name: str, tag: str):
         playerData = loadData()
         user_id = str(inter.user.id)
         async with aiohttp.ClientSession() as session:
-            async with session.get(f'https://{region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{name}/{tag}?api_key={RIOT_TOKEN}') as request:
+            async with session.get(f'https://api.henrikdev.xyz/valorant/v1/account/{name}/{tag}') as request:
+            # using this until access for riot api granted async with session.get(f'https://{region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{name}/{tag}?api_key={RIOT_TOKEN}') as request:
                 if request.status == 200:
                     data = await request.json()
                     playerData[user_id] = {
                         'name': name,
                         'tag': tag,
-                        'region': region,
-                        'puuid': data['puuid'],
+                        'region': data['data']['region'],
+                        'puuid': data['data']['puuid'],
                         'lastTime': time.time()
                     }
-                    await inter.response.send_message("database updated, user added. remove using /valorant-unwatch")
+                    await inter.response.send_message(f"<@{user_id}> database updated, user added. remove using /valorant-unwatch")
                     saveData(playerData)
                 else:
-                    await inter.response.send_message("error connecting, database not updated. please try again")
+                    await inter.response.send_message(f"<@{user_id}> error connecting, database not updated. please try again")
 
     @commands.slash_command(name='valorant-unwatch',
-                            description='removes user from database')
+                            description='removes user from database',
+                            guild_ids=config['guilds'])
     async def valorantunwatch(self, inter: disnake.ApplicationCommandInteraction):
         playerData = loadData()
         user_id = str(inter.user.id)
         if user_id in playerData:
             del playerData[user_id]
             saveData(playerData)
-            await inter.response.send_message("database updated, user removed. add again using /valorant-watch")
+            await inter.response.send_message(f"<@{user_id}> database updated, user removed. add again using /valorant-watch")
         else:
-            await inter.response.send_message("error updating, user not in database")
+            await inter.response.send_message(f"<@{user_id}> error updating, user not in database")
 
     @tasks.loop(seconds=30)
     async def valorantcycle(self):
@@ -112,10 +117,11 @@ class Game(commands.Cog):
         channel = self.bot.get_channel(config['watch_channel']) # retrieves channel ID from config.json
         playerData = loadData()
         for user_id in playerData:
+            playerData = loadData()
             user_data = playerData[user_id]
-            if time.time() - user_data['lastTime'] > 5 * 60: # cooldown in seconds
+            if time.time() - user_data['lastTime'] > config["watch_cooldown"] * 60: # cooldown in seconds
                 puuid = user_data['puuid']
-                region = 'ap'
+                region = user_data['region']
                 name = user_data['name']
                 tag = user_data['tag']
                 async with aiohttp.ClientSession() as session:
@@ -124,16 +130,21 @@ class Game(commands.Cog):
                         if request.status == 200:
                             data = await request.json()
                             if len(data['data']):
-                                recentTime = data['data'][0]['metadata']['game_start']
+                                latestGame = data['data'][0]
+                                recentTime = latestGame['metadata']['game_start']
                                 if user_data['lastTime'] < recentTime: # if latest game played is more recent than stored latest
+                                    party = [new_user_id for player in latestGame['players']['all_players'] for new_user_id in playerData if player['puuid'] == playerData[new_user_id]['puuid']]
+                                    # detects if multiple watched users are in the same game
                                     embed = disnake.Embed(
                                         title="valorant watch",
-                                        description=f"<@{user_id}> just finished a game!"
+                                        description=f"<@{'> and <@'.join(party)}> just finished a game!"
                                     )
                                     await channel.send(embed=embed)
-                                    user_data['lastTime'] = recentTime
+                                    for member_id in party:
+                                        # sets party members to update last updated time
+                                        playerData[member_id]['lastTime'] = recentTime
                                     saveData(playerData)
-            await asyncio.sleep(1) # sleeps for number of seconds (avoid rate limit)
+            await asyncio.sleep(0.5) # sleeps for number of seconds (avoid rate limit)
                           
 
 def setup(bot: commands.Bot):

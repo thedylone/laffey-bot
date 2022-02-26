@@ -1,7 +1,16 @@
 import disnake
 from disnake.ext import commands
 
+import os
+import json
 import aiohttp
+import sys
+
+if not os.path.isfile("config.json"):
+    sys.exit("'config.json' not found!")
+else:
+    with open("config.json") as file:
+        config = json.load(file)
 
 
 class Crypto(commands.Cog):
@@ -9,7 +18,8 @@ class Crypto(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name='sol',
-                            description='solprice')
+                            description='solprice',
+                            guild_ids=config['guilds'])
     async def sol(self, inter: disnake.ApplicationCommandInteraction):
         """get the current price of SOL in USD."""
         async with aiohttp.ClientSession() as session:
