@@ -29,7 +29,7 @@ class Background(commands.Cog):
         channel = self.bot.get_channel(config['watch_channel']) # retrieves channel ID from config.json
         playerData = json_helper.load()
         for user_id in playerData:
-            playerData = json_helper.load()
+            playerData = json_helper.load() # reloads playerData 
             user_data = playerData[user_id]
             if time.time() - user_data['lastTime'] > config["watch_cooldown"] * 60: # cooldown in seconds
                 puuid = user_data['puuid']
@@ -41,7 +41,9 @@ class Background(commands.Cog):
                             data = await request.json()
                             if len(data['data']):
                                 latestGame = data['data'][0]
-                                recentTime = latestGame['metadata']['game_start']
+                                startTime = latestGame['metadata']['game_start'] # given in s
+                                duration = latestGame['metadata']['game_length'] / 1000 # given in ms 
+                                recentTime = startTime + duration
                                 if user_data['lastTime'] < recentTime: # if latest game played is more recent than stored latest
                                     party = [new_user_id for player in latestGame['players']['all_players'] for new_user_id in playerData if player['puuid'] == playerData[new_user_id]['puuid']]
                                     # detects if multiple watched users are in the same game
@@ -49,7 +51,7 @@ class Background(commands.Cog):
                                         title="valorant watch",
                                         description=f"<@{'> and <@'.join(party)}> just finished a game at <t:{int(recentTime)}>!"
                                     )
-                                    await channel.send(embed=embed)
+                                    await channel.send(embed=embed) # sends the notification embed
                                     for member_id in party:
                                         # sets party members to update last updated time if more recent
                                         if playerData[member_id]['lastTime'] < recentTime: playerData[member_id]['lastTime'] = recentTime
