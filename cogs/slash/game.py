@@ -92,7 +92,7 @@ class Game(commands.Cog):
                     await inter.response.send_message("database updated, user added. remove using /valorant-unwatch")
                     saveData(playerData)
                 else:
-                    await inter.response.send_message("error connecting, database not updated")
+                    await inter.response.send_message("error connecting, database not updated. please try again")
 
     @commands.slash_command(name='valorant-unwatch',
                             description='removes user from database')

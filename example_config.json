@@ -1,0 +1,6 @@
+{
+  "prefix": "YOUR PREFIX HERE",
+  "slash": 1, 
+  "normal": 1,
+  "watch_channel": "YOUR CHANNEL ID HERE (INT) e.g. 1234567890"
+}
