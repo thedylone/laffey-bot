@@ -4,6 +4,7 @@ from disnake.ext import tasks, commands
 import os
 import json
 import aiohttp
+import asyncio
 import time
 import sys
 
@@ -47,7 +48,28 @@ class Game(commands.Cog):
         user_id = str(inter.user.id)
         if user_id in playerData:
             user_data = playerData[user_id]
-            await inter.response.send_message(f"<@{user_id}> {user_data['name']}#{user_data['tag']} in {user_data['region']}")
+            embed = disnake.Embed(
+                title="valorant info",
+                description=f"<@{user_id}> saved info"
+            )
+            embed.set_thumbnail(
+                url=inter.user.display_avatar.url
+            )
+            embed.add_field(
+                name="username",
+                value=f"{user_data['name']}",
+                inline= True
+            )
+            embed.add_field(
+                name="tag",
+                value=f"#{user_data['tag']}",
+                inline= True
+            )
+            embed.add_field(
+                name="last updated",
+                value=f"<t:{user_data['lastTime']}>"
+            )
+            await inter.response.send_message(embed=embed)
         else:
             await inter.response.send_message(f"<@{user_id}> not in database! do /valorant-watch first")
 
@@ -67,7 +89,7 @@ class Game(commands.Cog):
                         'puuid': data['puuid'],
                         'lastTime': time.time()
                     }
-                    await inter.response.send_message("database updated")
+                    await inter.response.send_message("database updated, user added. remove using /valorant-unwatch")
                     saveData(playerData)
                 else:
                     await inter.response.send_message("error connecting, database not updated")
@@ -80,33 +102,38 @@ class Game(commands.Cog):
         if user_id in playerData:
             del playerData[user_id]
             saveData(playerData)
-            await inter.response.send_message("database updated")
+            await inter.response.send_message("database updated, user removed. add again using /valorant-watch")
         else:
             await inter.response.send_message("error updating, user not in database")
 
     @tasks.loop(seconds=30)
     async def valorantcycle(self):
         await self.bot.wait_until_ready()  # wait until the bot logs in
-        channel = self.bot.get_channel(config['watch_channel'])
-        await channel.send("new cycle")
+        channel = self.bot.get_channel(config['watch_channel']) # retrieves channel ID from config.json
         playerData = loadData()
-        for key in playerData:
-            user = playerData[key]
-            await channel.send(f"hi {user['name']}#{user['tag']}")
-            if time.time() - user['lastTime'] > 5 * 60: # cooldown in seconds
-                puuid = user['puuid']
+        for user_id in playerData:
+            user_data = playerData[user_id]
+            if time.time() - user_data['lastTime'] > 5 * 60: # cooldown in seconds
+                puuid = user_data['puuid']
                 region = 'ap'
+                name = user_data['name']
+                tag = user_data['tag']
                 async with aiohttp.ClientSession() as session:
-                    async with session.get(f'https://api.henrikdev.xyz/valorant/v3/by-puuid/matches/{region}/{puuid}') as request:
+                    async with session.get(f'https://api.henrikdev.xyz/valorant/v3/matches/{region}/{name}/{tag}') as request:
                         # using this until access for riot granted async with session.get(f'https://{region}.api.riotgames.com/val/match/v1/matchlists/by-puuid/{puuid}?api_key={RIOT_TOKEN}') as request:
                         if request.status == 200:
                             data = await request.json()
                             if len(data['data']):
                                 recentTime = data['data'][0]['metadata']['game_start']
-                                if user['lastTime'] < recentTime:
-                                    await channel.send(f'noob')
-                                    user['lastTime'] = recentTime
+                                if user_data['lastTime'] < recentTime: # if latest game played is more recent than stored latest
+                                    embed = disnake.Embed(
+                                        title="valorant watch",
+                                        description=f"<@{user_id}> just finished a game!"
+                                    )
+                                    await channel.send(embed=embed)
+                                    user_data['lastTime'] = recentTime
                                     saveData(playerData)
+            await asyncio.sleep(1) # sleeps for number of seconds (avoid rate limit)
                           
 
 def setup(bot: commands.Bot):
