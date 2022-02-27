@@ -47,6 +47,12 @@ watch_cooldown
 ping_role
 > int: the ID of the role the bot will ping
 
+feeder_embed_image
+> str[]: list of urls for the feeder embed image. the bot will randomly choose 1 from the list each time.
+
+feeder_msg
+> str[]: list of messages for the feeder embed. the bot will randomly choose 1 from the list each time.
+
 ### .env
 BOT_TOKEN
 > place your Discord Application token in here

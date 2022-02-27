@@ -48,41 +48,32 @@ class Background(commands.Cog):
                                 duration = latestGame['metadata']['game_length'] / 1000 # given in ms 
                                 recentTime = startTime + duration + 100
                                 if user_data['lastTime'] < recentTime: # if latest game played is more recent than stored latest
-                                    #party = [new_user_id for player in latestGame['players']['all_players'] for new_user_id in playerData if player['puuid'] == playerData[new_user_id]['puuid']]
                                     party = []
                                     feeders = []
                                     for player in latestGame['players']['all_players']:
-                                        for n in playerData:
-                                            if player['puuid'] == playerData[n]['puuid']:
-                                                party.append(n)
+                                        for player_id in playerData:
+                                            if player['puuid'] == playerData[player_id]['puuid']: # detects if multiple watched users are in the same game
+                                                party.append(player_id)
                                                 kills = player['stats']['kills']
                                                 deaths = player['stats']['deaths']
-                                                # if (deaths >= (kills + (1.1*math.e)**(kills/5) + 2.9)):
-                                                #     feeders.append(n)
-                                                    
-                                                if (deaths >= 0):
-                                                    feeders.append(n)
-                                            
-                                        
-                                                
+                                                if (deaths >= (kills + (1.1*math.e)**(kills/5) + 2.9)): # formula for calculating feeding threshold
+                                                    feeders.append(player_id)
                                     
-                                            
-                                        
-                                    # detects if multiple watched users are in the same game
-                                    playerembed = disnake.Embed(
+                                    player_embed = disnake.Embed(
                                         title="valorant watch",
                                         description=f"<@{'> and <@'.join(party)}> just finished a game at <t:{int(recentTime)}>!"
                                     )
-                                    await channel.send(embed=playerembed) # sends the notification embed
+                                    await channel.send(embed=player_embed) # sends the notification embed
                                     
-                                    feederembed = disnake.Embed(
+                                    feeder_embed = disnake.Embed(
                                         title="feeder alert❗❗",
                                         color=0xfc2828,
-                                        description=f"<@{'> and <@'.join(feeders)}> were dirty inters! " + random.choice(config["feeder_msg"])
+                                        description=f"<@{'> and <@'.join(feeders)}> inted! " + random.choice(config["feeder_msg"])
                                     )
-                                    feederembed.set_image(url=config["feeder_embed_image"])
-                                    await channel.send(embed=feederembed)
-                                    
+                                    feeder_embed.set_image(
+                                        url=random.choice(config["feeder_embed_image"])
+                                    )
+                                    if feeders: await channel.send(embed=feeder_embed) # sends the feeder embed
 
                                     combined_waiters = [] # init list of users to ping for waitlist
                                     for member_id in party:
