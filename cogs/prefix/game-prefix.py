@@ -138,8 +138,7 @@ class Game(commands.Cog, name='game'):
 
     @commands.command(name='valorant-waitlist',
                       aliases=['valorantwaitlist','valwaitlist','vwaitlist'],
-                      description='prints valorant waitlist',
-                      guild_ids=config['guilds'])
+                      description='prints valorant waitlist')
     async def valorant_waitlist(self, ctx: commands.Context):
         """prints valorant waitlist"""
         embed = disnake.Embed(

@@ -22,16 +22,14 @@ class Game(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name='jewels',
-                            description='pings role',
-                            guild_ids=config['guilds'])
+                            description='pings role')
     async def jewelsPing(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """pings @jewels role and sends image"""
         await inter.edit_original_message(content=f"<@&{config['ping_role']}>", file=disnake.File('jewelsignal.jpg'))
 
     @commands.slash_command(name='valorant-info',
-                            description='view valorant data in database',
-                            guild_ids=config['guilds'])
+                            description='view valorant data in database')
     async def valorant_info(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """returns user's valorant info from the database"""
@@ -65,8 +63,7 @@ class Game(commands.Cog):
             await inter.edit_original_message(content=f"<@{user_id}> not in database! do /valorant-watch first")
 
     @commands.slash_command(name='valorant-watch',
-                            description='adds user into database',
-                            guild_ids=config['guilds'])
+                            description='adds user into database')
     async def valorant_watch(self, inter: disnake.ApplicationCommandInteraction, name: str, tag: str):
         await inter.response.defer()
         """add user's valorant info to the database"""
@@ -90,8 +87,7 @@ class Game(commands.Cog):
                     await inter.edit_original_message(content=f"<@{user_id}> error connecting, database not updated. please try again")
 
     @commands.slash_command(name='valorant-unwatch',
-                            description="removes user's valorant info from the database",
-                            guild_ids=config['guilds'])
+                            description="removes user's valorant info from the database")
     async def valorant_unwatch(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """removes user's valorant info from the database"""
@@ -105,8 +101,7 @@ class Game(commands.Cog):
             await inter.edit_original_message(content=f"<@{user_id}> error updating, user not in database")
 
     @commands.slash_command(name='valorant-wait',
-                            description='pings you when tagged user is done',
-                            guild_ids=config['guilds'])
+                            description='pings you when tagged user is done')
     async def valorant_wait(self, inter: disnake.ApplicationCommandInteraction, wait_user: disnake.User):
         await inter.response.defer()
         """pings you when tagged user is done"""
@@ -130,8 +125,7 @@ class Game(commands.Cog):
             await inter.edit_original_message(content=f"{extra_message}<@{wait_user_id}> is not in database, unable to execute")
     
     @commands.slash_command(name='valorant-waitlist',
-                            description='prints valorant waitlist',
-                            guild_ids=config['guilds'])
+                            description='prints valorant waitlist')
     async def valorant_waitlist(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """prints valorant waitlist"""

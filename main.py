@@ -14,7 +14,7 @@ else:
         config = json.load(file)
 
 # creating a commands.Bot() instance, and assigning it to "bot"
-bot = commands.Bot(command_prefix=config['prefix'], intents=disnake.Intents.default())
+bot = commands.Bot(command_prefix=config['prefix'], intents=disnake.Intents.default(), test_guilds=config['guilds'])
 
 # When the bot is ready, run this code.
 @bot.event

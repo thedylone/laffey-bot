@@ -20,16 +20,14 @@ class General(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name="ping",
-                            description="get bot's latency",
-                            guild_ids=config['guilds'])
+                            description="get bot's latency")
     async def ping(self, inter: disnake.ApplicationCommandInteraction):
         """get the bot's current websocket latency."""
         await inter.response.send_message(
             f"pong! {round(self.bot.latency * 1000)}ms")
 
     @commands.slash_command(name="peko",
-                            description="peko",
-                            guild_ids=config['guilds'])
+                            description="peko")
     async def ping(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """peko"""

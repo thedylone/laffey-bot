@@ -18,8 +18,7 @@ class Crypto(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name='sol',
-                            description='solprice',
-                            guild_ids=config['guilds'])
+                            description='sol price')
     async def sol(self, inter: disnake.ApplicationCommandInteraction):
         """get the current price of SOL in USD."""
         async with aiohttp.ClientSession() as session:
