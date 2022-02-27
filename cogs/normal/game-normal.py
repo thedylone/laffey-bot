@@ -22,10 +22,10 @@ class Game(commands.Cog, name='game'):
         self.bot = bot
 
     @commands.command(name='jewels',
-                      description='ping jewels role')
+                      description='pings role')
     async def jewelsPing(self, ctx: commands.Context):
         """pings @jewels role and sends image"""
-        await ctx.send("<@&943511061447987281>",
+        await ctx.send(f"<@&{config['ping_role']}>",
                        file=disnake.File('jewelsignal.jpg'))
 
     @commands.command(name='valorant-info',

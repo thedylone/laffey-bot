@@ -22,12 +22,12 @@ class Game(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name='jewels',
-                            description='ping jewels role',
+                            description='pings role',
                             guild_ids=config['guilds'])
     async def jewelsPing(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """pings @jewels role and sends image"""
-        await inter.edit_original_message(content="<@&943511061447987281>", file=disnake.File('jewelsignal.jpg'))
+        await inter.edit_original_message(content=f"<@&{config['ping_role']}>", file=disnake.File('jewelsignal.jpg'))
 
     @commands.slash_command(name='valorant-info',
                             description='view valorant data in database',
