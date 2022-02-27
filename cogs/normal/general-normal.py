@@ -16,7 +16,7 @@ class General(commands.Cog, name='general'):
     async def ping(self, ctx: commands.Context):
         """flips a coin kekg"""
         results = ["Heads!","Tails!"]
-        await ctx.send(f"You got... {random.choice(results)}")
+        await ctx.send(f"<@{ctx.author.id}> You got... {random.choice(results)}")
 
 
 def setup(bot: commands.Bot):
