@@ -10,7 +10,7 @@ from disnake.ext import commands
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found!")
 else:
-    with open("config.json") as file:
+    with open("config.json", encoding='utf-8') as file:
         config = json.load(file)
 
 # creating a commands.Bot() instance, and assigning it to "bot"
