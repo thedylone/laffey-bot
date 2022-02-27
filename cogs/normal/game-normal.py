@@ -29,6 +29,7 @@ class Game(commands.Cog, name='game'):
                        file=disnake.File('jewelsignal.jpg'))
 
     @commands.command(name='valorant-info',
+                      aliases=['valorantinfo','valinfo','vinfo'],
                       description='view valorant data in database')
     async def valorant_info(self, ctx: commands.Context):
         """returns user's valorant info from the database"""
@@ -62,7 +63,8 @@ class Game(commands.Cog, name='game'):
             await ctx.send(content=f"<@{user_id}> not in database! do /valorant-watch first")
 
     @commands.command(name='valorant-watch',
-                        description='adds user into database')
+                      aliases=['valorantwatch','valwatch','vwatch'],
+                      description='adds user into database')
     async def valorant_watch(self, ctx: commands.Context, name: str, tag: str):
         """add user's valorant info to the database"""
         playerData = json_helper.load()
@@ -91,6 +93,7 @@ class Game(commands.Cog, name='game'):
         await ctx.send(message)
 
     @commands.command(name='valorant-unwatch',
+                      aliases=['valorantunwatch','valunwatch','vunwatch'],
                       description="removes user's valorant info from the database")
     async def valorant_unwatch(self, ctx: commands.Context):
         """removes user's valorant info from the database"""
@@ -104,6 +107,7 @@ class Game(commands.Cog, name='game'):
             await ctx.send(content=f"<@{user_id}> error updating, user not in database")
     
     @commands.command(name='valorant-wait',
+                      aliases=['valorantwait','valwait','vwait'],
                       description="pings you when tagged user is done")
     async def valorant_wait(self, ctx: commands.Context, wait_user: disnake.User):
         """pings you when tagged user is done"""
@@ -133,8 +137,9 @@ class Game(commands.Cog, name='game'):
         await ctx.send(message)
 
     @commands.command(name='valorant-waitlist',
-                            description='prints valorant waitlist',
-                            guild_ids=config['guilds'])
+                      aliases=['valorantwaitlist','valwaitlist','vwaitlist'],
+                      description='prints valorant waitlist',
+                      guild_ids=config['guilds'])
     async def valorant_waitlist(self, ctx: commands.Context):
         """prints valorant waitlist"""
         embed = disnake.Embed(

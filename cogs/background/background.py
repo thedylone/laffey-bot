@@ -47,29 +47,46 @@ class Background(commands.Cog):
                                 startTime = latestGame['metadata']['game_start'] # given in s
                                 duration = latestGame['metadata']['game_length'] / 1000 # given in ms 
                                 recentTime = startTime + duration + 100
+                                rounds = latestGame['metadata']['rounds_played']
                                 if user_data['lastTime'] < recentTime: # if latest game played is more recent than stored latest
                                     party = []
-                                    feeders = []
+                                    feeders = {}
                                     for player in latestGame['players']['all_players']:
                                         for player_id in playerData:
                                             if player['puuid'] == playerData[player_id]['puuid']: # detects if multiple watched users are in the same game
                                                 party.append(player_id)
                                                 kills = player['stats']['kills']
                                                 deaths = player['stats']['deaths']
+                                                assists = player['stats']['assists']
+                                                score = player['stats']['score']
                                                 if (deaths >= (kills + (1.1*math.e)**(kills/5) + 2.9)): # formula for calculating feeding threshold
-                                                    feeders.append(player_id)
+                                                    feeders[player_id] = {
+                                                        "kills" : kills,
+                                                        "deaths" : deaths,
+                                                        "assists": assists,
+                                                        "acs": int(score/rounds),
+                                                        "kd" : "{:.2f}".format(kills/deaths)
+                                                    }
                                     
                                     player_embed = disnake.Embed(
                                         title="valorant watch",
-                                        description=f"<@{'> and <@'.join(party)}> just finished a game at <t:{int(recentTime)}>!"
+                                        description=f"<@{'> and <@'.join(party)}> just finished a {rounds}-round game at <t:{int(recentTime)}>!"
                                     )
                                     await channel.send(embed=player_embed) # sends the notification embed
                                     
                                     feeder_embed = disnake.Embed(
                                         title="feeder alert❗❗",
                                         color=0xfc2828,
-                                        description=f"<@{'> and <@'.join(feeders)}> inted! " + random.choice(config["feeder_msg"])
+                                        description=f"<@{'> and <@'.join(feeders.keys())}> inted! " + random.choice(config["feeder_msg"])
                                     )
+
+                                    for feeder in feeders:
+                                        feeder_embed.add_field(
+                                            name="dirty inter",
+                                            value=f"<@{feeder}> finished {feeders[feeder]['kills']}/{feeders[feeder]['deaths']}/{feeders[feeder]['assists']} with an ACS of {feeders[feeder]['acs']}",
+                                            inline=False
+                                        )
+
                                     feeder_embed.set_image(
                                         url=random.choice(config["feeder_embed_image"])
                                     )
