@@ -1,4 +1,5 @@
 import disnake
+import random
 from disnake.ext import commands
 
 
@@ -10,6 +11,12 @@ class General(commands.Cog, name='general'):
     async def ping(self, ctx: commands.Context):
         """get the bot's current websocket latency."""
         await ctx.send(f"pong! {round(self.bot.latency * 1000)}ms")
+        
+    @commands.command(name="flip", description="flip a coin and show the result")
+    async def ping(self, ctx: commands.Context):
+        """flips a coin kekg"""
+        results = ["Heads!","Tails!"]
+        await ctx.send(f"You got... {random.choice(results)}")
 
 
 def setup(bot: commands.Bot):
