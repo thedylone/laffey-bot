@@ -41,8 +41,8 @@ def autoLoad(command_type: str) -> None:
 if __name__ == "__main__":
     autoLoad("error") # loads error handler
     autoLoad("background") # loads background tasks
-    if config['slash']: autoLoad("slash")
-    if config['normal']: autoLoad("normal")
+    if config['slash_enabled']: autoLoad("slash")
+    if config['prefix_enabled']: autoLoad("prefix")
 
 # Login to Discord with the bot's token.
 bot.run(BOT_TOKEN)

@@ -29,10 +29,10 @@ valorant-waitlist
 prefix
 > string: your preferred prefix.
 
-slash
+slash_enabled
 > int or bool: 1/true or 0/false. 1 to enable [slash-commands](https://discord.com/blog/slash-commands-are-here), 0 to disable.
 
-normal
+prefix_enabled
 > int or bool: 1/true or 0/false. 1 to enable prefixed commands, 0 to disable.
 
 guilds
