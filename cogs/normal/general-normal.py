@@ -2,7 +2,7 @@ import disnake
 from disnake.ext import commands
 
 
-class General(commands.Cog, name='general-normal'):
+class General(commands.Cog, name='general'):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 

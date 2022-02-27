@@ -39,6 +39,8 @@ def autoLoad(command_type: str) -> None:
 
 
 if __name__ == "__main__":
+    autoLoad("error") # loads error handler
+    autoLoad("background") # loads background tasks
     if config['slash']: autoLoad("slash")
     if config['normal']: autoLoad("normal")
 

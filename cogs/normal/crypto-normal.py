@@ -4,7 +4,7 @@ from disnake.ext import commands
 import aiohttp
 
 
-class Crypto(commands.Cog, name='crypto-normal'):
+class Crypto(commands.Cog, name='crypto'):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
