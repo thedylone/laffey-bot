@@ -22,18 +22,18 @@ valorant-wait <wait_user\>
 > pings the user when the bot has detected the wait_user has completed a game. wait_user must be currently watched and in database.
 
 valorant-waitlist
-> returns an embed with the current waiting list. shows each wait_users and the users waiting for them
+> returns an embed with the current waiting list. shows each wait_users and the users waiting for them.
 
 ## how to setup
 ### config.json
 prefix
-> string: your preferred prefix
+> string: your preferred prefix.
 
 slash
 > int or bool: 1/true or 0/false. 1 to enable [slash-commands](https://discord.com/blog/slash-commands-are-here), 0 to disable.
 
 normal
-> int or bool: 1/true or 0/false. 1 to enable prefixed commands, 0 to disable
+> int or bool: 1/true or 0/false. 1 to enable prefixed commands, 0 to disable.
 
 guilds
 > int[]: list of guild IDs, IDs are integers. used for debugging when changing or adding slash-commands (as it takes time to sync). remove guild-ids from each slash-command for global use (but will take time to update).
@@ -42,10 +42,10 @@ watch_channel
 > int: the ID of the channel the bot will be sending watch updates in.
 
 watch_cooldown
-> int: how many minutes before the bot will ping for each user
+> int: how many minutes before the bot will ping for each user.
 
 ping_role
-> int: the ID of the role the bot will ping
+> int: the ID of the role the bot will ping.
 
 feeder_embed_image
 > str[]: list of urls for the feeder embed image. the bot will randomly choose 1 from the list each time.
@@ -55,7 +55,10 @@ feeder_msg
 
 ### .env
 BOT_TOKEN
-> place your Discord Application token in here
+> place your Discord Application token in here.
 
 RIOT_TOKEN
 > place your Riot API key in here. (currently unused at the moment)
+
+HOLODEX_TOKEN
+> place your [Holodex](https://holodex.net/) API key in here.

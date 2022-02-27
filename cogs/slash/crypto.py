@@ -3,8 +3,8 @@ from disnake.ext import commands
 
 import os
 import json
-import aiohttp
 import sys
+import aiohttp
 
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found!")
