@@ -48,7 +48,7 @@ class Background(commands.Cog):
                                 recentTime = startTime + duration + 100
                                 if user_data['lastTime'] >= recentTime: break # if stored latest is more recent than latest game played, break and skip user
                                 mode = latestGame['metadata']['mode']
-                                if mode == "Deathmatch": break
+                                if mode == "Deathmatch": continue
                                 party_red = []
                                 party_blue = []
                                 feeders = {}
