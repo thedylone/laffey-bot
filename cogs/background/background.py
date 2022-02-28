@@ -59,6 +59,9 @@ class Background(commands.Cog):
                                             deaths = player['stats']['deaths']
                                             assists = player['stats']['assists']
                                             score = player['stats']['score']
+                                            team = player["team"].lower()
+                                            result = latestGame["teams"][team]["has_won"]
+                                            map = latestGame["metadata"]["map"].upper()
                                             if mode in ['Unrated','Competitive','Spike Rush'] and deaths >= (kills + (1.1*math.e)**(kills/5) + 2.9): # formula for calculating feeding threshold
                                                 feeders[player_id] = {
                                                     "kills" : kills,
@@ -68,11 +71,20 @@ class Background(commands.Cog):
                                                     "kd" : "{:.2f}".format(kills/deaths)
                                                 }
                                 
-                                player_embed = disnake.Embed(
+                                player_won_embed = disnake.Embed(
                                     title="valorant watch",
-                                    description=f"<@{'> and <@'.join(party)}> just finished a {mode} game <t:{int(recentTime)}:R>!"
+                                    color=0x17dc33,
+                                    description=f"<@{'> and <@'.join(party)}> just wonnered a {mode} game on __**{map}**__ <t:{int(recentTime)}:R>!"
                                 )
-                                await channel.send(embed=player_embed) # sends the notification embed
+                                player_lost_embed = disnake.Embed(
+                                    title="valorant watch",
+                                    color=0xfc2828,
+                                    description=f"<@{'> and <@'.join(party)}> just losted a {mode} game on __**{map}**__ <t:{int(recentTime)}:R>!"
+                                )
+                                if result:
+                                    await channel.send(embed=player_won_embed) # sends the notification embed
+                                else:
+                                    await channel.send(embed=player_lost_embed)
                                 
                                 feeder_embed = disnake.Embed(
                                     title="feeder alert❗❗",
