@@ -48,18 +48,31 @@ class Background(commands.Cog):
                                 recentTime = startTime + duration + 100
                                 if user_data['lastTime'] >= recentTime: break # if stored latest is more recent than latest game played, break and skip user
                                 mode = latestGame['metadata']['mode']
-                                rounds_played = sum(round['end_type'] != "Surrendered" for round in latestGame['rounds'])
-                                party = []
+                                if mode == "Deathmatch": break
+                                party_red = []
+                                party_blue = []
                                 feeders = {}
+                                rounds_played = rounds_red = rounds_blue = 0
+                                for round in latestGame['rounds']:
+                                    rounds_played += round['end_type'] != "Surrendered"
+                                    rounds_red += round['winning_team'] == "Red"
+                                    rounds_blue += round['winning_team'] == "Blue"
                                 for player in latestGame['players']['all_players']:
                                     for player_id in playerData:
                                         if player['puuid'] == playerData[player_id]['puuid']: # detects if multiple watched users are in the same game
-                                            party.append(player_id)
                                             kills = player['stats']['kills']
                                             deaths = player['stats']['deaths']
                                             assists = player['stats']['assists']
                                             score = player['stats']['score']
-                                            if mode in ['Unrated','Competitive','Spike Rush'] and deaths >= (kills + (1.1*math.e)**(kills/5) + 2.9): # formula for calculating feeding threshold
+                                            team = player["team"]
+                                            if team == "Red":
+                                                party_red.append(player_id)
+                                            elif team == "Blue":
+                                                party_blue.append(player_id)
+                                            elif team == playerData[player_id]['puuid']: # deathmatch exception
+                                                party_red.append(player_id)
+                                            map = latestGame["metadata"]["map"]
+                                            if deaths >= (kills + (1.1*math.e)**(kills/5) + 2.9): # formula for calculating feeding threshold
                                                 feeders[player_id] = {
                                                     "kills" : kills,
                                                     "deaths" : deaths,
@@ -67,16 +80,28 @@ class Background(commands.Cog):
                                                     "acs": int(score/rounds_played),
                                                     "kd" : "{:.2f}".format(kills/deaths)
                                                 }
-                                
+                                if rounds_red == rounds_blue: # draw
+                                    color = 0x767676
+                                    description = f"<@{'> and <@'.join(party_red+party_blue)}> just finished a {mode} game {rounds_red} - {rounds_blue} on {map}!"
+                                elif party_red and party_blue: # watched players on both teams
+                                    color = 0x767676
+                                    description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game {rounds_red} - {rounds_blue} on {map}! <@{'> and <@'.join(party_blue)}> played on the other team!"
+                                elif party_red: # watched players on red only
+                                    color = 0x17dc33 if rounds_red > rounds_blue else 0xfc2828
+                                    description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game {rounds_red} - {rounds_blue} on {map}!"
+                                elif party_blue: # watched players on blue only
+                                    color = 0x17dc33 if rounds_blue > rounds_red else 0xfc2828
+                                    description = f"<@{'> and <@'.join(party_blue)}> just {'wonnered' if rounds_blue > rounds_red else 'losted'} a {mode} game {rounds_blue} - {rounds_red} on {map}!"
                                 player_embed = disnake.Embed(
                                     title="valorant watch",
-                                    description=f"<@{'> and <@'.join(party)}> just finished a {mode} game <t:{int(recentTime)}:R>!"
+                                    color=color,
+                                    description=description
                                 )
                                 await channel.send(embed=player_embed) # sends the notification embed
                                 
                                 feeder_embed = disnake.Embed(
                                     title="feeder alert❗❗",
-                                    color=0xfc2828,
+                                    color=0xff7614,
                                     description=f"<@{'> and <@'.join(feeders.keys())}> inted! " + random.choice(config["feeder_msg"])
                                 )
                                 for feeder in feeders:
@@ -91,7 +116,7 @@ class Background(commands.Cog):
                                 if feeders: await channel.send(embed=feeder_embed) # sends the feeder embed
 
                                 combined_waiters = [] # init list of users to ping for waitlist
-                                for member_id in party:
+                                for member_id in party_red+party_blue:
                                     # sets party members to update last updated time if more recent
                                     if playerData[member_id]['lastTime'] < recentTime: playerData[member_id]['lastTime'] = recentTime
                                     if member_id in self.bot.valorant_waitlist:
