@@ -90,7 +90,7 @@ class Background(commands.Cog):
                                 
                                 feeder_embed = disnake.Embed(
                                     title="feeder alert❗❗",
-                                    color=0xfc2828,
+                                    color=0xff7614,
                                     description=f"<@{'> and <@'.join(feeders.keys())}> inted! " + random.choice(config["feeder_msg"])
                                 )
                                 for feeder in feeders:
