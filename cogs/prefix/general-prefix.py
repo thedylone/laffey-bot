@@ -52,13 +52,21 @@ class General(commands.Cog, name='general'):
                     embed.set_thumbnail(
                         url="https://hololive.hololivepro.com/wp-content/themes/hololive/images/head_l.png"
                     )
-                    for video in data:
-                        pattern = '\[|\]'
+                    
+                    if data:
+                        for video in data:
+                            pattern = '\[|\]'
+                            embed.add_field(
+                                name=video["channel"]["name"],
+                                value=f"{video['status']}: [{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
+                                inline=False
+                            )
+                    else:
                         embed.add_field(
-                            name=video["channel"]["name"],
-                            value=f"{video['status']}: [{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
-                            inline=False
-                        )
+                                name="sadger badger",
+                                value="no strim rn",
+                                inline=False
+                            )
                     await ctx.send(embed=embed)
                 else:
                     await ctx.send("error retrieving info! try again later")
