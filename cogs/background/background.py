@@ -82,16 +82,16 @@ class Background(commands.Cog):
                                                 }
                                 if rounds_red == rounds_blue: # draw
                                     color = 0x767676
-                                    description = f"<@{'> and <@'.join(party_red+party_blue)}> just finished a {mode} game {rounds_red} - {rounds_blue} on {map}!"
+                                    description = f"<@{'> and <@'.join(party_red+party_blue)}> just finished a {mode} game {rounds_red} - {rounds_blue} on {map} <t:{int(recentTime)}:R>!"
                                 elif party_red and party_blue: # watched players on both teams
                                     color = 0x767676
-                                    description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game {rounds_red} - {rounds_blue} on {map}! <@{'> and <@'.join(party_blue)}> played on the other team!"
+                                    description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game {rounds_red} - {rounds_blue} on {map} <t:{int(recentTime)}:R>! <@{'> and <@'.join(party_blue)}> played on the other team!"
                                 elif party_red: # watched players on red only
                                     color = 0x17dc33 if rounds_red > rounds_blue else 0xfc2828
-                                    description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game {rounds_red} - {rounds_blue} on {map}!"
+                                    description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game {rounds_red} - {rounds_blue} on {map} <t:{int(recentTime)}:R>!"
                                 elif party_blue: # watched players on blue only
                                     color = 0x17dc33 if rounds_blue > rounds_red else 0xfc2828
-                                    description = f"<@{'> and <@'.join(party_blue)}> just {'wonnered' if rounds_blue > rounds_red else 'losted'} a {mode} game {rounds_blue} - {rounds_red} on {map}!"
+                                    description = f"<@{'> and <@'.join(party_blue)}> just {'wonnered' if rounds_blue > rounds_red else 'losted'} a {mode} game {rounds_blue} - {rounds_red} on {map} <t:{int(recentTime)}:R>!"
                                 player_embed = disnake.Embed(
                                     title="valorant watch",
                                     color=color,
