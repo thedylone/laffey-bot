@@ -8,6 +8,7 @@ import sys
 import aiohttp
 
 from helpers import json_helper
+from modals.modals import valorant_watch_modal
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
 
@@ -64,27 +65,8 @@ class Game(commands.Cog):
 
     @commands.slash_command(name='valorant-watch',
                             description='adds user into database')
-    async def valorant_watch(self, inter: disnake.ApplicationCommandInteraction, name: str, tag: str):
-        await inter.response.defer()
-        """add user's valorant info to the database"""
-        playerData = json_helper.load()
-        user_id = str(inter.user.id)
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f'https://api.henrikdev.xyz/valorant/v1/account/{name}/{tag}') as request:
-            # using this until access for riot api granted async with session.get(f'https://{region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{name}/{tag}?api_key={RIOT_TOKEN}') as request:
-                if request.status == 200:
-                    data = await request.json()
-                    playerData[user_id] = {
-                        'name': name,
-                        'tag': tag,
-                        'region': data['data']['region'],
-                        'puuid': data['data']['puuid'],
-                        'lastTime': time.time()
-                    }
-                    await inter.edit_original_message(content=f"<@{user_id}> database updated, user added. remove using /valorant-unwatch")
-                    json_helper.save(playerData)
-                else:
-                    await inter.edit_original_message(content=f"<@{user_id}> error connecting, database not updated. please try again")
+    async def valorant_watch(self, inter: disnake.ApplicationCommandInteraction):
+        await inter.response.send_modal(modal=valorant_watch_modal())
 
     @commands.slash_command(name='valorant-unwatch',
                             description="removes user's valorant info from the database")
