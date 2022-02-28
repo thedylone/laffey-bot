@@ -61,6 +61,8 @@ class Background(commands.Cog):
                                             score = player['stats']['score']
                                             team = player["team"].lower()
                                             result = latestGame["teams"][team]["has_won"]
+                                            rounds_won = latestGame["teams"][team]["rounds_won"]
+                                            rounds_lost = latestGame["teams"][team]["rounds_lost"]
                                             map = latestGame["metadata"]["map"].upper()
                                             if mode in ['Unrated','Competitive','Spike Rush'] and deaths >= (kills + (1.1*math.e)**(kills/5) + 2.9): # formula for calculating feeding threshold
                                                 feeders[player_id] = {
@@ -74,12 +76,12 @@ class Background(commands.Cog):
                                 player_won_embed = disnake.Embed(
                                     title="valorant watch",
                                     color=0x17dc33,
-                                    description=f"<@{'> and <@'.join(party)}> just wonnered a {mode} game on __**{map}**__ <t:{int(recentTime)}:R>!"
+                                    description=f"<@{'> and <@'.join(party)}> just wonnered a {mode} game __**{rounds_won} - {rounds_lost}**__ on __**{map}**__ <t:{int(recentTime)}:R>!"
                                 )
                                 player_lost_embed = disnake.Embed(
                                     title="valorant watch",
                                     color=0xfc2828,
-                                    description=f"<@{'> and <@'.join(party)}> just losted a {mode} game on __**{map}**__ <t:{int(recentTime)}:R>!"
+                                    description=f"<@{'> and <@'.join(party)}> just losted a {mode} game __**{rounds_lost} - {rounds_won}**__ on __**{map}**__ <t:{int(recentTime)}:R>!"
                                 )
                                 if result:
                                     await channel.send(embed=player_won_embed) # sends the notification embed
