@@ -61,7 +61,7 @@ class General(commands.Cog, name='general'):
                         )
                     await ctx.send(embed=embed)
                 else:
-                    await ctx.send("error retrieving info! try again later")
+                    await ctx.send(f"<@{ctx.author.id}> error retrieving info! try again later")
 
 
 def setup(bot: commands.Bot):

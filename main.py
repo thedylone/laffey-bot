@@ -41,6 +41,7 @@ def autoLoad(command_type: str) -> None:
 if __name__ == "__main__":
     autoLoad("error") # loads error handler
     autoLoad("background") # loads background tasks
+    autoLoad("contextmenu")
     if config['slash_enabled']: autoLoad("slash")
     if config['prefix_enabled']: autoLoad("prefix")
 
