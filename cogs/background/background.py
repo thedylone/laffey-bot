@@ -64,8 +64,12 @@ class Background(commands.Cog):
                     party_blue = []
                     feeders = {}
                     rounds_played = rounds_red = rounds_blue = 0
+                    is_surrendered = False
                     for round in latest_game["rounds"]:
-                        rounds_played += round["end_type"] != "Surrendered"
+                        if round["end_type"] == "Surrendered":
+                            is_surrendered = True
+                        else:
+                            rounds_played += 1
                         rounds_red += round["winning_team"] == "Red"
                         rounds_blue += round["winning_team"] == "Blue"
                     for player in latest_game["players"]["all_players"]:
@@ -113,13 +117,13 @@ class Background(commands.Cog):
                         description = f"<@{'> and <@'.join(party_red+party_blue)}> just finished a {mode} game __**{rounds_red} - {rounds_blue}**__ on **{map_played}** <t:{int(recent_time)}:R>!"
                     elif party_red and party_blue:  # watched players on both teams
                         color = 0x767676
-                        description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ on **{map_played}** <t:{int(recent_time)}:R>! <@{'> and <@'.join(party_blue)}> played on the other team!"
+                        description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ {'(surrendered) ' if is_surrendered else ' '}on **{map_played}** <t:{int(recent_time)}:R>! <@{'> and <@'.join(party_blue)}> played on the other team!"
                     elif party_red:  # watched players on red only
                         color = 0x17DC33 if rounds_red > rounds_blue else 0xFC2828
-                        description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ on **{map_played}** <t:{int(recent_time)}:R>!"
+                        description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ {'(surrendered) ' if is_surrendered else ' '}on **{map_played}** <t:{int(recent_time)}:R>!"
                     elif party_blue:  # watched players on blue only
                         color = 0x17DC33 if rounds_blue > rounds_red else 0xFC2828
-                        description = f"<@{'> and <@'.join(party_blue)}> just {'wonnered' if rounds_blue > rounds_red else 'losted'} a {mode} game __**{rounds_blue} - {rounds_red}**__ on **{map_played}** <t:{int(recent_time)}:R>!"
+                        description = f"<@{'> and <@'.join(party_blue)}> just {'wonnered' if rounds_blue > rounds_red else 'losted'} a {mode} game __**{rounds_blue} - {rounds_red}**__ {'(surrendered) ' if is_surrendered else ' '}on **{map_played}** <t:{int(recent_time)}:R>!"
                     player_embed = disnake.Embed(
                         title="valorant watch", color=color, description=description
                     )
