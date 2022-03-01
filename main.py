@@ -10,23 +10,31 @@ from disnake.ext import commands
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found!")
 else:
-    with open("config.json", encoding='utf-8') as file:
+    with open("config.json", encoding="utf-8") as file:
         config = json.load(file)
 
 # creating a commands.Bot() instance, and assigning it to "bot"
-bot = commands.Bot(command_prefix=config['prefix'], intents=disnake.Intents.default(), test_guilds=config['guilds'])
+bot = commands.Bot(
+    command_prefix=config["prefix"],
+    intents=disnake.Intents.default(),
+    test_guilds=config["guilds"],
+)
 
 # When the bot is ready, run this code.
 @bot.event
 async def on_ready():
     print(f"logged in {bot.user.name}")
-    #set activity of the bot
-    await bot.change_presence(activity=disnake.Game(f"with lolis | {config['prefix']}help"))
+    # set activity of the bot
+    await bot.change_presence(
+        activity=disnake.Game(f"with lolis | {config['prefix']}help")
+    )
+
 
 # removes default help command
 # bot.remove_command("help")
 
-def autoLoad(command_type: str) -> None:
+
+def autoload(command_type: str) -> None:
     for file in os.listdir(f"./cogs/{command_type}"):
         if file.endswith(".py"):
             extension = file[:-3]
@@ -39,11 +47,13 @@ def autoLoad(command_type: str) -> None:
 
 
 if __name__ == "__main__":
-    autoLoad("error") # loads error handler
-    autoLoad("background") # loads background tasks
-    autoLoad("contextmenu") # lodas context menu commands
-    if config['slash_enabled']: autoLoad("slash")
-    if config['prefix_enabled']: autoLoad("prefix")
+    autoload("error")  # loads error handler
+    autoload("background")  # loads background tasks
+    autoload("contextmenu")  # lodas context menu commands
+    if config["slash_enabled"]:
+        autoload("slash")
+    if config["prefix_enabled"]:
+        autoload("prefix")
 
 # Login to Discord with the bot's token.
 bot.run(BOT_TOKEN)

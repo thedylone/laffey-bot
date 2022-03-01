@@ -8,7 +8,9 @@ class ErrorHandler(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
+    async def on_command_error(
+        self, ctx: commands.Context, error: commands.CommandError
+    ):
         """A global error handler cog."""
         if isinstance(error, commands.CommandNotFound):
             return  # Return because we don't want to show an error for every command not found
@@ -20,7 +22,7 @@ class ErrorHandler(commands.Cog):
             message = "Something about your input was wrong, please check your input and try again!"
         else:
             message = "Oh no! Something went wrong while running the command!"
-        
+
         await ctx.send(message)
 
 

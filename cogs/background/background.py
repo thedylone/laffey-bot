@@ -30,36 +30,36 @@ class Background(commands.Cog):
     async def valorant_watch_cycle(self):
         await self.bot.wait_until_ready()  # wait until the bot logs in
         channel = self.bot.get_channel(config['watch_channel']) # retrieves channel ID from config.json
-        playerData = json_helper.load()
-        for user_id in playerData:
-            playerData = json_helper.load() # reloads playerData 
-            user_data = playerData[user_id]
+        player_data = json_helper.load()
+        for user_id in player_data:
+            player_data = json_helper.load() # reloads player_data 
+            user_data = player_data[user_id]
             if time.time() - user_data['lastTime'] < config["watch_cooldown"] * 60: continue # cooldown in seconds
             puuid = user_data['puuid']
             region = user_data['region']
             async with aiohttp.ClientSession() as session:
-                async with session.get(f'https://api.henrikdev.xyz/valorant/v3/by-puuid/matches/{region}/{puuid}') as request:
+                async with session.get(f'https://api.henrikdev.xyz/valorant/v3/by-puuid/matches/{region}/{puuid}') as match_request:
                     # using this until access for riot granted async with session.get(f'https://{region}.api.riotgames.com/val/match/v1/matchlists/by-puuid/{puuid}?api_key={RIOT_TOKEN}') as request:
-                    if request.status != 200: continue
-                    matchData = await request.json()
-                for latestGame in matchData['data']:
-                    startTime = latestGame['metadata']['game_start'] # given in s
-                    duration = latestGame['metadata']['game_length'] / 1000 # given in ms 
-                    recentTime = startTime + duration + 100
-                    if user_data['lastTime'] >= recentTime: break # if stored latest is more recent than latest game played, break and skip user
-                    mode = latestGame['metadata']['mode']
+                    if match_request.status != 200: continue
+                    match_data = await match_request.json()
+                for latest_game in match_data['data']:
+                    start_time = latest_game['metadata']['game_start'] # given in s
+                    duration = latest_game['metadata']['game_length'] / 1000 # given in ms 
+                    recent_time = start_time + duration + 100
+                    if user_data['lastTime'] >= recent_time: break # if stored latest is more recent than latest game played, break and skip user
+                    mode = latest_game['metadata']['mode']
                     if mode == "Deathmatch": continue
                     party_red = []
                     party_blue = []
                     feeders = {}
                     rounds_played = rounds_red = rounds_blue = 0
-                    for round in latestGame['rounds']:
+                    for round in latest_game['rounds']:
                         rounds_played += round['end_type'] != "Surrendered"
                         rounds_red += round['winning_team'] == "Red"
                         rounds_blue += round['winning_team'] == "Blue"
-                    for player in latestGame['players']['all_players']:
-                        for player_id in playerData:
-                            if player['puuid'] == playerData[player_id]['puuid']: # detects if multiple watched users are in the same game
+                    for player in latest_game['players']['all_players']:
+                        for player_id in player_data:
+                            if player['puuid'] == player_data[player_id]['puuid']: # detects if multiple watched users are in the same game
                                 kills = player['stats']['kills']
                                 deaths = player['stats']['deaths']
                                 assists = player['stats']['assists']
@@ -69,9 +69,9 @@ class Background(commands.Cog):
                                     party_red.append(player_id)
                                 elif team == "Blue":
                                     party_blue.append(player_id)
-                                elif team == playerData[player_id]['puuid']: # deathmatch exception
+                                elif team == player_data[player_id]['puuid']: # deathmatch exception
                                     party_red.append(player_id)
-                                map_played = latestGame["metadata"]["map"]
+                                map_played = latest_game["metadata"]["map"]
                                 if deaths >= (kills + (1.1*math.e)**(kills/5) + 2.9): # formula for calculating feeding threshold
                                     feeders[player_id] = {
                                         "kills" : kills,
@@ -81,26 +81,26 @@ class Background(commands.Cog):
                                         "kd" : "{:.2f}".format(kills/deaths)
                                     }
                     
-                    async with session.get("https://api.henrikdev.xyz/valorant/v1/content") as mapRequest:
-                        if mapRequest.status == 200:
-                            mapData = await mapRequest.json()
-                    for map in mapData["maps"]:
+                    async with session.get("https://api.henrikdev.xyz/valorant/v1/content") as map_request:
+                        if map_request.status == 200:
+                            map_data = await map_request.json()
+                    for map in map_data["maps"]:
                         if map["name"] == map_played:
                             map_url = f"https://media.valorant-api.com/maps/{map['id']}/splash.png"
                             break
 
                     if rounds_red == rounds_blue: # draw
                         color = 0x767676
-                        description = f"<@{'> and <@'.join(party_red+party_blue)}> just finished a {mode} game __**{rounds_red} - {rounds_blue}**__ on **{map_played}** <t:{int(recentTime)}:R>!"
+                        description = f"<@{'> and <@'.join(party_red+party_blue)}> just finished a {mode} game __**{rounds_red} - {rounds_blue}**__ on **{map_played}** <t:{int(recent_time)}:R>!"
                     elif party_red and party_blue: # watched players on both teams
                         color = 0x767676
-                        description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ on **{map_played}** <t:{int(recentTime)}:R>! <@{'> and <@'.join(party_blue)}> played on the other team!"
+                        description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ on **{map_played}** <t:{int(recent_time)}:R>! <@{'> and <@'.join(party_blue)}> played on the other team!"
                     elif party_red: # watched players on red only
                         color = 0x17dc33 if rounds_red > rounds_blue else 0xfc2828
-                        description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ on **{map_played}** <t:{int(recentTime)}:R>!"
+                        description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ on **{map_played}** <t:{int(recent_time)}:R>!"
                     elif party_blue: # watched players on blue only
                         color = 0x17dc33 if rounds_blue > rounds_red else 0xfc2828
-                        description = f"<@{'> and <@'.join(party_blue)}> just {'wonnered' if rounds_blue > rounds_red else 'losted'} a {mode} game __**{rounds_blue} - {rounds_red}**__ on **{map_played}** <t:{int(recentTime)}:R>!"
+                        description = f"<@{'> and <@'.join(party_blue)}> just {'wonnered' if rounds_blue > rounds_red else 'losted'} a {mode} game __**{rounds_blue} - {rounds_red}**__ on **{map_played}** <t:{int(recent_time)}:R>!"
                     player_embed = disnake.Embed(
                         title="valorant watch",
                         color=color,
@@ -130,12 +130,12 @@ class Background(commands.Cog):
                     combined_waiters = [] # init list of users to ping for waitlist
                     for member_id in party_red+party_blue:
                         # sets party members to update last updated time if more recent
-                        if playerData[member_id]['lastTime'] < recentTime: playerData[member_id]['lastTime'] = recentTime
+                        if player_data[member_id]['lastTime'] < recent_time: player_data[member_id]['lastTime'] = recent_time
                         if member_id in self.bot.valorant_waitlist:
                             combined_waiters += self.bot.valorant_waitlist.pop(member_id)
                     if combined_waiters: await channel.send(f"<@{'> <@'.join(list(set(combined_waiters)))}> removing from waitlist") # pings waiters
                     
-                    json_helper.save(playerData)
+                    json_helper.save(player_data)
             await asyncio.sleep(0.5) # sleeps for number of seconds (avoid rate limit)
 
 def setup(bot: commands.Bot):
