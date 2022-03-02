@@ -7,9 +7,11 @@ assignees: ''
 
 ---
 
+# bug
 **Describe the bug**
 A clear and concise description of what the bug is.
 
+# reasons
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Go to '...'
@@ -17,12 +19,14 @@ Steps to reproduce the behavior:
 3. Scroll down to '....'
 4. See error
 
+# expected
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
+# system information
 **Desktop (please complete the following information):**
  - OS: [e.g. iOS]
  - Browser [e.g. chrome, safari]
@@ -34,5 +38,6 @@ If applicable, add screenshots to help explain your problem.
  - Browser [e.g. stock browser, safari]
  - Version [e.g. 22]
 
+# others
 **Additional context**
 Add any other context about the problem here.
