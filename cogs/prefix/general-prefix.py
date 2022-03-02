@@ -71,6 +71,43 @@ class General(commands.Cog, name="general"):
                         f"<@{ctx.author.id}> error retrieving info! try again later"
                     )
 
+    @commands.command(name="holo", description="all live hololive streams")
+    async def holo(self, ctx: commands.Context):
+        """all live hololive streams"""
+        url = "https://holodex.net/api/v2/live"
+        params = {"status": "live", "org": "Hololive", "limit": "50"}
+        headers = {"Content-Type": "application/json", "X-APIKEY": HOLODEX_TOKEN}
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers, params=params) as request:
+                if request.status == 200:
+                    data = await request.json()
+                    embed = disnake.Embed(
+                        title="hololive",
+                        description="[live and upcoming videos](https://holodex.net/)",
+                    )
+
+                    embed.set_thumbnail(
+                        url="https://hololive.hololivepro.com/wp-content/themes/hololive/images/head_l.png"
+                    )
+
+                    if data:
+                        for video in data:
+                            pattern = "\[|\]"
+                            embed.add_field(
+                                name=video["channel"]["name"],
+                                value=f"[{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
+                                inline=False,
+                            )
+                    else:
+                        embed.add_field(
+                            name="sadger badger", value="no strim rn", inline=False
+                        )
+                    await ctx.send(embed=embed)
+                else:
+                    await ctx.send(
+                        f"<@{ctx.author.id}> error retrieving info! try again later"
+                    )
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(General(bot))
