@@ -6,7 +6,7 @@ import time
 from helpers import json_helper
 
 
-class valorant_watch_modal(disnake.ui.Modal):
+class ValorantWatchModal(disnake.ui.Modal):
     def __init__(self) -> None:
         components = [
             disnake.ui.TextInput(

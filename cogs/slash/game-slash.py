@@ -6,7 +6,7 @@ import json
 import sys
 
 from helpers import json_helper
-from modals.modals import valorant_watch_modal
+from modals.modals import ValorantWatchModal
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
 
@@ -58,7 +58,7 @@ class Game(commands.Cog):
         name="valorant-watch", description="adds user into database"
     )
     async def valorant_watch(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.response.send_modal(modal=valorant_watch_modal())
+        await inter.response.send_modal(modal=ValorantWatchModal())
 
     @commands.slash_command(
         name="valorant-unwatch",
