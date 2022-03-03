@@ -8,6 +8,8 @@ import sys
 import aiohttp
 import re
 
+from views.views import Menu
+
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found!")
 else:
@@ -81,28 +83,31 @@ class General(commands.Cog, name="general"):
             async with session.get(url, headers=headers, params=params) as request:
                 if request.status == 200:
                     data = await request.json()
-                    embed = disnake.Embed(
-                        title="hololive",
-                        description="[live and upcoming videos](https://holodex.net/)",
-                    )
-
-                    embed.set_thumbnail(
-                        url="https://hololive.hololivepro.com/wp-content/themes/hololive/images/head_l.png"
-                    )
-
                     if data:
-                        for video in data:
-                            pattern = "\[|\]"
-                            embed.add_field(
-                                name=video["channel"]["name"],
-                                value=f"[{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
-                                inline=False,
+                        embeds = []
+                        step = 5  # number of vids per embed
+                        for i in range(0, len(data), step):
+                            embed = disnake.Embed(
+                                title="hololive",
+                                description="[live and upcoming videos](https://holodex.net/)",
                             )
+                            embed.set_thumbnail(
+                                url="https://hololive.hololivepro.com/wp-content/themes/hololive/images/head_l.png"
+                            )
+                            for video in data[i:i+step]:
+                                pattern = "\[|\]"
+                                embed.add_field(
+                                    name=video["channel"]["name"],
+                                    value=f"[{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
+                                    inline=False,
+                                )
+                            embeds.append(embed)
+                        await ctx.send(embed=embeds[0], view=Menu(embeds))
                     else:
                         embed.add_field(
                             name="sadger badger", value="no strim rn", inline=False
                         )
-                    await ctx.send(embed=embed)
+                        await ctx.send(embed=embed)
                 else:
                     await ctx.send(
                         f"<@{ctx.author.id}> error retrieving info! try again later"
