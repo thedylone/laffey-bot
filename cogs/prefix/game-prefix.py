@@ -36,7 +36,7 @@ class Game(commands.Cog, name="game"):
     )
     async def valorant_info(self, ctx: commands.Context):
         """returns user's valorant info from the database"""
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         user_id = str(ctx.author.id)
         if user_id in player_data:
             user_data = player_data[user_id]
@@ -62,7 +62,7 @@ class Game(commands.Cog, name="game"):
     )
     async def valorant_watch(self, ctx: commands.Context, name: str, tag: str):
         """add user's valorant info to the database"""
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         user_id = str(ctx.author.id)
         async with aiohttp.ClientSession() as session:
             async with session.get(
@@ -81,7 +81,7 @@ class Game(commands.Cog, name="game"):
                     await ctx.send(
                         content=f"<@{user_id}> database updated, user added. remove using /valorant-unwatch"
                     )
-                    json_helper.save(player_data)
+                    json_helper.save(player_data, "playerData.json")
                 else:
                     await ctx.send(
                         content=f"<@{user_id}> error connecting, database not updated. please try again"
@@ -102,11 +102,11 @@ class Game(commands.Cog, name="game"):
     )
     async def valorant_unwatch(self, ctx: commands.Context):
         """removes user's valorant info from the database"""
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         user_id = str(ctx.author.id)
         if user_id in player_data:
             del player_data[user_id]
-            json_helper.save(player_data)
+            json_helper.save(player_data, "playerData.json")
             await ctx.send(
                 content=f"<@{user_id}> database updated, user removed. add again using /valorant-watch"
             )
@@ -120,7 +120,7 @@ class Game(commands.Cog, name="game"):
     )
     async def valorant_wait(self, ctx: commands.Context, wait_user: disnake.User):
         """pings you when tagged user is done"""
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         wait_user_id = str(wait_user.id)
         inter_user_id = str(ctx.author.id)
         extra_message = ""

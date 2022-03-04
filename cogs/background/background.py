@@ -33,9 +33,9 @@ class Background(commands.Cog):
         channel = self.bot.get_channel(
             config["watch_channel"]
         )  # retrieves channel ID from config.json
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         for user_id in player_data:
-            player_data = json_helper.load()  # reloads player_data
+            player_data = json_helper.load("playerData.json")  # reloads player_data
             user_data = player_data[user_id]
             if time.time() - user_data["lastTime"] < config["watch_cooldown"] * 60:
                 continue  # cooldown in seconds
@@ -163,7 +163,7 @@ class Background(commands.Cog):
                             f"<@{'> <@'.join(list(set(combined_waiters)))}> removing from waitlist"
                         )  # pings waiters
 
-                    json_helper.save(player_data)
+                    json_helper.save(player_data, "playerData.json")
             await asyncio.sleep(0.5)  # sleeps for number of seconds (avoid rate limit)
 
 

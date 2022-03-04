@@ -32,7 +32,7 @@ class ContextMenu(commands.Cog):
     ):
         await inter.response.defer()
         """pings you when tagged user is done"""
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         wait_user_id = str(wait_user.id)
         inter_user_id = str(inter.user.id)
         extra_message = ""

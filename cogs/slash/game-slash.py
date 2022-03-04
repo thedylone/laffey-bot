@@ -35,7 +35,7 @@ class Game(commands.Cog):
     async def valorant_info(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """returns user's valorant info from the database"""
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         user_id = str(inter.user.id)
         if user_id in player_data:
             user_data = player_data[user_id]
@@ -67,11 +67,11 @@ class Game(commands.Cog):
     async def valorant_unwatch(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """removes user's valorant info from the database"""
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         user_id = str(inter.user.id)
         if user_id in player_data:
             del player_data[user_id]
-            json_helper.save(player_data)
+            json_helper.save(player_data, "playerData.json")
             await inter.edit_original_message(
                 content=f"<@{user_id}> database updated, user removed. add again using /valorant-watch"
             )
@@ -88,7 +88,7 @@ class Game(commands.Cog):
     ):
         await inter.response.defer()
         """pings you when tagged user is done"""
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         wait_user_id = str(wait_user.id)
         inter_user_id = str(inter.user.id)
         extra_message = ""
