@@ -192,6 +192,7 @@ class Background(commands.Cog):
                             streak_embed.add_field(
                                 name="streaker",
                                 value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
+                                inline=False,
                             )
                         player_data[member_id]["streak"] = new_streak
 
