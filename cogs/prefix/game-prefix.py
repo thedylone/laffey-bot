@@ -79,6 +79,7 @@ class Game(commands.Cog, name="game"):
                         "region": data["data"]["region"],
                         "puuid": data["data"]["puuid"],
                         "lastTime": time.time(),
+                        "streak": 0,
                     }
                     await ctx.send(
                         content=f"<@{user_id}> database updated, user added. remove using /valorant-unwatch"
