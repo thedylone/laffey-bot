@@ -48,6 +48,7 @@ class ValorantWatchModal(disnake.ui.Modal):
                         "region": data["data"]["region"],
                         "puuid": data["data"]["puuid"],
                         "lastTime": time.time(),
+                        "streak": 0,
                     }
                     await inter.edit_original_message(
                         content=f"<@{user_id}> database updated, user added. remove using /valorant-unwatch"

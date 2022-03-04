@@ -132,32 +132,81 @@ class Background(commands.Cog):
                         embed=player_embed
                     )  # sends the notification embed
 
-                    feeder_embed = disnake.Embed(
-                        title="feeder alert❗❗",
-                        color=0xFF7614,
-                        description=f"<@{'> and <@'.join(feeders.keys())}> inted! {random.choice(config['feeder_msg'])}",
-                    )
-                    for feeder in feeders:
-                        feeder_embed.add_field(
-                            name="dirty inter",
-                            value=f"<@{feeder}> finished {feeders[feeder]['kills']}/{feeders[feeder]['deaths']}/{feeders[feeder]['assists']} with an ACS of {feeders[feeder]['acs']}.",
-                            inline=False,
-                        )
-                    feeder_embed.set_image(
-                        url=random.choice(config["feeder_embed_image"])
-                    )
                     if feeders:
+                        feeder_embed = disnake.Embed(
+                            title="feeder alert❗❗",
+                            color=0xFF7614,
+                            description=f"<@{'> and <@'.join(feeders.keys())}> inted! {random.choice(config['feeder_msg'])}",
+                        )
+                        for feeder in feeders:
+                            feeder_embed.add_field(
+                                name="dirty inter",
+                                value=f"<@{feeder}> finished {feeders[feeder]['kills']}/{feeders[feeder]['deaths']}/{feeders[feeder]['assists']} with an ACS of {feeders[feeder]['acs']}.",
+                                inline=False,
+                            )
+                        feeder_embed.set_image(
+                            url=random.choice(config["feeder_embed_image"])
+                        )
                         await channel.send(embed=feeder_embed)  # sends the feeder embed
 
                     combined_waiters = []  # init list of users to ping for waitlist
-                    for member_id in party_red + party_blue:
+
+                    is_streak = False
+                    streak_embed = disnake.Embed(
+                        title="streaker alert 👀👀",
+                        color=0xCC36D1,
+                        description="someone is on a streak!",
+                    )
+
+                    for member_id in party_red:
+                        # streak function
+                        if rounds_red > rounds_blue:
+                            new_streak = max(player_data[member_id]["streak"] + 1, 1)
+                        elif rounds_red < rounds_blue:
+                            new_streak = min(player_data[member_id]["streak"] - 1, -1)
+                        if abs(new_streak) >= 3:
+                            is_streak = True
+                            streak_embed.add_field(
+                                name="streaker",
+                                value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
+                            )
+                        player_data[member_id]["streak"] = new_streak
+
                         # sets party members to update last updated time if more recent
-                        if player_data[member_id]["lastTime"] < recent_time:
-                            player_data[member_id]["lastTime"] = recent_time
+                        player_data[member_id]["lastTime"] = max(
+                            player_data[member_id]["lastTime"], recent_time
+                        )
                         if member_id in self.bot.valorant_waitlist:
                             combined_waiters += self.bot.valorant_waitlist.pop(
                                 member_id
                             )
+
+                    for member_id in party_blue:
+                        # streak function
+                        if rounds_blue > rounds_red:
+                            new_streak = max(player_data[member_id]["streak"] + 1, 1)
+                        elif rounds_blue < rounds_red:
+                            new_streak = min(player_data[member_id]["streak"] - 1, -1)
+                        if abs(new_streak) >= 3:
+                            is_streak = True
+                            streak_embed.add_field(
+                                name="streaker",
+                                value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
+                            )
+                        player_data[member_id]["streak"] = new_streak
+
+                        # sets party members to update last updated time if more recent
+                        player_data[member_id]["lastTime"] = max(
+                            player_data[member_id]["lastTime"], recent_time
+                        )
+                        if member_id in self.bot.valorant_waitlist:
+                            combined_waiters += self.bot.valorant_waitlist.pop(
+                                member_id
+                            )
+
+                    if is_streak:
+                        await channel.send(embed=streak_embed)
+
                     if combined_waiters:
                         await channel.send(
                             f"<@{'> <@'.join(list(set(combined_waiters)))}> removing from waitlist"
