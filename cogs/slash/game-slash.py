@@ -6,7 +6,7 @@ import json
 import sys
 
 from helpers import json_helper
-from modals.modals import valorant_watch_modal
+from modals.modals import ValorantWatchModal
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
 
@@ -32,17 +32,21 @@ class Game(commands.Cog):
     @commands.slash_command(
         name="valorant-info", description="view valorant data in database"
     )
-    async def valorant_info(self, inter: disnake.ApplicationCommandInteraction):
+    async def valorant_info(
+        self, inter: disnake.ApplicationCommandInteraction, user: disnake.User = None
+    ):
         await inter.response.defer()
         """returns user's valorant info from the database"""
         player_data = json_helper.load("playerData.json")
-        user_id = str(inter.user.id)
+        if user == None:
+            user = inter.user
+        user_id = str(user.id)
         if user_id in player_data:
             user_data = player_data[user_id]
             embed = disnake.Embed(
                 title="valorant info", description=f"<@{user_id}> saved info"
             )
-            embed.set_thumbnail(url=inter.user.display_avatar.url)
+            embed.set_thumbnail(url=user.display_avatar.url)
             embed.add_field(name="username", value=f"{user_data['name']}", inline=True)
             embed.add_field(name="tag", value=f"#{user_data['tag']}", inline=True)
             embed.add_field(
@@ -58,7 +62,7 @@ class Game(commands.Cog):
         name="valorant-watch", description="adds user into database"
     )
     async def valorant_watch(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.response.send_modal(modal=valorant_watch_modal())
+        await inter.response.send_modal(modal=ValorantWatchModal())
 
     @commands.slash_command(
         name="valorant-unwatch",

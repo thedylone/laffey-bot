@@ -34,16 +34,18 @@ class Game(commands.Cog, name="game"):
         aliases=["valorantinfo", "valinfo", "vinfo"],
         description="view valorant data in database",
     )
-    async def valorant_info(self, ctx: commands.Context):
+    async def valorant_info(self, ctx: commands.Context, user: disnake.User = None):
         """returns user's valorant info from the database"""
         player_data = json_helper.load("playerData.json")
-        user_id = str(ctx.author.id)
+        if user == None:
+            user = ctx.author
+        user_id = str(user.id)
         if user_id in player_data:
             user_data = player_data[user_id]
             embed = disnake.Embed(
                 title="valorant info", description=f"<@{user_id}> saved info"
             )
-            embed.set_thumbnail(url=ctx.author.display_avatar.url)
+            embed.set_thumbnail(url=user.display_avatar.url)
             embed.add_field(name="username", value=f"{user_data['name']}", inline=True)
             embed.add_field(name="tag", value=f"#{user_data['tag']}", inline=True)
             embed.add_field(
@@ -77,6 +79,7 @@ class Game(commands.Cog, name="game"):
                         "region": data["data"]["region"],
                         "puuid": data["data"]["puuid"],
                         "lastTime": time.time(),
+                        "streak": 0,
                     }
                     await ctx.send(
                         content=f"<@{user_id}> database updated, user added. remove using /valorant-unwatch"
