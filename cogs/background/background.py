@@ -30,17 +30,17 @@ class Background(commands.Cog):
     @tasks.loop(seconds=30)
     async def valorant_watch_cycle(self):
         await self.bot.wait_until_ready()  # wait until the bot logs in
-        channel = self.bot.get_channel(
-            config["watch_channel"]
-        )  # retrieves channel ID from config.json
         player_data = json_helper.load("playerData.json")
         for user_id in player_data:
             player_data = json_helper.load("playerData.json")  # reloads player_data
+            guild_data = json_helper.load("guildData.json")
             user_data = player_data[user_id]
             if time.time() - user_data["lastTime"] < config["watch_cooldown"] * 60:
                 continue  # cooldown in seconds
             puuid = user_data["puuid"]
             region = user_data["region"]
+            guild = user_data["guild"]
+            channel = self.bot.get_channel(guild_data[guild]["watch_channel"])
             async with aiohttp.ClientSession() as session:
                 async with session.get(
                     f"https://api.henrikdev.xyz/valorant/v3/by-puuid/matches/{region}/{puuid}"
@@ -76,7 +76,8 @@ class Background(commands.Cog):
                         for player_id in player_data:
                             if (
                                 player["puuid"] == player_data[player_id]["puuid"]
-                            ):  # detects if multiple watched users are in the same game
+                                and player_data[player_id]["guild"] == guild
+                            ):  # detects if multiple watched users who "watched" in the same guild are in the same game
                                 kills = player["stats"]["kills"]
                                 deaths = player["stats"]["deaths"]
                                 assists = player["stats"]["assists"]
