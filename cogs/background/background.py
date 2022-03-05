@@ -41,16 +41,16 @@ class Background(commands.Cog):
             player_data = json_helper.load("playerData.json")  # reloads player_data
             guild_data = json_helper.load("guildData.json")
             user_data = player_data[user_id]
-            puuid = user_data["puuid"]
-            region = user_data["region"]
-            guild = user_data["guild"]
+            user_puuid = user_data["puuid"]
+            user_region = user_data["region"]
+            user_guild = user_data["guild"]
             channel = player_user
             channel_safe = False
 
-            guild_exists = self.bot.get_guild(guild)
+            guild_exists = self.bot.get_guild(user_guild)
             if guild_exists in self.bot.guilds:
                 # check if bot is still in the guild
-                watch_channel_id = guild_data[str(guild)]["watch_channel"]
+                watch_channel_id = guild_data[str(user_guild)]["watch_channel"]
                 channel_exists = self.bot.get_channel(watch_channel_id)
                 guild_exists_channels = guild_exists.text_channels
                 if channel_exists in guild_exists_channels:
@@ -59,13 +59,13 @@ class Background(commands.Cog):
                     channel_safe = True
                 elif watch_channel_id:
                     # sends a warning that guild exists but channel is gone
-                    guild_data[str(guild)]["watch_channel"] = 0
+                    guild_data[str(user_guild)]["watch_channel"] = 0
                     json_helper.save(guild_data, "guildData.json")
                     if guild_exists_channels:
                         await guild_exists_channels[0].send(
                             "The channel I am set to no longer exists! Please use valorant-setchannel on another channel. I will send updates to members directly instead."
                         )
-            elif guild:
+            elif user_guild:
                 # sends a DM to the user that bot is no longer in the guild
                 user_data["guild"] = 0
                 json_helper.save(player_data, "playerData.json")
@@ -75,7 +75,7 @@ class Background(commands.Cog):
 
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    f"https://api.henrikdev.xyz/valorant/v3/by-puuid/matches/{region}/{puuid}"
+                    f"https://api.henrikdev.xyz/valorant/v3/by-puuid/matches/{user_region}/{user_puuid}"
                 ) as match_request:
                     # using this until access for riot granted async with session.get(f'https://{region}.api.riotgames.com/val/match/v1/matchlists/by-puuid/{puuid}?api_key={RIOT_TOKEN}') as request:
                     if match_request.status != 200:
@@ -107,10 +107,11 @@ class Background(commands.Cog):
                     for player in latest_game["players"]["all_players"]:
                         for player_id in player_data:
                             if (
-                                player["puuid"] == player_data[user_id]["puuid"]
-                                or player["puuid"] == player_data[player_id]["puuid"]
-                                and guild
-                                and player_data[player_id]["guild"] == guild
+                                player_id == user_id
+                                and player["puuid"] == user_puuid
+                                or user_guild > 0
+                                and player["puuid"] == player_data[player_id]["puuid"]
+                                and player_data[player_id]["guild"] == user_guild
                             ):  # detects if multiple watched users who "watched" in the same guild (not 0) are in the same game
                                 kills = player["stats"]["kills"]
                                 deaths = player["stats"]["deaths"]
