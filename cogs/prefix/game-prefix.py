@@ -121,40 +121,38 @@ class Game(commands.Cog, name="game"):
         aliases=["valorantwait", "valwait", "vwait"],
         description="pings you when tagged user is done",
     )
-    async def valorant_wait(self, ctx: commands.Context, wait_user: disnake.User):
+    async def valorant_wait(self, ctx: commands.Context, *wait_users: disnake.User):
         """pings you when tagged user is done"""
+        ctx_user_id = str(ctx.author.id)
+        if len(wait_users) == 0:
+            await ctx.send(content=f"<@{ctx_user_id}> use {config['prefix']}valorant-wait <tag the user you are waiting for>")
+            return
         player_data = json_helper.load()
-        wait_user_id = str(wait_user.id)
-        inter_user_id = str(ctx.author.id)
         extra_message = ""
-        if wait_user_id == inter_user_id:
-            extra_message = "interesting but ok. "
-        if wait_user_id in player_data:
-            if wait_user_id in self.bot.valorant_waitlist:
-                if inter_user_id in self.bot.valorant_waitlist[wait_user_id]:
-                    await ctx.send(
-                        content=f"{extra_message}<@{inter_user_id}> you are already waiting for <@{wait_user_id}>"
-                    )
-                    return
+        success_waiting = []
+        already_waiting = []
+        not_in_database = []
+        for wait_user in wait_users:
+            wait_user_id = str(wait_user.id)
+            if wait_user_id == ctx_user_id:
+                extra_message = "interesting but ok. "
+            if wait_user_id in player_data:
+                if wait_user_id in self.bot.valorant_waitlist:
+                    if ctx_user_id in self.bot.valorant_waitlist[wait_user_id]:
+                        already_waiting.append(wait_user_id)
+                    else:
+                        self.bot.valorant_waitlist[wait_user_id] += [ctx_user_id]
+                        success_waiting.append(wait_user_id)
                 else:
-                    self.bot.valorant_waitlist[wait_user_id] += [inter_user_id]
+                    self.bot.valorant_waitlist[wait_user_id] = [ctx_user_id]
+                    success_waiting.append(wait_user_id)
             else:
-                self.bot.valorant_waitlist[wait_user_id] = [inter_user_id]
-            await ctx.send(
-                content=f"{extra_message}<@{inter_user_id}> success, will notify when <@{wait_user_id}> is done"
-            )
-        else:
-            await ctx.send(
-                content=f"{extra_message}<@{wait_user_id}> is not in database, unable to execute"
-            )
+                not_in_database.append(wait_user_id)
+        success_message = f"success, will notify when <@{'> <@'.join(success_waiting)}> {'is' if len(success_waiting) == 1 else 'are'} done. " if success_waiting else ""
+        already_message = f"you are already waiting for <@{'> <@'.join(already_waiting)}>. " if already_waiting else ""
+        not_in_database_message = f"<@{'> <@'.join(not_in_database)}> not in database, unable to wait." if not_in_database else ""
+        await ctx.send(content=f"{extra_message}<@{ctx_user_id}> {success_message}{already_message}{not_in_database_message}")
 
-    @valorant_wait.error
-    async def valorant_wait_error(
-        self, ctx: commands.Context, error: commands.CommandError
-    ):
-        if isinstance(error, commands.MissingRequiredArgument):
-            message = f"use {config['prefix']}valorant-wait <tag the user you are waiting for>"
-        await ctx.send(message)
 
     @commands.command(
         name="valorant-waitlist",
