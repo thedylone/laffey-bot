@@ -30,6 +30,23 @@ class Game(commands.Cog):
         )
 
     @commands.slash_command(
+        name="valorant-setchannel",
+        description="set the channel the bot will send updates to",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_setchannel(self, inter: disnake.ApplicationCommandInteraction):
+        await inter.response.defer()
+        """set the channel the bot will send updates to"""
+        channel = inter.channel
+        guild = inter.guild
+        guild_data = json_helper.load("guildData.json")
+        guild_data[str(guild.id)]["watch_channel"] = channel.id
+        json_helper.save(guild_data, "guildData.json")
+        await inter.edit_original_message(
+            content=f"Successfully set `#{channel}` as watch channel for `{guild}`"
+        )
+
+    @commands.slash_command(
         name="valorant-info", description="view valorant data in database"
     )
     async def valorant_info(
@@ -62,7 +79,18 @@ class Game(commands.Cog):
         name="valorant-watch", description="adds user into database"
     )
     async def valorant_watch(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.response.send_modal(modal=ValorantWatchModal())
+        guild_data = json_helper.load("guildData.json")
+        guild_id = inter.guild_id
+        if (
+            str(guild_id) not in guild_data
+            or guild_data[str(guild_id)]["watch_channel"] == 0
+        ):
+            await inter.send(
+                content="Please set the watch channel for the guild first using valorant-setchannel! You can also DM me and I will DM you for each update instead!"
+            )
+            return
+        else:
+            await inter.response.send_modal(modal=ValorantWatchModal())
 
     @commands.slash_command(
         name="valorant-unwatch",

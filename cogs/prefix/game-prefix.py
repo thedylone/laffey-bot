@@ -31,7 +31,7 @@ class Game(commands.Cog, name="game"):
 
     @commands.command(
         name="valorant-setchannel",
-        aliases=["valorantsetchannel", "valsetchannel", "vsetchannel","vset"],
+        aliases=["valorantsetchannel", "valsetchannel", "vsetchannel", "vset"],
         description="set the channel the bot will send updates to",
     )
     @commands.has_guild_permissions(manage_messages=True)
@@ -42,7 +42,7 @@ class Game(commands.Cog, name="game"):
         guild_data = json_helper.load("guildData.json")
         guild_data[str(guild.id)]["watch_channel"] = channel.id
         json_helper.save(guild_data, "guildData.json")
-        await ctx.send(f"Successfully set {channel} as watch channel for {guild}")
+        await ctx.send(f"Successfully set `#{channel}` as watch channel for `{guild}`")
 
     @commands.command(
         name="valorant-info",
@@ -79,6 +79,19 @@ class Game(commands.Cog, name="game"):
     )
     async def valorant_watch(self, ctx: commands.Context, name: str, tag: str):
         """add user's valorant info to the database"""
+        if isinstance(ctx.channel, disnake.channel.DMChannel):
+            guild_id = 0
+        else:
+            guild_data = json_helper.load("guildData.json")
+            guild_id = ctx.guild.id
+            if (
+                str(guild_id) not in guild_data
+                or guild_data[str(guild_id)]["watch_channel"] == 0
+            ):
+                await ctx.send(
+                    "Please set the watch channel for the guild first using valorant-setchannel! You can also DM me and I will DM you for each update instead!"
+                )
+                return
         player_data = json_helper.load("playerData.json")
         user_id = str(ctx.author.id)
         async with aiohttp.ClientSession() as session:
@@ -95,6 +108,7 @@ class Game(commands.Cog, name="game"):
                         "puuid": data["data"]["puuid"],
                         "lastTime": time.time(),
                         "streak": 0,
+                        "guild": guild_id,
                     }
                     await ctx.send(
                         content=f"<@{user_id}> database updated, user added. remove using /valorant-unwatch"

@@ -31,6 +31,8 @@ class ValorantWatchModal(disnake.ui.Modal):
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
         """add user's valorant info to the database"""
+        guild_data = json_helper.load("guildData.json")
+        guild_id = inter.guild_id
         player_data = json_helper.load("playerData.json")
         user_id = str(inter.user.id)
         name = inter.text_values["name"]
@@ -49,6 +51,7 @@ class ValorantWatchModal(disnake.ui.Modal):
                         "puuid": data["data"]["puuid"],
                         "lastTime": time.time(),
                         "streak": 0,
+                        "guild": guild_id,
                     }
                     await inter.edit_original_message(
                         content=f"<@{user_id}> database updated, user added. remove using /valorant-unwatch"
