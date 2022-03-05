@@ -161,7 +161,7 @@ class Game(commands.Cog, name="game"):
         success_waiting = []
         already_waiting = []
         not_in_database = []
-        for wait_user in wait_users:
+        for wait_user in list(set(wait_users)):
             wait_user_id = str(wait_user.id)
             if wait_user_id == ctx_user_id:
                 extra_message = "interesting but ok. "
