@@ -61,7 +61,7 @@ class General(commands.Cog, name="general"):
                                 pattern = "\[|\]"
                                 embed.add_field(
                                     name=video["channel"]["name"],
-                                    value=f"[{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
+                                    value=f"{video['status']}: [{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
                                     inline=False,
                                 )
                             embeds.append(embed)

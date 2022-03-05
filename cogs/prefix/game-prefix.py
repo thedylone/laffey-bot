@@ -154,7 +154,9 @@ class Game(commands.Cog, name="game"):
         """pings you when tagged user is done"""
         ctx_user_id = str(ctx.author.id)
         if len(wait_users) == 0:
-            await ctx.send(content=f"<@{ctx_user_id}> use {config['prefix']}valorant-wait <tag the user you are waiting for>")
+            await ctx.send(
+                content=f"<@{ctx_user_id}> use {config['prefix']}valorant-wait <tag the user you are waiting for>"
+            )
             return
         player_data = json_helper.load("playerData.json")
         extra_message = ""
@@ -177,11 +179,24 @@ class Game(commands.Cog, name="game"):
                     success_waiting.append(wait_user_id)
             else:
                 not_in_database.append(wait_user_id)
-        success_message = f"success, will notify when <@{'> <@'.join(success_waiting)}> {'is' if len(success_waiting) == 1 else 'are'} done. " if success_waiting else ""
-        already_message = f"you are already waiting for <@{'> <@'.join(already_waiting)}>. " if already_waiting else ""
-        not_in_database_message = f"<@{'> <@'.join(not_in_database)}> not in database, unable to wait." if not_in_database else ""
-        await ctx.send(content=f"{extra_message}<@{ctx_user_id}> {success_message}{already_message}{not_in_database_message}")
-
+        success_message = (
+            f"success, will notify when <@{'> <@'.join(success_waiting)}> {'is' if len(success_waiting) == 1 else 'are'} done. "
+            if success_waiting
+            else ""
+        )
+        already_message = (
+            f"you are already waiting for <@{'> <@'.join(already_waiting)}>. "
+            if already_waiting
+            else ""
+        )
+        not_in_database_message = (
+            f"<@{'> <@'.join(not_in_database)}> not in database, unable to wait."
+            if not_in_database
+            else ""
+        )
+        await ctx.send(
+            content=f"{extra_message}<@{ctx_user_id}> {success_message}{already_message}{not_in_database_message}"
+        )
 
     @commands.command(
         name="valorant-waitlist",
