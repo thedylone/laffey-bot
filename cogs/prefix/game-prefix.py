@@ -30,13 +30,28 @@ class Game(commands.Cog, name="game"):
         )
 
     @commands.command(
+        name="valorant-setchannel",
+        aliases=["valorantsetchannel", "valsetchannel", "vsetchannel", "vset"],
+        description="set the channel the bot will send updates to",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_setchannel(self, ctx: commands.Context):
+        """set the channel the bot will send updates to"""
+        channel = ctx.channel
+        guild = ctx.guild
+        guild_data = json_helper.load("guildData.json")
+        guild_data[str(guild.id)]["watch_channel"] = channel.id
+        json_helper.save(guild_data, "guildData.json")
+        await ctx.send(f"Successfully set `#{channel}` as watch channel for `{guild}`")
+
+    @commands.command(
         name="valorant-info",
         aliases=["valorantinfo", "valinfo", "vinfo"],
         description="view valorant data in database",
     )
     async def valorant_info(self, ctx: commands.Context, user: disnake.User = None):
         """returns user's valorant info from the database"""
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         if user == None:
             user = ctx.author
         user_id = str(user.id)
@@ -64,7 +79,20 @@ class Game(commands.Cog, name="game"):
     )
     async def valorant_watch(self, ctx: commands.Context, name: str, tag: str):
         """add user's valorant info to the database"""
-        player_data = json_helper.load()
+        if isinstance(ctx.channel, disnake.channel.DMChannel):
+            guild_id = 0
+        else:
+            guild_data = json_helper.load("guildData.json")
+            guild_id = ctx.guild.id
+            if (
+                str(guild_id) not in guild_data
+                or guild_data[str(guild_id)]["watch_channel"] == 0
+            ):
+                await ctx.send(
+                    "Please set the watch channel for the guild first using valorant-setchannel! You can also DM me and I will DM you for each update instead!"
+                )
+                return
+        player_data = json_helper.load("playerData.json")
         user_id = str(ctx.author.id)
         async with aiohttp.ClientSession() as session:
             async with session.get(
@@ -80,11 +108,12 @@ class Game(commands.Cog, name="game"):
                         "puuid": data["data"]["puuid"],
                         "lastTime": time.time(),
                         "streak": 0,
+                        "guild": guild_id,
                     }
                     await ctx.send(
                         content=f"<@{user_id}> database updated, user added. remove using /valorant-unwatch"
                     )
-                    json_helper.save(player_data)
+                    json_helper.save(player_data, "playerData.json")
                 else:
                     await ctx.send(
                         content=f"<@{user_id}> error connecting, database not updated. please try again"
@@ -105,11 +134,11 @@ class Game(commands.Cog, name="game"):
     )
     async def valorant_unwatch(self, ctx: commands.Context):
         """removes user's valorant info from the database"""
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         user_id = str(ctx.author.id)
         if user_id in player_data:
             del player_data[user_id]
-            json_helper.save(player_data)
+            json_helper.save(player_data, "playerData.json")
             await ctx.send(
                 content=f"<@{user_id}> database updated, user removed. add again using /valorant-watch"
             )
@@ -127,7 +156,7 @@ class Game(commands.Cog, name="game"):
         if len(wait_users) == 0:
             await ctx.send(content=f"<@{ctx_user_id}> use {config['prefix']}valorant-wait <tag the user you are waiting for>")
             return
-        player_data = json_helper.load()
+        player_data = json_helper.load("playerData.json")
         extra_message = ""
         success_waiting = []
         already_waiting = []
