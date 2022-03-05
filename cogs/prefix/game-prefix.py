@@ -30,6 +30,21 @@ class Game(commands.Cog, name="game"):
         )
 
     @commands.command(
+        name="valorant-setchannel",
+        aliases=["valorantsetchannel", "valsetchannel", "vsetchannel","vset"],
+        description="set the channel the bot will send updates to",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_setchannel(self, ctx: commands.Context):
+        """set the channel the bot will send updates to"""
+        channel = ctx.channel
+        guild = ctx.guild
+        guild_data = json_helper.load("guildData.json")
+        guild_data[str(guild.id)]["watch_channel"] = channel.id
+        json_helper.save(guild_data, "guildData.json")
+        await ctx.send(f"Successfully set {channel} as watch channel for {guild}")
+
+    @commands.command(
         name="valorant-info",
         aliases=["valorantinfo", "valinfo", "vinfo"],
         description="view valorant data in database",

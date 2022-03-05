@@ -20,6 +20,8 @@ class ErrorHandler(commands.Cog):
             message = "You are missing the required permissions to run this command!"
         elif isinstance(error, commands.UserInputError):
             message = "Something about your input was wrong, please check your input and try again!"
+        elif isinstance(error, commands.NoPrivateMessage):
+            message = "This command cannot be run in a Private Message!"
         else:
             message = "Oh no! Something went wrong while running the command!"
 
