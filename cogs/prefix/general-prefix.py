@@ -28,11 +28,11 @@ class General(commands.Cog, name="general"):
         """get the bot's current websocket latency."""
         await ctx.send(f"pong! {round(self.bot.latency * 1000)}ms")
 
-    @commands.command(name="flip", description="flip a coin and show the result")
+    @commands.command(name="shouldiorder", description="should you get indulge?")
     async def ping(self, ctx: commands.Context):
-        """flips a coin kekg"""
-        results = ["Heads!", "Tails!"]
-        await ctx.send(f"<@{ctx.author.id}> You got... {random.choice(results)}")
+        """should you get indulge?"""
+        results = ["Hell yea boiii", "Nah save monet tday sadge"]
+        await ctx.send(f"<@{ctx.author.id}> {random.choice(results)}")
 
     @commands.command(name="peko", description="peko")
     async def peko(self, ctx: commands.Context):
