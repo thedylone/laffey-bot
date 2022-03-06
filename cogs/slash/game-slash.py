@@ -6,7 +6,8 @@ import json
 import sys
 
 from helpers import json_helper
-from modals.modals import ValorantWatchModal
+from modals.modals import ValorantWatchModal, ValorantFeederMessageModal
+from views.views import Menu
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
 
@@ -204,6 +205,80 @@ class ValorantAdmin(commands.Cog):
         await inter.edit_original_message(
             content=f"successfully set role `{role}` as watch channel for `{guild}`"
         )
+
+    @commands.slash_command(
+        name="valorant-add-feeder-message",
+        description="add custom message for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_add_feeder_message(
+        self, inter: disnake.ApplicationCommandInteraction
+    ):
+        """add custom message for feeder alert"""
+        await inter.response.send_modal(modal=ValorantFeederMessageModal())
+
+    @commands.slash_command(
+        name="valorant-show-feeder-messages",
+        description="show custom messages for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_show_feeder_message(
+        self, inter: disnake.ApplicationCommandInteraction
+    ):
+        await inter.response.defer()
+        """show custom messages for feeder alert"""
+        guild = inter.guild
+        guild_data = json_helper.load("guildData.json")
+        if "feeder_messages" not in guild_data[str(guild.id)]:
+            await inter.edit_original_message(
+                content=f'no custom messages for `{guild}`! add using valorant-add-feeder-message "<custom message>"!'
+            )
+        else:
+            feeder_messages = guild_data[str(guild.id)]["feeder_messages"]
+            embeds = []
+            step = 5  # number of messages per embed
+            for i in range(0, len(feeder_messages), step):
+                embed = disnake.Embed(
+                    title="custom feeder messages",
+                    description="messsages randomly sent with the feeder alert",
+                )
+                value = ""
+                for j, message in enumerate(feeder_messages[i : i + step]):
+                    value += f"`{i+j}` {message} \n"
+                embed.add_field(name="messages", value=value)
+                embeds.append(embed)
+            if len(feeder_messages) > step:
+                await inter.edit_original_message(embed=embeds[0], view=Menu(embeds))
+            else:
+                await inter.edit_original_message(embed=embeds[0])
+
+    @commands.slash_command(
+        name="valorant-delete-feeder-message",
+        description="delete custom message for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_delete_feeder_message(
+        self, inter: disnake.ApplicationCommandInteraction, index: int
+    ):
+        await inter.response.defer()
+        """delete custom message for feeder alert"""
+        guild = inter.guild
+        guild_data = json_helper.load("guildData.json")
+        if "feeder_messages" not in guild_data[str(guild.id)]:
+            await inter.edit_original_message(
+                content=f'no custom messages for `{guild}`! add using valorant-add-feeder-message "<custom message>"!'
+            )
+        else:
+            messages = guild_data[str(guild.id)]["feeder_messages"]
+            if index > len(messages):
+                await inter.edit_original_message(content="invalid index to delete!")
+            else:
+                del messages[index]
+                guild_data[str(guild.id)]["feeder_messages"] = messages
+                json_helper.save(guild_data, "guildData.json")
+                await inter.edit_original_message(
+                    content=f"successfully deleted custom feeder message for `{guild}`"
+                )
 
 
 def setup(bot: commands.Bot):

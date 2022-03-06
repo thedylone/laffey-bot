@@ -66,3 +66,39 @@ class ValorantWatchModal(disnake.ui.Modal):
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         await inter.response.send_message("Oops, something went wrong.", ephemeral=True)
+
+
+class ValorantFeederMessageModal(disnake.ui.Modal):
+    def __init__(self) -> None:
+        components = [
+            disnake.ui.TextInput(
+                label="Custom Message",
+                placeholder="custom message for feeder alert",
+                custom_id="message",
+                style=disnake.TextInputStyle.short,
+                max_length=500,
+            ),
+        ]
+        super().__init__(
+            title="valorant feeder message",
+            custom_id="valorant_feeder_message",
+            components=components,
+        )
+
+    async def callback(self, inter: disnake.ModalInteraction) -> None:
+        await inter.response.defer()
+        """add custom message for feeder alert"""
+        message = inter.text_values["message"]
+        guild = inter.guild
+        guild_data = json_helper.load("guildData.json")
+        if "feeder_messages" not in guild_data[str(guild.id)]:
+            guild_data[str(guild.id)]["feeder_messages"] = [message]
+        else:
+            guild_data[str(guild.id)]["feeder_messages"] += [message]
+        json_helper.save(guild_data, "guildData.json")
+        await inter.edit_original_message(
+            content=f"successfully added custom feeder message for `{guild}`"
+        )
+
+    async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
+        await inter.response.send_message("Oops, something went wrong.", ephemeral=True)
