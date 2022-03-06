@@ -120,7 +120,7 @@ class Valorant(commands.Cog, name="valorant"):
     ):
         if isinstance(error, commands.MissingRequiredArgument):
             message = f"use valorant-watch <name> <tag without #>"
-        await ctx.send(message)
+            await ctx.send(message)
 
     @commands.command(
         name="valorant-unwatch",
@@ -250,6 +250,14 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         guild_data[str(guild.id)]["ping_role"] = role.id
         json_helper.save(guild_data, "guildData.json")
         await ctx.send(f"successfully set role `{role}` as watch channel for `{guild}`")
+
+    @valorant_setrole.error
+    async def valorant_setrole_error(
+        self, ctx: commands.Context, error: commands.CommandError
+    ):
+        if isinstance(error, commands.MissingRequiredArgument):
+            message = f"use valorant-setrole <tag the role>"
+            await ctx.send(message)
 
 
 def setup(bot: commands.Bot):
