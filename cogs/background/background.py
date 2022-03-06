@@ -169,10 +169,14 @@ class Background(commands.Cog):
                     )  # sends the notification embed
 
                     if feeders:
+                        if user_guild == 0 or str(user_guild) not in guild_data or "feeder_messages" not in guild_data[str(user_guild)]:
+                            feeder_messages = ["lmao", "git gud"]
+                        else:
+                            feeder_messages = guild_data[str(user_guild)]["feeder_messages"]
                         feeder_embed = disnake.Embed(
                             title="feeder alert❗❗",
                             color=0xFF7614,
-                            description=f"<@{'> and <@'.join(feeders.keys())}> inted! {random.choice(config['feeder_msg'])}",
+                            description=f"<@{'> and <@'.join(feeders.keys())}> inted! {random.choice(feeder_messages)}",
                         )
                         for feeder in feeders:
                             feeder_embed.add_field(

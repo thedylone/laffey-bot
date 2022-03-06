@@ -264,11 +264,14 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     @commands.command(
         name="valorant-add-feeder-message",
         aliases=["valorantaddfeedermessage", "valaddmessage", "vaddmsg", "vmsg"],
-        description="dd custom message for feeder alert",
+        description="add custom message for feeder alert",
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def valorant_add_feeder_message(self, ctx: commands.Context, message: str):
         """add custom message for feeder alert"""
+        if len(message) > 500:
+            await ctx.send("message is too long!")
+            return
         guild = ctx.guild
         guild_data = json_helper.load("guildData.json")
         if "feeder_messages" not in guild_data[str(guild.id)]:
@@ -318,15 +321,49 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
                 value = ""
                 for j, message in enumerate(feeder_messages[i : i + step]):
                     value += f"`{i+j}` {message} \n"
-                embed.add_field(
-                    name="messages",
-                    value=value
-                )
+                embed.add_field(name="messages", value=value)
                 embeds.append(embed)
             if len(feeder_messages) > step:
                 await ctx.send(embed=embeds[0], view=Menu(embeds))
             else:
                 await ctx.send(embed=embeds[0])
+
+    @commands.command(
+        name="valorant-delete-feeder-message",
+        aliases=[
+            "valorantdeletefeedermessage",
+            "valdeletemessage",
+            "vdeletemsg",
+            "vdelmsg",
+        ],
+        description="delete custom message for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_delete_feeder_message(self, ctx: commands.Context, index: int):
+        """delete custom message for feeder alert"""
+        guild = ctx.guild
+        guild_data = json_helper.load("guildData.json")
+        if "feeder_messages" not in guild_data[str(guild.id)]:
+            await ctx.send(
+                f'no custom messages for `{guild}`! add using valorant-add-feeder-message "<custom message>"!'
+            )
+        else:
+            messages = guild_data[str(guild.id)]["feeder_messages"]
+            if index > len(messages):
+                await ctx.send("invalid index to delete!")
+            else:
+                del messages[index]
+                guild_data[str(guild.id)]["feeder_messages"] = messages
+                json_helper.save(guild_data, "guildData.json")
+                await ctx.send(f"successfully deleted custom feeder message for `{guild}`")
+
+    @valorant_delete_feeder_message.error
+    async def valorant_delete_feeder_message_error(
+        self, ctx: commands.Context, error: commands.CommandError
+    ):
+        if isinstance(error, commands.MissingRequiredArgument):
+            message = f'use valorant-delete-feeder-message <index of message> (you can view the index using valorant-show-feeder-message)'
+            await ctx.send(message)
 
 
 def setup(bot: commands.Bot):
