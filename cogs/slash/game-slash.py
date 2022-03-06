@@ -170,10 +170,15 @@ class ValorantAdmin(commands.Cog):
         description="set the channel the bot will send updates to",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_setchannel(self, inter: disnake.ApplicationCommandInteraction):
+    async def valorant_setchannel(
+        self,
+        inter: disnake.ApplicationCommandInteraction,
+        channel: disnake.TextChannel = None,
+    ):
         await inter.response.defer()
         """set the channel the bot will send updates to"""
-        channel = inter.channel
+        if channel == None:
+            channel = inter.channel
         guild = inter.guild
         guild_data = json_helper.load("guildData.json")
         guild_data[str(guild.id)]["watch_channel"] = channel.id
