@@ -7,6 +7,8 @@ import aiohttp
 import time
 import sys
 
+from views.views import Menu
+
 from helpers import json_helper
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
@@ -33,7 +35,7 @@ class Valorant(commands.Cog, name="valorant"):
         guild_id = ctx.guild.id
         guild_data = json_helper.load("guildData.json")
         if "ping_role" not in guild_data[str(guild_id)]:
-            await ctx.send("please set the role to ping first using valorant-setrole!")
+            await ctx.send("please set the role to ping first using valorant-set-role!")
         else:
             ping_role = guild_data[str(guild_id)]["ping_role"]
             await ctx.send(f"<@&{ping_role}>", file=disnake.File("jewelsignal.jpg"))
@@ -84,7 +86,7 @@ class Valorant(commands.Cog, name="valorant"):
                 or guild_data[str(guild_id)]["watch_channel"] == 0
             ):
                 await ctx.send(
-                    "please set the watch channel for the guild first using valorant-setchannel! you can also DM me and i will DM you for each update instead!"
+                    "please set the watch channel for the guild first using valorant-set-channel! you can also DM me and i will DM you for each update instead!"
                 )
                 return
         player_data = json_helper.load("playerData.json")
@@ -220,12 +222,12 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         self.bot = bot
 
     @commands.command(
-        name="valorant-setchannel",
+        name="valorant-set-channel",
         aliases=["valorantsetchannel", "valsetchannel", "vsetchannel", "vchannel"],
         description="set the channel the bot will send updates to",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_setchannel(
+    async def valorant_set_channel(
         self, ctx: commands.Context, channel: disnake.TextChannel = None
     ):
         """set the channel the bot will send updates to"""
@@ -238,12 +240,12 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         await ctx.send(f"successfully set `#{channel}` as watch channel for `{guild}`")
 
     @commands.command(
-        name="valorant-setrole",
+        name="valorant-set-role",
         aliases=["valorantsetrole", "valsetrole", "vsetrole", "vrole"],
         description="set the role the bot will ping",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_setrole(self, ctx: commands.Context, role: disnake.Role):
+    async def valorant_set_role(self, ctx: commands.Context, role: disnake.Role):
         "set the role the bot will ping"
         guild = ctx.guild
         guild_data = json_helper.load("guildData.json")
@@ -251,13 +253,80 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         json_helper.save(guild_data, "guildData.json")
         await ctx.send(f"successfully set role `{role}` as watch channel for `{guild}`")
 
-    @valorant_setrole.error
-    async def valorant_setrole_error(
+    @valorant_set_role.error
+    async def valorant_set_role_error(
         self, ctx: commands.Context, error: commands.CommandError
     ):
         if isinstance(error, commands.MissingRequiredArgument):
-            message = f"use valorant-setrole <tag the role>"
+            message = f"use valorant-set-role <tag the role>"
             await ctx.send(message)
+
+    @commands.command(
+        name="valorant-add-feeder-message",
+        aliases=["valorantaddfeedermessage", "valaddmessage", "vaddmsg", "vmsg"],
+        description="dd custom message for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_add_feeder_message(self, ctx: commands.Context, message: str):
+        """add custom message for feeder alert"""
+        guild = ctx.guild
+        guild_data = json_helper.load("guildData.json")
+        if "feeder_messages" not in guild_data[str(guild.id)]:
+            guild_data[str(guild.id)]["feeder_messages"] = [message]
+        else:
+            guild_data[str(guild.id)]["feeder_messages"] += [message]
+        json_helper.save(guild_data, "guildData.json")
+        await ctx.send(f"successfully added custom feeder message for `{guild}`")
+
+    @valorant_add_feeder_message.error
+    async def valorant_add_feeder_message_error(
+        self, ctx: commands.Context, error: commands.CommandError
+    ):
+        if isinstance(error, commands.MissingRequiredArgument):
+            message = f'use valorant-add-feeder-message "<the message you want>" (include the "")'
+            await ctx.send(message)
+
+    @commands.command(
+        name="valorant-show-feeder-messages",
+        aliases=[
+            "valorant-show-feeder-message",
+            "valorantshowfeedermessages",
+            "valshowmessages",
+            "vshowmsgs",
+            "vmsgs",
+        ],
+        description="show custom messages for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_show_feeder_message(self, ctx: commands.Context):
+        """show custom messages for feeder alert"""
+        guild = ctx.guild
+        guild_data = json_helper.load("guildData.json")
+        if "feeder_messages" not in guild_data[str(guild.id)]:
+            await ctx.send(
+                f'no custom messages for `{guild}`! add using valorant-add-feeder-message "<custom message>"!'
+            )
+        else:
+            feeder_messages = guild_data[str(guild.id)]["feeder_messages"]
+            embeds = []
+            step = 5  # number of messages per embed
+            for i in range(0, len(feeder_messages), step):
+                embed = disnake.Embed(
+                    title="custom feeder messages",
+                    description="messsages randomly sent with the feeder alert",
+                )
+                value = ""
+                for j, message in enumerate(feeder_messages[i : i + step]):
+                    value += f"`{i+j}` {message} \n"
+                embed.add_field(
+                    name="messages",
+                    value=value
+                )
+                embeds.append(embed)
+            if len(feeder_messages) > step:
+                await ctx.send(embed=embeds[0], view=Menu(embeds))
+            else:
+                await ctx.send(embed=embeds[0])
 
 
 def setup(bot: commands.Bot):

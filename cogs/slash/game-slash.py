@@ -30,7 +30,7 @@ class Valorant(commands.Cog):
         guild_data = json_helper.load("guildData.json")
         if "ping_role" not in guild_data[str(guild_id)]:
             await inter.edit_original_message(
-                content="please set the role to ping first using valorant-setrole!"
+                content="please set the role to ping first using valorant-set-role!"
             )
         else:
             ping_role = guild_data[str(guild_id)]["ping_role"]
@@ -82,7 +82,7 @@ class Valorant(commands.Cog):
                 or guild_data[str(guild_id)]["watch_channel"] == 0
             ):
                 await inter.send(
-                    content="Please set the watch channel for the guild first using valorant-setchannel! You can also DM me and I will DM you for each update instead!"
+                    content="Please set the watch channel for the guild first using valorant-set-channel! You can also DM me and I will DM you for each update instead!"
                 )
                 return
         await inter.response.send_modal(modal=ValorantWatchModal())
@@ -166,11 +166,11 @@ class ValorantAdmin(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(
-        name="valorant-setchannel",
+        name="valorant-set-channel",
         description="set the channel the bot will send updates to",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_setchannel(
+    async def valorant_set_channel(
         self,
         inter: disnake.ApplicationCommandInteraction,
         channel: disnake.TextChannel = None,
@@ -188,11 +188,11 @@ class ValorantAdmin(commands.Cog):
         )
 
     @commands.slash_command(
-        name="valorant-setrole",
+        name="valorant-set-role",
         description="set the role the bot will ping",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_setrole(
+    async def valorant_set_role(
         self, inter: disnake.ApplicationCommandInteraction, role: disnake.Role
     ):
         await inter.response.defer()
