@@ -18,10 +18,7 @@ else:
 
 def get_prefix(bot, message):
     guild_data = json_helper.load("guildData.json")
-    if (
-        isinstance(message.channel, disnake.channel.DMChannel)
-        or str(message.guild.id) not in guild_data
-    ):
+    if isinstance(message.channel, disnake.channel.DMChannel) or str(message.guild.id) not in guild_data:
         return os.environ["DEFAULT_PREFIX"]
     else:
         return guild_data[str(message.guild.id)]["prefix"]
