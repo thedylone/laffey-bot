@@ -18,7 +18,7 @@ else:
         config = json.load(file)
 
 
-class Game(commands.Cog, name="game"):
+class Valorant(commands.Cog, name="valorant"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -28,21 +28,6 @@ class Game(commands.Cog, name="game"):
         await ctx.send(
             f"<@&{config['ping_role']}>", file=disnake.File("jewelsignal.jpg")
         )
-
-    @commands.command(
-        name="valorant-setchannel",
-        aliases=["valorantsetchannel", "valsetchannel", "vsetchannel", "vset"],
-        description="set the channel the bot will send updates to",
-    )
-    @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_setchannel(self, ctx: commands.Context):
-        """set the channel the bot will send updates to"""
-        channel = ctx.channel
-        guild = ctx.guild
-        guild_data = json_helper.load("guildData.json")
-        guild_data[str(guild.id)]["watch_channel"] = channel.id
-        json_helper.save(guild_data, "guildData.json")
-        await ctx.send(f"Successfully set `#{channel}` as watch channel for `{guild}`")
 
     @commands.command(
         name="valorant-info",
@@ -86,6 +71,7 @@ class Game(commands.Cog, name="game"):
             guild_id = ctx.guild.id
             if (
                 str(guild_id) not in guild_data
+                or "watch_channel" not in guild_data[str(guild_id)]
                 or guild_data[str(guild_id)]["watch_channel"] == 0
             ):
                 await ctx.send(
@@ -124,7 +110,7 @@ class Game(commands.Cog, name="game"):
         self, ctx: commands.Context, error: commands.CommandError
     ):
         if isinstance(error, commands.MissingRequiredArgument):
-            message = f"use {config['prefix']}valorant-watch <name> <tag without #>"
+            message = f"use valorant-watch <name> <tag without #>"
         await ctx.send(message)
 
     @commands.command(
@@ -155,7 +141,7 @@ class Game(commands.Cog, name="game"):
         ctx_user_id = str(ctx.author.id)
         if len(wait_users) == 0:
             await ctx.send(
-                content=f"<@{ctx_user_id}> use {config['prefix']}valorant-wait <tag the user you are waiting for>"
+                content=f"<@{ctx_user_id}> use valorant-wait <tag the user you are waiting for>"
             )
             return
         player_data = json_helper.load("playerData.json")
@@ -220,5 +206,26 @@ class Game(commands.Cog, name="game"):
         await ctx.send(embed=embed)
 
 
+class ValorantAdmin(commands.Cog, name="valorant admin"):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @commands.command(
+        name="valorant-setchannel",
+        aliases=["valorantsetchannel", "valsetchannel", "vsetchannel", "vset"],
+        description="set the channel the bot will send updates to",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_setchannel(self, ctx: commands.Context):
+        """set the channel the bot will send updates to"""
+        channel = ctx.channel
+        guild = ctx.guild
+        guild_data = json_helper.load("guildData.json")
+        guild_data[str(guild.id)]["watch_channel"] = channel.id
+        json_helper.save(guild_data, "guildData.json")
+        await ctx.send(f"Successfully set `#{channel}` as watch channel for `{guild}`")
+
+
 def setup(bot: commands.Bot):
-    bot.add_cog(Game(bot))
+    bot.add_cog(Valorant(bot))
+    bot.add_cog(ValorantAdmin(bot))

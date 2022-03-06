@@ -7,18 +7,44 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 import disnake
 from disnake.ext import commands
 
+from helpers import json_helper
+
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found!")
 else:
     with open("config.json", encoding="utf-8") as file:
         config = json.load(file)
 
+
+def get_prefix(bot, message):
+    guild_data = json_helper.load("guildData.json")
+    if str(message.guild.id) not in guild_data:
+        return os.environ["DEFAULT_PREFIX"]
+    else:
+        return guild_data[str(message.guild.id)]["prefix"]
+
+
 # creating a commands.Bot() instance, and assigning it to "bot"
 bot = commands.Bot(
-    command_prefix=config["prefix"],
+    command_prefix=get_prefix,
     intents=disnake.Intents.default(),
     test_guilds=config["guilds"],
 )
+
+
+@bot.event
+async def on_guild_join(guild):
+    guild_data = json_helper.load("guildData.json")
+    guild_data[str(guild.id)] = {"prefix": os.environ["DEFAULT_PREFIX"]}
+    json_helper.save(guild_data, "guildData.json")
+
+
+@bot.event
+async def on_guild_remove(guild):
+    guild_data = json_helper.load("guildData.json")
+    del guild_data[str(guild.id)]
+    json_helper.save(guild_data, "guildData.json")
+
 
 # When the bot is ready, run this code.
 @bot.event

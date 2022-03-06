@@ -17,7 +17,7 @@ else:
         config = json.load(file)
 
 
-class Game(commands.Cog):
+class Valorant(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -27,23 +27,6 @@ class Game(commands.Cog):
         """pings @jewels role and sends image"""
         await inter.edit_original_message(
             content=f"<@&{config['ping_role']}>", file=disnake.File("jewelsignal.jpg")
-        )
-
-    @commands.slash_command(
-        name="valorant-setchannel",
-        description="set the channel the bot will send updates to",
-    )
-    @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_setchannel(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.response.defer()
-        """set the channel the bot will send updates to"""
-        channel = inter.channel
-        guild = inter.guild
-        guild_data = json_helper.load("guildData.json")
-        guild_data[str(guild.id)]["watch_channel"] = channel.id
-        json_helper.save(guild_data, "guildData.json")
-        await inter.edit_original_message(
-            content=f"Successfully set `#{channel}` as watch channel for `{guild}`"
         )
 
     @commands.slash_command(
@@ -83,6 +66,7 @@ class Game(commands.Cog):
         guild_id = inter.guild_id
         if (
             str(guild_id) not in guild_data
+            or "watch_channel" not in guild_data[str(guild_id)]
             or guild_data[str(guild_id)]["watch_channel"] == 0
         ):
             await inter.send(
@@ -166,5 +150,28 @@ class Game(commands.Cog):
         await inter.edit_original_message(embed=embed)
 
 
+class ValorantAdmin(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @commands.slash_command(
+        name="valorant-setchannel",
+        description="set the channel the bot will send updates to",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_setchannel(self, inter: disnake.ApplicationCommandInteraction):
+        await inter.response.defer()
+        """set the channel the bot will send updates to"""
+        channel = inter.channel
+        guild = inter.guild
+        guild_data = json_helper.load("guildData.json")
+        guild_data[str(guild.id)]["watch_channel"] = channel.id
+        json_helper.save(guild_data, "guildData.json")
+        await inter.edit_original_message(
+            content=f"Successfully set `#{channel}` as watch channel for `{guild}`"
+        )
+
+
 def setup(bot: commands.Bot):
-    bot.add_cog(Game(bot))
+    bot.add_cog(Valorant(bot))
+    bot.add_cog(ValorantAdmin(bot))

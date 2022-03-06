@@ -7,6 +7,8 @@ import sys
 import aiohttp
 import re
 
+from helpers import json_helper
+
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found!")
 else:
@@ -58,6 +60,20 @@ class General(commands.Cog):
                         "error retrieving info! try again later"
                     )
 
+class GeneralAdmin(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @commands.slash_command(name="prefix", description="set prefix for the server")
+    @commands.has_guild_permissions(manage_messages=True)
+    async def prefix(self, inter: disnake.ApplicationCommandInteraction, prefix: str):
+        await inter.response.defer()
+        """set prefix for the server"""
+        guild_data = json_helper.load("guildData.json")
+        guild_data[str(inter.guild.id)]["prefix"] = prefix
+        json_helper.save(guild_data, "guildData.json")
+        await inter.edit_original_message(content=f"<@{inter.author.id}> successfully saved {prefix} as new server prefix")
 
 def setup(bot: commands.Bot):
     bot.add_cog(General(bot))
+    bot.add_cog(GeneralAdmin(bot))
