@@ -35,8 +35,8 @@ class Background(commands.Cog):
         for user_id in init_list:
             player_user = await self.bot.getch_user(int(user_id))
             if player_user == None:  # player no longer exists
-                del player_data[user_id]
-                json_helper.save(player_data, "playerData.json")
+                # del player_data[user_id] 
+                # json_helper.save(player_data, "playerData.json")
                 continue
             player_data = json_helper.load("playerData.json")  # reloads player_data
             guild_data = json_helper.load("guildData.json")
