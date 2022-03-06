@@ -1,5 +1,4 @@
 import disnake
-import random
 from disnake.ext import commands
 
 import os
@@ -7,6 +6,7 @@ import json
 import sys
 import aiohttp
 import re
+import random
 
 from views.views import Menu
 
@@ -31,7 +31,7 @@ class General(commands.Cog, name="general"):
         await ctx.send(f"pong! {round(self.bot.latency * 1000)}ms")
 
     @commands.command(name="shouldiorder", description="should you get indulge?")
-    async def ping(self, ctx: commands.Context):
+    async def rng(self, ctx: commands.Context):
         """should you get indulge?"""
         results = ["Hell yea boiii", "Nah save monet tday sadge"]
         await ctx.send(f"<@{ctx.author.id}> {random.choice(results)}")

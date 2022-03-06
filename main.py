@@ -52,7 +52,7 @@ async def on_ready():
     print(f"logged in {bot.user.name}")
     # set activity of the bot
     await bot.change_presence(
-        activity=disnake.Game(f"with lolis | {config['prefix']}help")
+        activity=disnake.Game(f"with lolis | {os.environ['DEFAULT_PREFIX']}help")
     )
 
 
