@@ -22,12 +22,21 @@ class Valorant(commands.Cog, name="valorant"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="jewels", description="pings role")
-    async def jewels_ping(self, ctx: commands.Context):
-        """pings @jewels role and sends image"""
-        await ctx.send(
-            f"<@&{config['ping_role']}>", file=disnake.File("jewelsignal.jpg")
-        )
+    @commands.command(
+        name="valorant-ping",
+        aliases=["valorantping", "valping", "vping", "jewels"],
+        description="pings role",
+    )
+    @commands.guild_only()
+    async def valorant_ping(self, ctx: commands.Context):
+        """pings role and sends optional image"""
+        guild_id = ctx.guild.id
+        guild_data = json_helper.load("guildData.json")
+        if "ping_role" not in guild_data[str(guild_id)]:
+            await ctx.send("please set the role to ping first using valorant-setrole!")
+        else:
+            ping_role = guild_data[str(guild_id)]["ping_role"]
+            await ctx.send(f"<@&{ping_role}>", file=disnake.File("jewelsignal.jpg"))
 
     @commands.command(
         name="valorant-info",
@@ -75,7 +84,7 @@ class Valorant(commands.Cog, name="valorant"):
                 or guild_data[str(guild_id)]["watch_channel"] == 0
             ):
                 await ctx.send(
-                    "Please set the watch channel for the guild first using valorant-setchannel! You can also DM me and I will DM you for each update instead!"
+                    "please set the watch channel for the guild first using valorant-setchannel! you can also DM me and i will DM you for each update instead!"
                 )
                 return
         player_data = json_helper.load("playerData.json")
@@ -212,7 +221,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
 
     @commands.command(
         name="valorant-setchannel",
-        aliases=["valorantsetchannel", "valsetchannel", "vsetchannel", "vset"],
+        aliases=["valorantsetchannel", "valsetchannel", "vsetchannel", "vchannel"],
         description="set the channel the bot will send updates to",
     )
     @commands.has_guild_permissions(manage_messages=True)
@@ -223,7 +232,21 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         guild_data = json_helper.load("guildData.json")
         guild_data[str(guild.id)]["watch_channel"] = channel.id
         json_helper.save(guild_data, "guildData.json")
-        await ctx.send(f"Successfully set `#{channel}` as watch channel for `{guild}`")
+        await ctx.send(f"successfully set `#{channel}` as watch channel for `{guild}`")
+
+    @commands.command(
+        name="valorant-setrole",
+        aliases=["valorantsetrole", "valsetrole", "vsetrole", "vrole"],
+        description="set the role the bot will ping",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_setrole(self, ctx: commands.Context, role: disnake.Role):
+        "set the role the bot will ping"
+        guild = ctx.guild
+        guild_data = json_helper.load("guildData.json")
+        guild_data[str(guild.id)]["ping_role"] = role.id
+        json_helper.save(guild_data, "guildData.json")
+        await ctx.send(f"successfully set role `{role}` as watch channel for `{guild}`")
 
 
 def setup(bot: commands.Bot):

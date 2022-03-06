@@ -31,8 +31,10 @@ class ValorantWatchModal(disnake.ui.Modal):
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
         """add user's valorant info to the database"""
-        guild_data = json_helper.load("guildData.json")
-        guild_id = inter.guild_id
+        if isinstance(inter.channel, disnake.channel.DMChannel):
+            guild_id = 0
+        else:
+            guild_id = inter.guild_id
         player_data = json_helper.load("playerData.json")
         user_id = str(inter.user.id)
         name = inter.text_values["name"]

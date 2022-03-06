@@ -22,12 +22,21 @@ class Valorant(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name="jewels", description="pings role")
+    @commands.guild_only()
     async def jewels_ping(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """pings @jewels role and sends image"""
-        await inter.edit_original_message(
-            content=f"<@&{config['ping_role']}>", file=disnake.File("jewelsignal.jpg")
-        )
+        guild_id = inter.guild.id
+        guild_data = json_helper.load("guildData.json")
+        if "ping_role" not in guild_data[str(guild_id)]:
+            await inter.edit_original_message(
+                content="please set the role to ping first using valorant-setrole!"
+            )
+        else:
+            ping_role = guild_data[str(guild_id)]["ping_role"]
+            await inter.edit_original_message(
+                content=f"<@&{ping_role}>", file=disnake.File("jewelsignal.jpg")
+            )
 
     @commands.slash_command(
         name="valorant-info", description="view valorant data in database"
@@ -62,19 +71,21 @@ class Valorant(commands.Cog):
         name="valorant-watch", description="adds user into database"
     )
     async def valorant_watch(self, inter: disnake.ApplicationCommandInteraction):
-        guild_data = json_helper.load("guildData.json")
-        guild_id = inter.guild_id
-        if (
-            str(guild_id) not in guild_data
-            or "watch_channel" not in guild_data[str(guild_id)]
-            or guild_data[str(guild_id)]["watch_channel"] == 0
-        ):
-            await inter.send(
-                content="Please set the watch channel for the guild first using valorant-setchannel! You can also DM me and I will DM you for each update instead!"
-            )
-            return
+        if isinstance(inter.channel, disnake.channel.DMChannel):
+            guild_id = 0
         else:
-            await inter.response.send_modal(modal=ValorantWatchModal())
+            guild_data = json_helper.load("guildData.json")
+            guild_id = inter.guild_id
+            if (
+                str(guild_id) not in guild_data
+                or "watch_channel" not in guild_data[str(guild_id)]
+                or guild_data[str(guild_id)]["watch_channel"] == 0
+            ):
+                await inter.send(
+                    content="Please set the watch channel for the guild first using valorant-setchannel! You can also DM me and I will DM you for each update instead!"
+                )
+                return
+        await inter.response.send_modal(modal=ValorantWatchModal())
 
     @commands.slash_command(
         name="valorant-unwatch",
@@ -169,6 +180,24 @@ class ValorantAdmin(commands.Cog):
         json_helper.save(guild_data, "guildData.json")
         await inter.edit_original_message(
             content=f"Successfully set `#{channel}` as watch channel for `{guild}`"
+        )
+
+    @commands.slash_command(
+        name="valorant-setrole",
+        description="set the role the bot will ping",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_setrole(
+        self, inter: disnake.ApplicationCommandInteraction, role: disnake.Role
+    ):
+        await inter.response.defer()
+        "set the role the bot will ping"
+        guild = inter.guild
+        guild_data = json_helper.load("guildData.json")
+        guild_data[str(guild.id)]["ping_role"] = role.id
+        json_helper.save(guild_data, "guildData.json")
+        await inter.edit_original_message(
+            content=f"successfully set role `{role}` as watch channel for `{guild}`"
         )
 
 
