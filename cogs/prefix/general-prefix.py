@@ -150,7 +150,15 @@ class GeneralAdmin(commands.Cog, name="general admin"):
         guild_data = json_helper.load("guildData.json")
         guild_data[str(ctx.guild.id)]["prefix"] = prefix
         json_helper.save(guild_data, "guildData.json")
-        await ctx.send(f"<@{ctx.author.id}> successfully saved {prefix} as new server prefix")
+        await ctx.send(
+            f"<@{ctx.author.id}> successfully saved {prefix} as new server prefix"
+        )
+
+    @prefix.error
+    async def prefix_error(self, ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.MissingRequiredArgument):
+            message = f'use {await self.bot.get_prefix(ctx)}prefix "<new prefix>" (include "" for multiple worded prefix)'
+            await ctx.send(message)
 
 
 def setup(bot: commands.Bot):

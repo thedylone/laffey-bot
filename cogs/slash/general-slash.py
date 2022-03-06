@@ -153,15 +153,23 @@ class GeneralAdmin(commands.Cog):
 
     @commands.slash_command(name="prefix", description="set prefix for the server")
     @commands.has_guild_permissions(manage_messages=True)
-    async def prefix(self, inter: disnake.ApplicationCommandInteraction, prefix: str):
+    async def prefix(
+        self, inter: disnake.ApplicationCommandInteraction, prefix: str = None
+    ):
         await inter.response.defer()
         """set prefix for the server"""
         guild_data = json_helper.load("guildData.json")
-        guild_data[str(inter.guild.id)]["prefix"] = prefix
-        json_helper.save(guild_data, "guildData.json")
-        await inter.edit_original_message(
-            content=f"<@{inter.author.id}> successfully saved {prefix} as new server prefix"
-        )
+        if prefix == None:
+            current_prefix = guild_data[str(inter.guild.id)]["prefix"]
+            await inter.edit_original_message(
+                content=f'current prefix: {current_prefix}\nuse {current_prefix}prefix "<new prefix>" to change the prefix (include "" for multiple worded prefix)'
+            )
+        else:
+            guild_data[str(inter.guild.id)]["prefix"] = prefix
+            json_helper.save(guild_data, "guildData.json")
+            await inter.edit_original_message(
+                content=f"<@{inter.author.id}> successfully saved {prefix} as new server prefix"
+            )
 
 
 def setup(bot: commands.Bot):
