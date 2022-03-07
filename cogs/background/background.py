@@ -174,11 +174,17 @@ class Background(commands.Cog):
                             "https://intinc.com/wp-content/uploads/2022/02/INT-Logo-Update_2104.png"
                         ]
                         if user_guild != 0 and str(user_guild) in guild_data:
-                            if "feeder_messages" in guild_data[str(user_guild)]:
+                            if (
+                                "feeder_messages" in guild_data[str(user_guild)]
+                                and guild_data[str(user_guild)]["feeder_messages"]
+                            ):
                                 feeder_messages = guild_data[str(user_guild)][
                                     "feeder_messages"
                                 ]
-                            if "feeder_images" in guild_data[str(user_guild)]:
+                            if (
+                                "feeder_images" in guild_data[str(user_guild)]
+                                and guild_data[str(user_guild)]["feeder_images"]
+                            ):
                                 feeder_images = guild_data[str(user_guild)][
                                     "feeder_images"
                                 ]

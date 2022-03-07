@@ -7,7 +7,7 @@ import aiohttp
 import time
 import sys
 
-from views.views import Menu
+from views.views import Menu, FeederMessagesView, FeederImagesView
 
 from helpers import json_helper
 
@@ -291,13 +291,18 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     @commands.has_guild_permissions(manage_messages=True)
     async def valorant_add_feeder_message(self, ctx: commands.Context, message: str):
         """add custom message for feeder alert"""
-        if len(message) > 500:
+        if len(message) > 100:
             await ctx.send("message is too long!")
             return
         guild = ctx.guild
         guild_data = json_helper.load("guildData.json")
         if "feeder_messages" not in guild_data[str(guild.id)]:
             guild_data[str(guild.id)]["feeder_messages"] = [message]
+        elif len(guild_data[str(guild.id)]["feeder_images"]) == 25:
+            await ctx.send(
+                "max number of messages reached! delete one before adding a new one!"
+            )
+            return
         else:
             guild_data[str(guild.id)]["feeder_messages"] += [message]
         json_helper.save(guild_data, "guildData.json")
@@ -361,7 +366,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         description="delete custom message for feeder alert",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_delete_feeder_message(self, ctx: commands.Context, index: int):
+    async def valorant_delete_feeder_message(self, ctx: commands.Context):
         """delete custom message for feeder alert"""
         guild = ctx.guild
         guild_data = json_helper.load("guildData.json")
@@ -370,24 +375,8 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
                 f'no custom messages for `{guild}`! add using {ctx.prefix}valorant-add-feeder-message "<custom message>"!'
             )
         else:
-            messages = guild_data[str(guild.id)]["feeder_messages"]
-            if index > len(messages):
-                await ctx.send("invalid index to delete!")
-            else:
-                del messages[index - 1]
-                guild_data[str(guild.id)]["feeder_messages"] = messages
-                json_helper.save(guild_data, "guildData.json")
-                await ctx.send(
-                    f"successfully deleted custom feeder message for `{guild}`"
-                )
-
-    @valorant_delete_feeder_message.error
-    async def valorant_delete_feeder_message_error(
-        self, ctx: commands.Context, error: commands.CommandError
-    ):
-        if isinstance(error, commands.MissingRequiredArgument):
-            message = f"use {ctx.prefix}valorant-delete-feeder-message <index of message> (you can view the index using valorant-show-feeder-message)"
-            await ctx.send(message)
+            view = FeederMessagesView(ctx)
+            await ctx.send("choose messages to delete", view=view)
 
     @commands.command(
         name="valorant-add-feeder-image",
@@ -397,7 +386,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     @commands.has_guild_permissions(manage_messages=True)
     async def valorant_add_feeder_image(self, ctx: commands.Context, image: str):
         """add custom image for feeder alert"""
-        if len(image) > 500:
+        if len(image) > 100:
             await ctx.send("url is too long!")
             return
         guild = ctx.guild
@@ -406,7 +395,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
             guild_data[str(guild.id)]["feeder_images"] = [image]
         elif len(guild_data[str(guild.id)]["feeder_images"]) == 10:
             await ctx.send(
-                "max number of imgs reached! delete one before adding a new one!"
+                "max number of images reached! delete one before adding a new one!"
             )
             return
         else:
@@ -468,7 +457,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         description="delete custom image for feeder alert",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_delete_feeder_image(self, ctx: commands.Context, index: int):
+    async def valorant_delete_feeder_image(self, ctx: commands.Context):
         """delete custom image for feeder alert"""
         guild = ctx.guild
         guild_data = json_helper.load("guildData.json")
@@ -477,24 +466,9 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
                 f'no custom images for `{guild}`! add using {ctx.prefix}valorant-add-feeder-image "<custom image>"!'
             )
         else:
-            images = guild_data[str(guild.id)]["feeder_images"]
-            if index > len(images):
-                await ctx.send("invalid index to delete!")
-            else:
-                del images[index - 1]
-                guild_data[str(guild.id)]["feeder_images"] = images
-                json_helper.save(guild_data, "guildData.json")
-                await ctx.send(
-                    f"successfully deleted custom feeder image for `{guild}`"
-                )
+            view = FeederImagesView(ctx)
+            await ctx.send("choose images to delete", view=view)
 
-    @valorant_delete_feeder_image.error
-    async def valorant_delete_feeder_image_error(
-        self, ctx: commands.Context, error: commands.CommandError
-    ):
-        if isinstance(error, commands.MissingRequiredArgument):
-            message = f"use {ctx.prefix}valorant-delete-feeder-image <index of image> (you can view the index using valorant-show-feeder-image)"
-            await ctx.send(message)
 
 
 def setup(bot: commands.Bot):
