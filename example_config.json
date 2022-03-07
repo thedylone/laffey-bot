@@ -1,4 +1,0 @@
-{
-  "guilds": ["INPUT LIST OF GUILD IDS (for faster debugging for slash commands)"],
-  "feeder_embed_image": ["LIST OF URL (STR)"]
-}

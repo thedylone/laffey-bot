@@ -35,7 +35,7 @@ class Background(commands.Cog):
         for user_id in init_list:
             player_user = await self.bot.getch_user(int(user_id))
             if player_user == None:  # player no longer exists
-                # del player_data[user_id] 
+                # del player_data[user_id]
                 # json_helper.save(player_data, "playerData.json")
                 continue
             player_data = json_helper.load("playerData.json")  # reloads player_data
@@ -169,10 +169,20 @@ class Background(commands.Cog):
                     )  # sends the notification embed
 
                     if feeders:
-                        if user_guild == 0 or str(user_guild) not in guild_data or "feeder_messages" not in guild_data[str(user_guild)]:
-                            feeder_messages = ["lmao", "git gud"]
-                        else:
-                            feeder_messages = guild_data[str(user_guild)]["feeder_messages"]
+                        feeder_messages = ["lmao", "git gud"]
+                        feeder_images = [
+                            "https://intinc.com/wp-content/uploads/2022/02/INT-Logo-Update_2104.png"
+                        ]
+                        if user_guild != 0 and str(user_guild) in guild_data:
+                            if "feeder_messages" in guild_data[str(user_guild)]:
+                                feeder_messages = guild_data[str(user_guild)][
+                                    "feeder_messages"
+                                ]
+                            if "feeder_images" in guild_data[str(user_guild)]:
+                                feeder_images = guild_data[str(user_guild)][
+                                    "feeder_images"
+                                ]
+
                         feeder_embed = disnake.Embed(
                             title="feeder alert❗❗",
                             color=0xFF7614,
@@ -184,9 +194,7 @@ class Background(commands.Cog):
                                 value=f"<@{feeder}> finished {feeders[feeder]['kills']}/{feeders[feeder]['deaths']}/{feeders[feeder]['assists']} with an ACS of {feeders[feeder]['acs']}.",
                                 inline=False,
                             )
-                        feeder_embed.set_image(
-                            url=random.choice(config["feeder_embed_image"])
-                        )
+                        feeder_embed.set_image(url=random.choice(feeder_images))
                         await channel.send(embed=feeder_embed)  # sends the feeder embed
 
                     combined_waiters = []  # init list of users to ping for waitlist

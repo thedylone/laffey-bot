@@ -342,7 +342,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
                 )
                 value = ""
                 for j, message in enumerate(feeder_messages[i : i + step]):
-                    value += f"`{i+j}` {message} \n"
+                    value += f"`{i+j+1}` {message} \n"
                 embed.add_field(name="messages", value=value)
                 embeds.append(embed)
             if len(feeder_messages) > step:
@@ -374,7 +374,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
             if index > len(messages):
                 await ctx.send("invalid index to delete!")
             else:
-                del messages[index]
+                del messages[index - 1]
                 guild_data[str(guild.id)]["feeder_messages"] = messages
                 json_helper.save(guild_data, "guildData.json")
                 await ctx.send(
@@ -387,6 +387,113 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     ):
         if isinstance(error, commands.MissingRequiredArgument):
             message = f"use {await self.bot.get_prefix(ctx)}valorant-delete-feeder-message <index of message> (you can view the index using valorant-show-feeder-message)"
+            await ctx.send(message)
+
+    @commands.command(
+        name="valorant-add-feeder-image",
+        aliases=["valorantaddfeederimage", "valaddimage", "vaddimg", "vimg"],
+        description="add custom image for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_add_feeder_image(self, ctx: commands.Context, image: str):
+        """add custom image for feeder alert"""
+        if len(image) > 500:
+            await ctx.send("url is too long!")
+            return
+        guild = ctx.guild
+        guild_data = json_helper.load("guildData.json")
+        if "feeder_images" not in guild_data[str(guild.id)]:
+            if len(guild_data[str(guild.id)]["feeder_images"]) == 10:
+                await ctx.send(
+                    "max number of imgs reached! delete one before adding a new one!"
+                )
+                return
+            guild_data[str(guild.id)]["feeder_images"] = [image]
+        else:
+            guild_data[str(guild.id)]["feeder_images"] += [image]
+        json_helper.save(guild_data, "guildData.json")
+        await ctx.send(f"successfully added custom feeder image for `{guild}`")
+
+    @valorant_add_feeder_image.error
+    async def valorant_add_feeder_image_error(
+        self, ctx: commands.Context, error: commands.CommandError
+    ):
+        if isinstance(error, commands.MissingRequiredArgument):
+            message = f'use {await self.bot.get_prefix(ctx)}valorant-add-feeder-image "<url of the image you want>" (include the "")'
+            await ctx.send(message)
+
+    @commands.command(
+        name="valorant-show-feeder-images",
+        aliases=[
+            "valorant-show-feeder-image",
+            "valorantshowfeederimages",
+            "valshowimages",
+            "vshowimgs",
+            "vimgs",
+        ],
+        description="show custom images for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_show_feeder_image(self, ctx: commands.Context):
+        """show custom images for feeder alert"""
+        guild = ctx.guild
+        guild_data = json_helper.load("guildData.json")
+        if "feeder_images" not in guild_data[str(guild.id)]:
+            await ctx.send(
+                f'no custom images for `{guild}`! add using {await self.bot.get_prefix(ctx)}valorant-add-feeder-image "<custom image>"!'
+            )
+        else:
+            feeder_images = guild_data[str(guild.id)]["feeder_images"]
+            embeds = []
+            for image in feeder_images:
+                embed = disnake.Embed(
+                    title="custom feeder images",
+                    description="messsages randomly sent with the feeder alert",
+                )
+                embed.set_image(url=image)
+                embeds.append(embed)
+            if len(feeder_images) > 1:
+                await ctx.send(embed=embeds[0], view=Menu(embeds))
+            else:
+                await ctx.send(embed=embeds[0])
+
+    @commands.command(
+        name="valorant-delete-feeder-image",
+        aliases=[
+            "valorantdeletefeederimage",
+            "valdeleteimage",
+            "vdeleteimg",
+            "vdelimg",
+        ],
+        description="delete custom image for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_delete_feeder_image(self, ctx: commands.Context, index: int):
+        """delete custom image for feeder alert"""
+        guild = ctx.guild
+        guild_data = json_helper.load("guildData.json")
+        if "feeder_images" not in guild_data[str(guild.id)]:
+            await ctx.send(
+                f'no custom images for `{guild}`! add using {await self.bot.get_prefix(ctx)}valorant-add-feeder-image "<custom image>"!'
+            )
+        else:
+            images = guild_data[str(guild.id)]["feeder_images"]
+            if index > len(images):
+                await ctx.send("invalid index to delete!")
+            else:
+                del images[index - 1]
+                guild_data[str(guild.id)]["feeder_images"] = images
+                json_helper.save(guild_data, "guildData.json")
+                await ctx.send(
+                    f"successfully deleted custom feeder image for `{guild}`"
+                )
+
+    @valorant_delete_feeder_image.error
+    async def valorant_delete_feeder_image_error(
+        self, ctx: commands.Context, error: commands.CommandError
+    ):
+        if isinstance(error, commands.MissingRequiredArgument):
+            message = f"use {await self.bot.get_prefix(ctx)}valorant-delete-feeder-image <index of image> (you can view the index using valorant-show-feeder-image)"
             await ctx.send(message)
 
 
