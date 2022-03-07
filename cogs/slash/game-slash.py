@@ -11,7 +11,7 @@ from modals.modals import (
     ValorantFeederMessageModal,
     ValorantFeederImageModal,
 )
-from views.views import Menu
+from views.views import FeederImagesView, FeederMessagesView, Menu
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
 
@@ -235,6 +235,16 @@ class ValorantAdmin(commands.Cog):
         self, inter: disnake.ApplicationCommandInteraction
     ):
         """add custom message for feeder alert"""
+        guild = inter.guild
+        guild_data = json_helper.load("guildData.json")
+        if (
+            "feeder_messages" in guild_data[str(guild.id)]
+            and len(guild_data[str(guild.id)]["feeder_messages"]) == 25
+        ):
+            await inter.response.send_message(
+                content="max number of messages reached! delete one before adding a new one!"
+            )
+            return
         await inter.response.send_modal(modal=ValorantFeederMessageModal())
 
     @commands.slash_command(
@@ -249,9 +259,12 @@ class ValorantAdmin(commands.Cog):
         """show custom messages for feeder alert"""
         guild = inter.guild
         guild_data = json_helper.load("guildData.json")
-        if "feeder_messages" not in guild_data[str(guild.id)]:
+        if (
+            "feeder_messages" not in guild_data[str(guild.id)]
+            or not guild_data[str(guild.id)]["feeder_messages"]
+        ):
             await inter.edit_original_message(
-                content=f'no custom messages for `{guild}`! add using valorant-add-feeder-message "<custom message>"!'
+                content=f'no custom messages for `{guild}`! add using /valorant-add-feeder-message "<custom message>"!'
             )
         else:
             feeder_messages = guild_data[str(guild.id)]["feeder_messages"]
@@ -278,27 +291,24 @@ class ValorantAdmin(commands.Cog):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def valorant_delete_feeder_message(
-        self, inter: disnake.ApplicationCommandInteraction, index: int
+        self, inter: disnake.ApplicationCommandInteraction
     ):
         await inter.response.defer()
         """delete custom message for feeder alert"""
         guild = inter.guild
         guild_data = json_helper.load("guildData.json")
-        if "feeder_messages" not in guild_data[str(guild.id)]:
+        if (
+            "feeder_messages" not in guild_data[str(guild.id)]
+            or not guild_data[str(guild.id)]["feeder_messages"]
+        ):
             await inter.edit_original_message(
-                content=f'no custom messages for `{guild}`! add using valorant-add-feeder-message "<custom message>"!'
+                content=f'no custom messages for `{guild}`! add using /valorant-add-feeder-message "<custom message>"!'
             )
         else:
-            messages = guild_data[str(guild.id)]["feeder_messages"]
-            if index > len(messages):
-                await inter.edit_original_message(content="invalid index to delete!")
-            else:
-                del messages[index]
-                guild_data[str(guild.id)]["feeder_messages"] = messages
-                json_helper.save(guild_data, "guildData.json")
-                await inter.edit_original_message(
-                    content=f"successfully deleted custom feeder message for `{guild}`"
-                )
+            view = FeederMessagesView(inter)
+            await inter.edit_original_message(
+                content="choose messages to delete", view=view
+            )
 
     @commands.slash_command(
         name="valorant-add-feeder-image",
@@ -316,7 +326,7 @@ class ValorantAdmin(commands.Cog):
             and len(guild_data[str(guild.id)]["feeder_images"]) == 10
         ):
             await inter.response.send_message(
-                content="max number of imgs reached! delete one before adding a new one!"
+                content="max number of images reached! delete one before adding a new one!"
             )
         else:
             await inter.response.send_modal(modal=ValorantFeederImageModal())
@@ -333,7 +343,10 @@ class ValorantAdmin(commands.Cog):
         """show custom images for feeder alert"""
         guild = inter.guild
         guild_data = json_helper.load("guildData.json")
-        if "feeder_images" not in guild_data[str(guild.id)]:
+        if (
+            "feeder_images" not in guild_data[str(guild.id)]
+            or not guild_data[str(guild.id)]["feeder_images"]
+        ):
             await inter.edit_original_message(
                 content=f'no custom images for `{guild}`! add using /valorant-add-feeder-image "<custom image>"!'
             )
@@ -358,27 +371,24 @@ class ValorantAdmin(commands.Cog):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def valorant_delete_feeder_image(
-        self, inter: disnake.ApplicationCommandInteraction, index: int
+        self, inter: disnake.ApplicationCommandInteraction
     ):
         await inter.response.defer()
         """delete custom image for feeder alert"""
         guild = inter.guild
         guild_data = json_helper.load("guildData.json")
-        if "feeder_images" not in guild_data[str(guild.id)]:
+        if (
+            "feeder_images" not in guild_data[str(guild.id)]
+            or not guild_data[str(guild.id)]["feeder_images"]
+        ):
             await inter.edit_original_message(
                 content=f'no custom images for `{guild}`! add using /valorant-add-feeder-image "<custom image>"!'
             )
         else:
-            images = guild_data[str(guild.id)]["feeder_images"]
-            if index > len(images):
-                await inter.edit_original_message(content="invalid index to delete!")
-            else:
-                del images[index - 1]
-                guild_data[str(guild.id)]["feeder_images"] = images
-                json_helper.save(guild_data, "guildData.json")
-                await inter.edit_original_message(
-                    content=f"successfully deleted custom feeder image for `{guild}`"
-                )
+            view = FeederImagesView(inter)
+            await inter.edit_original_message(
+                content="choose images to delete", view=view
+            )
 
 
 def setup(bot: commands.Bot):

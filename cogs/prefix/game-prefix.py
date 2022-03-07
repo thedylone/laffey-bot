@@ -278,9 +278,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         self, ctx: commands.Context, error: commands.CommandError
     ):
         if isinstance(error, commands.MissingRequiredArgument):
-            message = (
-                f"use {ctx.prefix}valorant-set-role <tag the role>"
-            )
+            message = f"use {ctx.prefix}valorant-set-role <tag the role>"
             await ctx.send(message)
 
     @commands.command(
@@ -298,7 +296,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         guild_data = json_helper.load("guildData.json")
         if "feeder_messages" not in guild_data[str(guild.id)]:
             guild_data[str(guild.id)]["feeder_messages"] = [message]
-        elif len(guild_data[str(guild.id)]["feeder_images"]) == 25:
+        elif len(guild_data[str(guild.id)]["feeder_messages"]) == 25:
             await ctx.send(
                 "max number of messages reached! delete one before adding a new one!"
             )
@@ -332,7 +330,10 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         """show custom messages for feeder alert"""
         guild = ctx.guild
         guild_data = json_helper.load("guildData.json")
-        if "feeder_messages" not in guild_data[str(guild.id)]:
+        if (
+            "feeder_messages" not in guild_data[str(guild.id)]
+            or not guild_data[str(guild.id)]["feeder_messages"]
+        ):
             await ctx.send(
                 f'no custom messages for `{guild}`! add using {ctx.prefix}valorant-add-feeder-message "<custom message>"!'
             )
@@ -370,7 +371,10 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         """delete custom message for feeder alert"""
         guild = ctx.guild
         guild_data = json_helper.load("guildData.json")
-        if "feeder_messages" not in guild_data[str(guild.id)]:
+        if (
+            "feeder_messages" not in guild_data[str(guild.id)]
+            or not guild_data[str(guild.id)]["feeder_messages"]
+        ):
             await ctx.send(
                 f'no custom messages for `{guild}`! add using {ctx.prefix}valorant-add-feeder-message "<custom message>"!'
             )
@@ -427,7 +431,10 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         """show custom images for feeder alert"""
         guild = ctx.guild
         guild_data = json_helper.load("guildData.json")
-        if "feeder_images" not in guild_data[str(guild.id)]:
+        if (
+            "feeder_images" not in guild_data[str(guild.id)]
+            or not guild_data[str(guild.id)]["feeder_images"]
+        ):
             await ctx.send(
                 f'no custom images for `{guild}`! add using {ctx.prefix}valorant-add-feeder-image "<custom image>"!'
             )
@@ -461,14 +468,16 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         """delete custom image for feeder alert"""
         guild = ctx.guild
         guild_data = json_helper.load("guildData.json")
-        if "feeder_images" not in guild_data[str(guild.id)]:
+        if (
+            "feeder_images" not in guild_data[str(guild.id)]
+            or not guild_data[str(guild.id)]["feeder_images"]
+        ):
             await ctx.send(
                 f'no custom images for `{guild}`! add using {ctx.prefix}valorant-add-feeder-image "<custom image>"!'
             )
         else:
             view = FeederImagesView(ctx)
             await ctx.send("choose images to delete", view=view)
-
 
 
 def setup(bot: commands.Bot):

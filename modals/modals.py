@@ -76,7 +76,7 @@ class ValorantFeederMessageModal(disnake.ui.Modal):
                 placeholder="custom message for feeder alert",
                 custom_id="message",
                 style=disnake.TextInputStyle.short,
-                max_length=500,
+                max_length=100,
             ),
         ]
         super().__init__(
@@ -112,7 +112,7 @@ class ValorantFeederImageModal(disnake.ui.Modal):
                 placeholder="url of custom image for feeder alert",
                 custom_id="url",
                 style=disnake.TextInputStyle.short,
-                max_length=500,
+                max_length=100,
             ),
         ]
         super().__init__(
