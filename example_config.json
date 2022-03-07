@@ -1,11 +1,4 @@
 {
-  "prefix": "YOUR PREFIX HERE",
-  "slash_enabled": 1, 
-  "prefix_enabled": 1,
   "guilds": ["INPUT LIST OF GUILD IDS (for faster debugging for slash commands)"],
-  "watch_channel": "YOUR CHANNEL ID HERE (INT) e.g. 1234567890",
-  "watch_cooldown": "NUMBER OF MINUTES FOR COOLDOWN PER PLAYER e.g. 5",
-  "ping_role": "ROLE ID HERE (INT)",
-  "feeder_embed_image": "URL (STR)",
-  "feeder_msg": ["LIST OF (STR) FOR MSG OPTIONS"]
+  "feeder_embed_image": ["LIST OF URL (STR)"]
 }

@@ -31,26 +31,12 @@ valorant-waitlist
 
 ## how to setup
 ### config.json
-prefix
-> string: your preferred prefix.
-
-slash_enabled
-> int or bool: 1/true or 0/false. 1 to enable [slash-commands](https://discord.com/blog/slash-commands-are-here), 0 to disable.
-
-prefix_enabled
-> int or bool: 1/true or 0/false. 1 to enable prefixed commands, 0 to disable.
-
+note: config.json will be removed eventually
 guilds
 > int[]: list of guild IDs, IDs are integers. used for debugging when changing or adding slash-commands (as it takes time to sync). remove guild-ids from each slash-command for global use (but will take time to update).
 
-ping_role
-> int: the ID of the role the bot will ping.
-
 feeder_embed_image
 > str[]: list of urls for the feeder embed image. the bot will randomly choose 1 from the list each time.
-
-feeder_msg
-> str[]: list of messages for the feeder embed. the bot will randomly choose 1 from the list each time.
 
 ### .env
 BOT_TOKEN
@@ -61,3 +47,12 @@ RIOT_TOKEN
 
 HOLODEX_TOKEN
 > place your [Holodex](https://holodex.net/) API key in here.
+
+DEFAULT_PREFIX
+> place the prefix the bot will default to when joining a new server
+
+SLASH_ENABLED
+> int: 1 or 0. 1 to enable [slash-commands](https://discord.com/blog/slash-commands-are-here), 0 to disable.
+
+PREFIX_ENABLED
+> int: 1 or 0. 1 to enable prefixed commands, 0 to disable.

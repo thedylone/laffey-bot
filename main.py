@@ -76,9 +76,9 @@ if __name__ == "__main__":
     autoload("error")  # loads error handler
     autoload("background")  # loads background tasks
     autoload("contextmenu")  # lodas context menu commands
-    if config["slash_enabled"]:
+    if int(os.environ["SLASH_ENABLED"]):
         autoload("slash")
-    if config["prefix_enabled"]:
+    if int(os.environ["PREFIX_ENABLED"]):
         autoload("prefix")
 
 # Login to Discord with the bot's token.
