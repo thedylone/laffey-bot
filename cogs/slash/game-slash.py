@@ -6,7 +6,11 @@ import json
 import sys
 
 from helpers import json_helper
-from modals.modals import ValorantWatchModal, ValorantFeederMessageModal
+from modals.modals import (
+    ValorantWatchModal,
+    ValorantFeederMessageModal,
+    ValorantFeederImageModal,
+)
 from views.views import Menu
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
@@ -294,6 +298,86 @@ class ValorantAdmin(commands.Cog):
                 json_helper.save(guild_data, "guildData.json")
                 await inter.edit_original_message(
                     content=f"successfully deleted custom feeder message for `{guild}`"
+                )
+
+    @commands.slash_command(
+        name="valorant-add-feeder-image",
+        description="add custom image for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_add_feeder_image(
+        self, inter: disnake.ApplicationCommandInteraction
+    ):
+        """add custom image for feeder alert"""
+        guild = inter.guild
+        guild_data = json_helper.load("guildData.json")
+        if (
+            "feeder_images" in guild_data[str(guild.id)]
+            and len(guild_data[str(guild.id)]["feeder_images"]) == 10
+        ):
+            await inter.response.send_message(
+                content="max number of imgs reached! delete one before adding a new one!"
+            )
+        else:
+            await inter.response.send_modal(modal=ValorantFeederImageModal())
+
+    @commands.slash_command(
+        name="valorant-show-feeder-images",
+        description="show custom images for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_show_feeder_image(
+        self, inter: disnake.ApplicationCommandInteraction
+    ):
+        await inter.response.defer()
+        """show custom images for feeder alert"""
+        guild = inter.guild
+        guild_data = json_helper.load("guildData.json")
+        if "feeder_images" not in guild_data[str(guild.id)]:
+            await inter.edit_original_message(
+                content=f'no custom images for `{guild}`! add using /valorant-add-feeder-image "<custom image>"!'
+            )
+        else:
+            feeder_images = guild_data[str(guild.id)]["feeder_images"]
+            embeds = []
+            for image in feeder_images:
+                embed = disnake.Embed(
+                    title="custom feeder images",
+                    description="messsages randomly sent with the feeder alert",
+                )
+                embed.set_image(url=image)
+                embeds.append(embed)
+            if len(feeder_images) > 1:
+                await inter.edit_original_message(embed=embeds[0], view=Menu(embeds))
+            else:
+                await inter.edit_original_message(embed=embeds[0])
+
+    @commands.slash_command(
+        name="valorant-delete-feeder-image",
+        description="delete custom image for feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def valorant_delete_feeder_image(
+        self, inter: disnake.ApplicationCommandInteraction, index: int
+    ):
+        await inter.response.defer()
+        """delete custom image for feeder alert"""
+        guild = inter.guild
+        guild_data = json_helper.load("guildData.json")
+        if "feeder_images" not in guild_data[str(guild.id)]:
+            await inter.edit_original_message(
+                content=f'no custom images for `{guild}`! add using /valorant-add-feeder-image "<custom image>"!'
+            )
+        else:
+            images = guild_data[str(guild.id)]["feeder_images"]
+            if index > len(images):
+                await inter.edit_original_message(content="invalid index to delete!")
+            else:
+                del images[index - 1]
+                guild_data[str(guild.id)]["feeder_images"] = images
+                json_helper.save(guild_data, "guildData.json")
+                await inter.edit_original_message(
+                    content=f"successfully deleted custom feeder image for `{guild}`"
                 )
 
 

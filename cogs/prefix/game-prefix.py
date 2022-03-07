@@ -403,12 +403,12 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         guild = ctx.guild
         guild_data = json_helper.load("guildData.json")
         if "feeder_images" not in guild_data[str(guild.id)]:
-            if len(guild_data[str(guild.id)]["feeder_images"]) == 10:
-                await ctx.send(
-                    "max number of imgs reached! delete one before adding a new one!"
-                )
-                return
             guild_data[str(guild.id)]["feeder_images"] = [image]
+        elif len(guild_data[str(guild.id)]["feeder_images"]) == 10:
+            await ctx.send(
+                "max number of imgs reached! delete one before adding a new one!"
+            )
+            return
         else:
             guild_data[str(guild.id)]["feeder_images"] += [image]
         json_helper.save(guild_data, "guildData.json")
