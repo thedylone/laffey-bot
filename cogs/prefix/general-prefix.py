@@ -157,7 +157,7 @@ class GeneralAdmin(commands.Cog, name="general admin"):
     @prefix.error
     async def prefix_error(self, ctx: commands.Context, error: commands.CommandError):
         if isinstance(error, commands.MissingRequiredArgument):
-            message = f'use {await self.bot.get_prefix(ctx)}prefix "<new prefix>" (include "" for multiple worded prefix)'
+            message = f'use {ctx.prefix}prefix "<new prefix>" (include "" for multiple worded prefix)'
             await ctx.send(message)
 
 

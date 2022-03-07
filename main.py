@@ -18,10 +18,14 @@ else:
 
 def get_prefix(bot, message):
     guild_data = json_helper.load("guildData.json")
-    if isinstance(message.channel, disnake.channel.DMChannel) or str(message.guild.id) not in guild_data:
-        return os.environ["DEFAULT_PREFIX"]
+    if (
+        isinstance(message.channel, disnake.channel.DMChannel)
+        or str(message.guild.id) not in guild_data
+    ):
+        custom_prefix = os.environ["DEFAULT_PREFIX"]
     else:
-        return guild_data[str(message.guild.id)]["prefix"]
+        custom_prefix = guild_data[str(message.guild.id)]["prefix"]
+    return commands.when_mentioned_or(*custom_prefix)(bot, message)
 
 
 # creating a commands.Bot() instance, and assigning it to "bot"

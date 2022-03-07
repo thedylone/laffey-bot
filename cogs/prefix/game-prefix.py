@@ -36,7 +36,7 @@ class Valorant(commands.Cog, name="valorant"):
         guild_data = json_helper.load("guildData.json")
         if "ping_role" not in guild_data[str(guild_id)]:
             await ctx.send(
-                f"please set the role to ping first using {await self.bot.get_prefix(ctx)}valorant-set-role!"
+                f"please set the role to ping first using {ctx.prefix}valorant-set-role!"
             )
         else:
             ping_role = guild_data[str(guild_id)]["ping_role"]
@@ -67,7 +67,7 @@ class Valorant(commands.Cog, name="valorant"):
             await ctx.send(embed=embed)
         else:
             await ctx.send(
-                content=f"<@{user_id}> not in database! do {await self.bot.get_prefix(ctx)}valorant-watch first"
+                content=f"<@{user_id}> not in database! do {ctx.prefix}valorant-watch first"
             )
 
     @commands.command(
@@ -88,7 +88,7 @@ class Valorant(commands.Cog, name="valorant"):
                 or guild_data[str(guild_id)]["watch_channel"] == 0
             ):
                 await ctx.send(
-                    f"please set the watch channel for the guild first using {await self.bot.get_prefix(ctx)}valorant-set-channel! you can also DM me and i will DM you for each update instead!"
+                    f"please set the watch channel for the guild first using {ctx.prefix}valorant-set-channel! you can also DM me and i will DM you for each update instead!"
                 )
                 return
         player_data = json_helper.load("playerData.json")
@@ -110,7 +110,7 @@ class Valorant(commands.Cog, name="valorant"):
                         "guild": guild_id,
                     }
                     await ctx.send(
-                        content=f"<@{user_id}> database updated, user added. remove using {await self.bot.get_prefix(ctx)}valorant-unwatch"
+                        content=f"<@{user_id}> database updated, user added. remove using {ctx.prefix}valorant-unwatch"
                     )
                     json_helper.save(player_data, "playerData.json")
                 else:
@@ -123,7 +123,7 @@ class Valorant(commands.Cog, name="valorant"):
         self, ctx: commands.Context, error: commands.CommandError
     ):
         if isinstance(error, commands.MissingRequiredArgument):
-            message = f"use {await self.bot.get_prefix(ctx)}valorant-watch <name> <tag without #>"
+            message = f"use {ctx.prefix}valorant-watch <name> <tag without #>"
             await ctx.send(message)
 
     @commands.command(
@@ -139,7 +139,7 @@ class Valorant(commands.Cog, name="valorant"):
             del player_data[user_id]
             json_helper.save(player_data, "playerData.json")
             await ctx.send(
-                content=f"<@{user_id}> database updated, user removed. add again using {await self.bot.get_prefix(ctx)}valorant-watch"
+                content=f"<@{user_id}> database updated, user removed. add again using {ctx.prefix}valorant-watch"
             )
         else:
             await ctx.send(content=f"<@{user_id}> error updating, user not in database")
@@ -154,7 +154,7 @@ class Valorant(commands.Cog, name="valorant"):
         ctx_user_id = str(ctx.author.id)
         if len(wait_users) == 0:
             await ctx.send(
-                content=f"<@{ctx_user_id}> use {await self.bot.get_prefix(ctx)}valorant-wait <tag the user you are waiting for>"
+                content=f"<@{ctx_user_id}> use {ctx.prefix}valorant-wait <tag the user you are waiting for>"
             )
             return
         player_data = json_helper.load("playerData.json")
@@ -279,7 +279,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     ):
         if isinstance(error, commands.MissingRequiredArgument):
             message = (
-                f"use {await self.bot.get_prefix(ctx)}valorant-set-role <tag the role>"
+                f"use {ctx.prefix}valorant-set-role <tag the role>"
             )
             await ctx.send(message)
 
@@ -308,7 +308,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         self, ctx: commands.Context, error: commands.CommandError
     ):
         if isinstance(error, commands.MissingRequiredArgument):
-            message = f'use {await self.bot.get_prefix(ctx)}valorant-add-feeder-message "<the message you want>" (include the "")'
+            message = f'use {ctx.prefix}valorant-add-feeder-message "<the message you want>" (include the "")'
             await ctx.send(message)
 
     @commands.command(
@@ -329,7 +329,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         guild_data = json_helper.load("guildData.json")
         if "feeder_messages" not in guild_data[str(guild.id)]:
             await ctx.send(
-                f'no custom messages for `{guild}`! add using {await self.bot.get_prefix(ctx)}valorant-add-feeder-message "<custom message>"!'
+                f'no custom messages for `{guild}`! add using {ctx.prefix}valorant-add-feeder-message "<custom message>"!'
             )
         else:
             feeder_messages = guild_data[str(guild.id)]["feeder_messages"]
@@ -367,7 +367,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         guild_data = json_helper.load("guildData.json")
         if "feeder_messages" not in guild_data[str(guild.id)]:
             await ctx.send(
-                f'no custom messages for `{guild}`! add using {await self.bot.get_prefix(ctx)}valorant-add-feeder-message "<custom message>"!'
+                f'no custom messages for `{guild}`! add using {ctx.prefix}valorant-add-feeder-message "<custom message>"!'
             )
         else:
             messages = guild_data[str(guild.id)]["feeder_messages"]
@@ -386,7 +386,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         self, ctx: commands.Context, error: commands.CommandError
     ):
         if isinstance(error, commands.MissingRequiredArgument):
-            message = f"use {await self.bot.get_prefix(ctx)}valorant-delete-feeder-message <index of message> (you can view the index using valorant-show-feeder-message)"
+            message = f"use {ctx.prefix}valorant-delete-feeder-message <index of message> (you can view the index using valorant-show-feeder-message)"
             await ctx.send(message)
 
     @commands.command(
@@ -419,7 +419,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         self, ctx: commands.Context, error: commands.CommandError
     ):
         if isinstance(error, commands.MissingRequiredArgument):
-            message = f'use {await self.bot.get_prefix(ctx)}valorant-add-feeder-image "<url of the image you want>" (include the "")'
+            message = f'use {ctx.prefix}valorant-add-feeder-image "<url of the image you want>" (include the "")'
             await ctx.send(message)
 
     @commands.command(
@@ -440,7 +440,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         guild_data = json_helper.load("guildData.json")
         if "feeder_images" not in guild_data[str(guild.id)]:
             await ctx.send(
-                f'no custom images for `{guild}`! add using {await self.bot.get_prefix(ctx)}valorant-add-feeder-image "<custom image>"!'
+                f'no custom images for `{guild}`! add using {ctx.prefix}valorant-add-feeder-image "<custom image>"!'
             )
         else:
             feeder_images = guild_data[str(guild.id)]["feeder_images"]
@@ -474,7 +474,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         guild_data = json_helper.load("guildData.json")
         if "feeder_images" not in guild_data[str(guild.id)]:
             await ctx.send(
-                f'no custom images for `{guild}`! add using {await self.bot.get_prefix(ctx)}valorant-add-feeder-image "<custom image>"!'
+                f'no custom images for `{guild}`! add using {ctx.prefix}valorant-add-feeder-image "<custom image>"!'
             )
         else:
             images = guild_data[str(guild.id)]["feeder_images"]
@@ -493,7 +493,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         self, ctx: commands.Context, error: commands.CommandError
     ):
         if isinstance(error, commands.MissingRequiredArgument):
-            message = f"use {await self.bot.get_prefix(ctx)}valorant-delete-feeder-image <index of image> (you can view the index using valorant-show-feeder-image)"
+            message = f"use {ctx.prefix}valorant-delete-feeder-image <index of image> (you can view the index using valorant-show-feeder-image)"
             await ctx.send(message)
 
 
