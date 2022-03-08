@@ -227,10 +227,34 @@ class ValorantAdmin(commands.Cog):
         )
 
     @commands.slash_command(
-        name="valorant-add-feeder-message",
-        description="add custom message for feeder alert",
+        name="feeder-message",
+        description="custom message for feeder alert functions",
     )
     @commands.has_guild_permissions(manage_messages=True)
+    async def feeder_message(
+        self, inter: disnake.ApplicationCommandInteraction, option: str
+    ):
+        """custom feeder messages functions"""
+        if option == "add":
+            await self.valorant_add_feeder_message(inter)
+        elif option == "show":
+            await self.valorant_show_feeder_message(inter)
+        elif option == "delete" or option == "del":
+            await self.valorant_delete_feeder_message(inter)
+        else:
+            await inter.response.send_message(
+                content=f"use /feeder-message <add | show | delete>"
+            )
+
+    @feeder_message.autocomplete("option")
+    async def feeder_message_autocomplete(
+        self, inter: disnake.ApplicationCommandInteraction, string: str
+    ):
+        string = string.lower()
+        return [
+            option for option in ["add", "show", "delete"] if string in option.lower()
+        ]
+
     async def valorant_add_feeder_message(
         self, inter: disnake.ApplicationCommandInteraction
     ):
@@ -247,11 +271,6 @@ class ValorantAdmin(commands.Cog):
             return
         await inter.response.send_modal(modal=ValorantFeederMessageModal())
 
-    @commands.slash_command(
-        name="valorant-show-feeder-messages",
-        description="show custom messages for feeder alert",
-    )
-    @commands.has_guild_permissions(manage_messages=True)
     async def valorant_show_feeder_message(
         self, inter: disnake.ApplicationCommandInteraction
     ):
@@ -285,11 +304,6 @@ class ValorantAdmin(commands.Cog):
             else:
                 await inter.edit_original_message(embed=embeds[0])
 
-    @commands.slash_command(
-        name="valorant-delete-feeder-message",
-        description="delete custom message for feeder alert",
-    )
-    @commands.has_guild_permissions(manage_messages=True)
     async def valorant_delete_feeder_message(
         self, inter: disnake.ApplicationCommandInteraction
     ):
@@ -311,10 +325,34 @@ class ValorantAdmin(commands.Cog):
             )
 
     @commands.slash_command(
-        name="valorant-add-feeder-image",
-        description="add custom image for feeder alert",
+        name="feeder-image",
+        description="custom image for feeder alert functions",
     )
     @commands.has_guild_permissions(manage_messages=True)
+    async def feeder_image(
+        self, inter: disnake.ApplicationCommandInteraction, option: str
+    ):
+        """custom feeder images functions"""
+        if option == "add":
+            await self.valorant_add_feeder_image(inter)
+        elif option == "show":
+            await self.valorant_show_feeder_image(inter)
+        elif option == "delete" or option == "del":
+            await self.valorant_delete_feeder_image(inter)
+        else:
+            await inter.response.send_message(
+                content=f"use /feeder-image <add | show | delete>"
+            )
+
+    @feeder_image.autocomplete("option")
+    async def feeder_image_autocomplete(
+        self, inter: disnake.ApplicationCommandInteraction, string: str
+    ):
+        string = string.lower()
+        return [
+            option for option in ["add", "show", "delete"] if string in option.lower()
+        ]
+
     async def valorant_add_feeder_image(
         self, inter: disnake.ApplicationCommandInteraction
     ):
@@ -331,11 +369,6 @@ class ValorantAdmin(commands.Cog):
         else:
             await inter.response.send_modal(modal=ValorantFeederImageModal())
 
-    @commands.slash_command(
-        name="valorant-show-feeder-images",
-        description="show custom images for feeder alert",
-    )
-    @commands.has_guild_permissions(manage_messages=True)
     async def valorant_show_feeder_image(
         self, inter: disnake.ApplicationCommandInteraction
     ):
@@ -365,11 +398,6 @@ class ValorantAdmin(commands.Cog):
             else:
                 await inter.edit_original_message(embed=embeds[0])
 
-    @commands.slash_command(
-        name="valorant-delete-feeder-image",
-        description="delete custom image for feeder alert",
-    )
-    @commands.has_guild_permissions(manage_messages=True)
     async def valorant_delete_feeder_image(
         self, inter: disnake.ApplicationCommandInteraction
     ):
