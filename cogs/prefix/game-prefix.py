@@ -75,8 +75,11 @@ class Valorant(commands.Cog, name="valorant"):
         aliases=["valorantwatch", "valwatch", "vwatch"],
         description="adds user into database",
     )
-    async def valorant_watch(self, ctx: commands.Context, name: str, tag: str):
+    async def valorant_watch(self, ctx: commands.Context, name: str = None, tag: str = None):
         """add user's valorant info to the database"""
+        if name == None or tag == None:
+            await ctx.send(content=f"use {ctx.prefix}valorant-watch <name> <tag without #>")
+            return
         if isinstance(ctx.channel, disnake.channel.DMChannel):
             guild_id = 0
         else:
@@ -117,14 +120,6 @@ class Valorant(commands.Cog, name="valorant"):
                     await ctx.send(
                         content=f"<@{user_id}> error connecting, database not updated. please try again"
                     )
-
-    @valorant_watch.error
-    async def valorant_watch_error(
-        self, ctx: commands.Context, error: commands.CommandError
-    ):
-        if isinstance(error, commands.MissingRequiredArgument):
-            message = f"use {ctx.prefix}valorant-watch <name> <tag without #>"
-            await ctx.send(message)
 
     @commands.command(
         name="valorant-unwatch",
@@ -242,12 +237,12 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         self.bot = bot
 
     @commands.command(
-        name="valorant-set-channel",
-        aliases=["valorantsetchannel", "valsetchannel", "vsetchannel", "vchannel"],
+        name="set-channel",
+        aliases=["setchannel"],
         description="set the channel the bot will send updates to",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_set_channel(
+    async def set_channel(
         self, ctx: commands.Context, channel: disnake.TextChannel = None
     ):
         """set the channel the bot will send updates to"""
@@ -260,33 +255,48 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         await ctx.send(f"successfully set `#{channel}` as watch channel for `{guild}`")
 
     @commands.command(
-        name="valorant-set-role",
-        aliases=["valorantsetrole", "valsetrole", "vsetrole", "vrole"],
+        name="set-role",
+        aliases=["setrole"],
         description="set the role the bot will ping",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_set_role(self, ctx: commands.Context, role: disnake.Role):
+    async def set_role(self, ctx: commands.Context, role: disnake.Role = None):
         "set the role the bot will ping"
+        if role == None:
+            await ctx.send(content=f"use {ctx.prefix}set-role <tag the role>")
+            return
         guild = ctx.guild
         guild_data = json_helper.load("guildData.json")
         guild_data[str(guild.id)]["ping_role"] = role.id
         json_helper.save(guild_data, "guildData.json")
         await ctx.send(f"successfully set role `{role}` as watch channel for `{guild}`")
 
-    @valorant_set_role.error
-    async def valorant_set_role_error(
-        self, ctx: commands.Context, error: commands.CommandError
-    ):
-        if isinstance(error, commands.MissingRequiredArgument):
-            message = f"use {ctx.prefix}valorant-set-role <tag the role>"
-            await ctx.send(message)
-
     @commands.command(
-        name="valorant-add-feeder-message",
-        aliases=["valorantaddfeedermessage", "valaddmessage", "vaddmsg", "vmsg"],
-        description="add custom message for feeder alert",
+        name="feeder-message",
+        aliases=["feedermessage", "feeder-msg", "feedermsg"],
+        description="custom feeder messages functions",
     )
     @commands.has_guild_permissions(manage_messages=True)
+    async def feeder_message(
+        self, ctx: commands.Context, option: str = None, new_message: str = None
+    ):
+        """custom feeder messages functions"""
+        if option == "add":
+            if new_message:
+                await self.valorant_add_feeder_message(ctx, new_message)
+            else:
+                await ctx.send(
+                    content=f'use {ctx.prefix}feeder-message add "<new message>" (include the "") '
+                )
+        elif option == "show":
+            await self.valorant_show_feeder_message(ctx)
+        elif option == "delete" or option == "del":
+            await self.valorant_delete_feeder_message(ctx)
+        else:
+            await ctx.send(
+                content=f"use {ctx.prefix}feeder-message <add | show | delete>"
+            )
+
     async def valorant_add_feeder_message(self, ctx: commands.Context, message: str):
         """add custom message for feeder alert"""
         if len(message) > 100:
@@ -306,26 +316,6 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         json_helper.save(guild_data, "guildData.json")
         await ctx.send(f"successfully added custom feeder message for `{guild}`")
 
-    @valorant_add_feeder_message.error
-    async def valorant_add_feeder_message_error(
-        self, ctx: commands.Context, error: commands.CommandError
-    ):
-        if isinstance(error, commands.MissingRequiredArgument):
-            message = f'use {ctx.prefix}valorant-add-feeder-message "<the message you want>" (include the "")'
-            await ctx.send(message)
-
-    @commands.command(
-        name="valorant-show-feeder-messages",
-        aliases=[
-            "valorant-show-feeder-message",
-            "valorantshowfeedermessages",
-            "valshowmessages",
-            "vshowmsgs",
-            "vmsgs",
-        ],
-        description="show custom messages for feeder alert",
-    )
-    @commands.has_guild_permissions(manage_messages=True)
     async def valorant_show_feeder_message(self, ctx: commands.Context):
         """show custom messages for feeder alert"""
         guild = ctx.guild
@@ -356,17 +346,6 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
             else:
                 await ctx.send(embed=embeds[0])
 
-    @commands.command(
-        name="valorant-delete-feeder-message",
-        aliases=[
-            "valorantdeletefeedermessage",
-            "valdeletemessage",
-            "vdeletemsg",
-            "vdelmsg",
-        ],
-        description="delete custom message for feeder alert",
-    )
-    @commands.has_guild_permissions(manage_messages=True)
     async def valorant_delete_feeder_message(self, ctx: commands.Context):
         """delete custom message for feeder alert"""
         guild = ctx.guild
@@ -383,11 +362,31 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
             await ctx.send("choose messages to delete", view=view)
 
     @commands.command(
-        name="valorant-add-feeder-image",
-        aliases=["valorantaddfeederimage", "valaddimage", "vaddimg", "vimg"],
-        description="add custom image for feeder alert",
+        name="feeder-image",
+        aliases=["feederimage", "feeder-img", "feederimg"],
+        description="custom feeder images functions",
     )
     @commands.has_guild_permissions(manage_messages=True)
+    async def feeder_image(
+        self, ctx: commands.Context, option: str = None, new_image: str = None
+    ):
+        """custom feeder images functions"""
+        if option == "add":
+            if new_image:
+                await self.valorant_add_feeder_image(ctx, new_image)
+            else:
+                await ctx.send(
+                    content=f'use {ctx.prefix}feeder-image add "<new image url>" (include the "") '
+                )
+        elif option == "show":
+            await self.valorant_show_feeder_image(ctx)
+        elif option == "delete" or option == "del":
+            await self.valorant_delete_feeder_image(ctx)
+        else:
+            await ctx.send(
+                content=f"use {ctx.prefix}feeder-image <add | show | delete>"
+            )
+
     async def valorant_add_feeder_image(self, ctx: commands.Context, image: str):
         """add custom image for feeder alert"""
         if len(image) > 100:
@@ -407,26 +406,6 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         json_helper.save(guild_data, "guildData.json")
         await ctx.send(f"successfully added custom feeder image for `{guild}`")
 
-    @valorant_add_feeder_image.error
-    async def valorant_add_feeder_image_error(
-        self, ctx: commands.Context, error: commands.CommandError
-    ):
-        if isinstance(error, commands.MissingRequiredArgument):
-            message = f'use {ctx.prefix}valorant-add-feeder-image "<url of the image you want>" (include the "")'
-            await ctx.send(message)
-
-    @commands.command(
-        name="valorant-show-feeder-images",
-        aliases=[
-            "valorant-show-feeder-image",
-            "valorantshowfeederimages",
-            "valshowimages",
-            "vshowimgs",
-            "vimgs",
-        ],
-        description="show custom images for feeder alert",
-    )
-    @commands.has_guild_permissions(manage_messages=True)
     async def valorant_show_feeder_image(self, ctx: commands.Context):
         """show custom images for feeder alert"""
         guild = ctx.guild
@@ -436,7 +415,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
             or not guild_data[str(guild.id)]["feeder_images"]
         ):
             await ctx.send(
-                f'no custom images for `{guild}`! add using {ctx.prefix}valorant-add-feeder-image "<custom image>"!'
+                f'no custom images for `{guild}`! add using {ctx.prefix}feeder-image add "<custom image>"!'
             )
         else:
             feeder_images = guild_data[str(guild.id)]["feeder_images"]
@@ -453,17 +432,6 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
             else:
                 await ctx.send(embed=embeds[0])
 
-    @commands.command(
-        name="valorant-delete-feeder-image",
-        aliases=[
-            "valorantdeletefeederimage",
-            "valdeleteimage",
-            "vdeleteimg",
-            "vdelimg",
-        ],
-        description="delete custom image for feeder alert",
-    )
-    @commands.has_guild_permissions(manage_messages=True)
     async def valorant_delete_feeder_image(self, ctx: commands.Context):
         """delete custom image for feeder alert"""
         guild = ctx.guild
@@ -473,7 +441,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
             or not guild_data[str(guild.id)]["feeder_images"]
         ):
             await ctx.send(
-                f'no custom images for `{guild}`! add using {ctx.prefix}valorant-add-feeder-image "<custom image>"!'
+                f'no custom images for `{guild}`! add using {ctx.prefix}feeder-image add "<custom image>"!'
             )
         else:
             view = FeederImagesView(ctx)

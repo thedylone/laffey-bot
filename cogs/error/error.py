@@ -18,8 +18,6 @@ class ErrorHandler(commands.Cog):
             message = f"This command is on cooldown. Please try again after {round(error.retry_after, 1)} seconds."
         elif isinstance(error, commands.MissingPermissions):
             message = "You are missing the required permissions to run this command!"
-        elif isinstance(error, commands.MissingRequiredArgument):
-            return  # Return as should be handled in each command
         elif isinstance(error, commands.UserInputError):
             message = "Something about your input was wrong, please check your input and try again!"
         elif isinstance(error, commands.NoPrivateMessage):
