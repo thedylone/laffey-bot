@@ -325,7 +325,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
             or not guild_data[str(guild.id)]["feeder_messages"]
         ):
             await ctx.send(
-                f'no custom messages for `{guild}`! add using {ctx.prefix}valorant-add-feeder-message "<custom message>"!'
+                f'no custom messages for `{guild}`! add using {ctx.prefix}feeder-message add "<custom message>"!'
             )
         else:
             feeder_messages = guild_data[str(guild.id)]["feeder_messages"]
@@ -355,7 +355,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
             or not guild_data[str(guild.id)]["feeder_messages"]
         ):
             await ctx.send(
-                f'no custom messages for `{guild}`! add using {ctx.prefix}valorant-add-feeder-message "<custom message>"!'
+                f'no custom messages for `{guild}`! add using {ctx.prefix}feeder-message add "<custom message>"!'
             )
         else:
             view = FeederMessagesView(ctx)
