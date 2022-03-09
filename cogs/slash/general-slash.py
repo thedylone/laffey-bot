@@ -1,12 +1,9 @@
 import disnake
 from disnake.ext import commands
 
-import os
 import random
 
 from helpers import general_helper
-
-HOLODEX_TOKEN = os.environ["HOLODEX_TOKEN"]
 
 
 class General(commands.Cog):
