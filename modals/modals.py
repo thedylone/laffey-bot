@@ -65,7 +65,7 @@ class ValorantWatchModal(disnake.ui.Modal):
                     )
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
-        await inter.response.send_message("Oops, something went wrong.", ephemeral=True)
+        await inter.edit_original_message(content="Oops, something went wrong.")
 
 
 class ValorantFeederMessageModal(disnake.ui.Modal):
@@ -101,7 +101,7 @@ class ValorantFeederMessageModal(disnake.ui.Modal):
         )
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
-        await inter.response.send_message("Oops, something went wrong.", ephemeral=True)
+        await inter.edit_original_message(content="Oops, something went wrong.")
 
 
 class ValorantFeederImageModal(disnake.ui.Modal):
@@ -127,7 +127,7 @@ class ValorantFeederImageModal(disnake.ui.Modal):
         image = inter.text_values["url"]
         guild = inter.guild
         guild_data = json_helper.load("guildData.json")
-        if "feeder_messages" not in guild_data[str(guild.id)]:
+        if "feeder_images" not in guild_data[str(guild.id)]:
             guild_data[str(guild.id)]["feeder_images"] = [image]
         else:
             guild_data[str(guild.id)]["feeder_images"] += [image]
@@ -137,4 +137,4 @@ class ValorantFeederImageModal(disnake.ui.Modal):
         )
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
-        await inter.response.send_message("Oops, something went wrong.", ephemeral=True)
+        await inter.edit_original_message(content="Oops, something went wrong.")

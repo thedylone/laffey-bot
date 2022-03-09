@@ -9,7 +9,7 @@ import sys
 
 from views.views import Menu, FeederMessagesView, FeederImagesView
 
-from helpers import json_helper
+from helpers import json_helper, valorant_helper
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
 
@@ -75,10 +75,14 @@ class Valorant(commands.Cog, name="valorant"):
         aliases=["valorantwatch", "valwatch", "vwatch"],
         description="adds user into database",
     )
-    async def valorant_watch(self, ctx: commands.Context, name: str = None, tag: str = None):
+    async def valorant_watch(
+        self, ctx: commands.Context, name: str = None, tag: str = None
+    ):
         """add user's valorant info to the database"""
         if name == None or tag == None:
-            await ctx.send(content=f"use {ctx.prefix}valorant-watch <name> <tag without #>")
+            await ctx.send(
+                content=f"use {ctx.prefix}valorant-watch <name> <tag without #>"
+            )
             return
         if isinstance(ctx.channel, disnake.channel.DMChannel):
             guild_id = 0
@@ -283,83 +287,22 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         """custom feeder messages functions"""
         if option == "add":
             if new_message:
-                await self.valorant_add_feeder_message(ctx, new_message)
+                out = await valorant_helper.feeder_message_add(ctx, new_message)
+                await ctx.send(out)
             else:
                 await ctx.send(
                     content=f'use {ctx.prefix}feeder-message add "<new message>" (include the "") '
                 )
         elif option == "show":
-            await self.valorant_show_feeder_message(ctx)
+            content, embed, view = await valorant_helper.feeder_message_show(ctx)
+            await ctx.send(content=content, embed=embed, view=view)
         elif option == "delete" or option == "del":
-            await self.valorant_delete_feeder_message(ctx)
+            content, view = await valorant_helper.feeder_message_delete(ctx)
+            await ctx.send(content=content, view=view)
         else:
             await ctx.send(
                 content=f"use {ctx.prefix}feeder-message <add | show | delete>"
             )
-
-    async def valorant_add_feeder_message(self, ctx: commands.Context, message: str):
-        """add custom message for feeder alert"""
-        if len(message) > 100:
-            await ctx.send("message is too long!")
-            return
-        guild = ctx.guild
-        guild_data = json_helper.load("guildData.json")
-        if "feeder_messages" not in guild_data[str(guild.id)]:
-            guild_data[str(guild.id)]["feeder_messages"] = [message]
-        elif len(guild_data[str(guild.id)]["feeder_messages"]) == 25:
-            await ctx.send(
-                "max number of messages reached! delete one before adding a new one!"
-            )
-            return
-        else:
-            guild_data[str(guild.id)]["feeder_messages"] += [message]
-        json_helper.save(guild_data, "guildData.json")
-        await ctx.send(f"successfully added custom feeder message for `{guild}`")
-
-    async def valorant_show_feeder_message(self, ctx: commands.Context):
-        """show custom messages for feeder alert"""
-        guild = ctx.guild
-        guild_data = json_helper.load("guildData.json")
-        if (
-            "feeder_messages" not in guild_data[str(guild.id)]
-            or not guild_data[str(guild.id)]["feeder_messages"]
-        ):
-            await ctx.send(
-                f'no custom messages for `{guild}`! add using {ctx.prefix}feeder-message add "<custom message>"!'
-            )
-        else:
-            feeder_messages = guild_data[str(guild.id)]["feeder_messages"]
-            embeds = []
-            step = 5  # number of messages per embed
-            for i in range(0, len(feeder_messages), step):
-                embed = disnake.Embed(
-                    title="custom feeder messages",
-                    description="messsages randomly sent with the feeder alert",
-                )
-                value = ""
-                for j, message in enumerate(feeder_messages[i : i + step]):
-                    value += f"`{i+j+1}` {message} \n"
-                embed.add_field(name="messages", value=value)
-                embeds.append(embed)
-            if len(feeder_messages) > step:
-                await ctx.send(embed=embeds[0], view=Menu(embeds))
-            else:
-                await ctx.send(embed=embeds[0])
-
-    async def valorant_delete_feeder_message(self, ctx: commands.Context):
-        """delete custom message for feeder alert"""
-        guild = ctx.guild
-        guild_data = json_helper.load("guildData.json")
-        if (
-            "feeder_messages" not in guild_data[str(guild.id)]
-            or not guild_data[str(guild.id)]["feeder_messages"]
-        ):
-            await ctx.send(
-                f'no custom messages for `{guild}`! add using {ctx.prefix}feeder-message add "<custom message>"!'
-            )
-        else:
-            view = FeederMessagesView(ctx)
-            await ctx.send("choose messages to delete", view=view)
 
     @commands.command(
         name="feeder-image",
@@ -373,79 +316,22 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         """custom feeder images functions"""
         if option == "add":
             if new_image:
-                await self.valorant_add_feeder_image(ctx, new_image)
+                out = await valorant_helper.feeder_image_add(ctx, new_image)
+                await ctx.send(out)
             else:
                 await ctx.send(
                     content=f'use {ctx.prefix}feeder-image add "<new image url>" (include the "") '
                 )
         elif option == "show":
-            await self.valorant_show_feeder_image(ctx)
+            content, embed, view = await valorant_helper.feeder_image_show(ctx)
+            await ctx.send(content=content, embed=embed, view=view)
         elif option == "delete" or option == "del":
-            await self.valorant_delete_feeder_image(ctx)
+            content, view = await valorant_helper.feeder_image_delete(ctx)
+            await ctx.send(content=content, view=view)
         else:
             await ctx.send(
                 content=f"use {ctx.prefix}feeder-image <add | show | delete>"
             )
-
-    async def valorant_add_feeder_image(self, ctx: commands.Context, image: str):
-        """add custom image for feeder alert"""
-        if len(image) > 100:
-            await ctx.send("url is too long!")
-            return
-        guild = ctx.guild
-        guild_data = json_helper.load("guildData.json")
-        if "feeder_images" not in guild_data[str(guild.id)]:
-            guild_data[str(guild.id)]["feeder_images"] = [image]
-        elif len(guild_data[str(guild.id)]["feeder_images"]) == 10:
-            await ctx.send(
-                "max number of images reached! delete one before adding a new one!"
-            )
-            return
-        else:
-            guild_data[str(guild.id)]["feeder_images"] += [image]
-        json_helper.save(guild_data, "guildData.json")
-        await ctx.send(f"successfully added custom feeder image for `{guild}`")
-
-    async def valorant_show_feeder_image(self, ctx: commands.Context):
-        """show custom images for feeder alert"""
-        guild = ctx.guild
-        guild_data = json_helper.load("guildData.json")
-        if (
-            "feeder_images" not in guild_data[str(guild.id)]
-            or not guild_data[str(guild.id)]["feeder_images"]
-        ):
-            await ctx.send(
-                f'no custom images for `{guild}`! add using {ctx.prefix}feeder-image add "<custom image>"!'
-            )
-        else:
-            feeder_images = guild_data[str(guild.id)]["feeder_images"]
-            embeds = []
-            for image in feeder_images:
-                embed = disnake.Embed(
-                    title="custom feeder images",
-                    description="messsages randomly sent with the feeder alert",
-                )
-                embed.set_image(url=image)
-                embeds.append(embed)
-            if len(feeder_images) > 1:
-                await ctx.send(embed=embeds[0], view=Menu(embeds))
-            else:
-                await ctx.send(embed=embeds[0])
-
-    async def valorant_delete_feeder_image(self, ctx: commands.Context):
-        """delete custom image for feeder alert"""
-        guild = ctx.guild
-        guild_data = json_helper.load("guildData.json")
-        if (
-            "feeder_images" not in guild_data[str(guild.id)]
-            or not guild_data[str(guild.id)]["feeder_images"]
-        ):
-            await ctx.send(
-                f'no custom images for `{guild}`! add using {ctx.prefix}feeder-image add "<custom image>"!'
-            )
-        else:
-            view = FeederImagesView(ctx)
-            await ctx.send("choose images to delete", view=view)
 
 
 def setup(bot: commands.Bot):
