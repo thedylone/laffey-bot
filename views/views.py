@@ -1,7 +1,6 @@
 from __future__ import annotations
 import disnake
 from disnake.ext import commands
-from itsdangerous import json
 
 
 from helpers import json_helper
