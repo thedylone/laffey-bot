@@ -66,51 +66,8 @@ class Valorant(commands.Cog, name="valorant"):
     )
     async def valorant_wait(self, ctx: commands.Context, *wait_users: disnake.User):
         """pings you when tagged user is done"""
-        ctx_user_id = str(ctx.author.id)
-        if len(wait_users) == 0:
-            await ctx.send(
-                content=f"<@{ctx_user_id}> use {ctx.prefix}valorant-wait <tag the user you are waiting for>"
-            )
-            return
-        player_data = json_helper.load("playerData.json")
-        extra_message = ""
-        success_waiting = []
-        already_waiting = []
-        not_in_database = []
-        for wait_user in list(set(wait_users)):
-            wait_user_id = str(wait_user.id)
-            if wait_user_id == ctx_user_id:
-                extra_message = "interesting but ok. "
-            if wait_user_id in player_data:
-                if wait_user_id in self.bot.valorant_waitlist:
-                    if ctx_user_id in self.bot.valorant_waitlist[wait_user_id]:
-                        already_waiting.append(wait_user_id)
-                    else:
-                        self.bot.valorant_waitlist[wait_user_id] += [ctx_user_id]
-                        success_waiting.append(wait_user_id)
-                else:
-                    self.bot.valorant_waitlist[wait_user_id] = [ctx_user_id]
-                    success_waiting.append(wait_user_id)
-            else:
-                not_in_database.append(wait_user_id)
-        success_message = (
-            f"success, will notify when <@{'> <@'.join(success_waiting)}> {'is' if len(success_waiting) == 1 else 'are'} done. "
-            if success_waiting
-            else ""
-        )
-        already_message = (
-            f"you are already waiting for <@{'> <@'.join(already_waiting)}>. "
-            if already_waiting
-            else ""
-        )
-        not_in_database_message = (
-            f"<@{'> <@'.join(not_in_database)}> not in database, unable to wait."
-            if not_in_database
-            else ""
-        )
-        await ctx.send(
-            content=f"{extra_message}<@{ctx_user_id}> {success_message}{already_message}{not_in_database_message}"
-        )
+        content = await valorant_helper.wait(self.bot, ctx, *wait_users)
+        await ctx.send(content=content)
 
     @commands.command(
         name="valorant-waitlist",
@@ -131,8 +88,6 @@ class Valorant(commands.Cog, name="valorant"):
             url="https://cdn.vox-cdn.com/uploads/chorus_image/image/66615355/VALORANT_Jett_Red_crop.0.jpg"
         )
         for user_id in self.bot.valorant_waitlist:
-            print(user_id)
-            print(ctx.author.id)
             if guild_id == 0 and ctx.author.id in self.bot.valorant_waitlist[user_id]:
                 embed.add_field(name="user", value=f"<@{user_id}>", inline=False)
                 embed.add_field(

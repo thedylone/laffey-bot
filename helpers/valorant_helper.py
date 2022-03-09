@@ -102,6 +102,53 @@ async def unwatch(message):
     return content
 
 
+async def wait(bot, message, *wait_users):
+    """pings you when tagged user is done"""
+    """returns [content]"""
+    message_user_id = str(message.author.id)
+    if len(wait_users) == 0:
+        return f"<@{message_user_id}> use {message.prefix if isinstance(message, commands.Context) else '/'}valorant-wait <tag the user you are waiting for>"
+    player_data = json_helper.load("playerData.json")
+    extra_message = ""
+    success_waiting = []
+    already_waiting = []
+    not_in_database = []
+    for wait_user in list(set(wait_users)):
+        wait_user_id = str(wait_user.id)
+        if wait_user_id == message_user_id:
+            extra_message = "interesting but ok. "
+        if wait_user_id in player_data:
+            if wait_user_id in bot.valorant_waitlist:
+                if message_user_id in bot.valorant_waitlist[wait_user_id]:
+                    already_waiting.append(wait_user_id)
+                else:
+                    bot.valorant_waitlist[wait_user_id] += [message_user_id]
+                    success_waiting.append(wait_user_id)
+            else:
+                bot.valorant_waitlist[wait_user_id] = [message_user_id]
+                success_waiting.append(wait_user_id)
+        else:
+            not_in_database.append(wait_user_id)
+    success_message = (
+        f"success, will notify when <@{'> <@'.join(success_waiting)}> {'is' if len(success_waiting) == 1 else 'are'} done. "
+        if success_waiting
+        else ""
+    )
+    already_message = (
+        f"you are already waiting for <@{'> <@'.join(already_waiting)}>. "
+        if already_waiting
+        else ""
+    )
+    not_in_database_message = (
+        f"<@{'> <@'.join(not_in_database)}> not in database, unable to wait."
+        if not_in_database
+        else ""
+    )
+    return(
+        f"{extra_message}<@{message_user_id}> {success_message}{already_message}{not_in_database_message}"
+    )
+
+
 async def feeder_message_add(message, new_message: str):
     """add custom message for feeder alert"""
     """returns [content]"""

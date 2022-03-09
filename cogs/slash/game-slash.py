@@ -52,30 +52,8 @@ class Valorant(commands.Cog):
     ):
         await inter.response.defer()
         """pings you when tagged user is done"""
-        player_data = json_helper.load("playerData.json")
-        wait_user_id = str(wait_user.id)
-        inter_user_id = str(inter.user.id)
-        extra_message = ""
-        if wait_user_id == inter_user_id:
-            extra_message = "interesting but ok. "
-        if wait_user_id in player_data:
-            if wait_user_id in self.bot.valorant_waitlist:
-                if inter_user_id in self.bot.valorant_waitlist[wait_user_id]:
-                    await inter.edit_original_message(
-                        content=f"{extra_message}<@{inter_user_id}> you are already waiting for <@{wait_user_id}>"
-                    )
-                    return
-                else:
-                    self.bot.valorant_waitlist[wait_user_id] += [inter_user_id]
-            else:
-                self.bot.valorant_waitlist[wait_user_id] = [inter_user_id]
-            await inter.edit_original_message(
-                content=f"{extra_message}<@{inter_user_id}> success, will notify when <@{wait_user_id}> is done"
-            )
-        else:
-            await inter.edit_original_message(
-                content=f"{extra_message}<@{wait_user_id}> is not in database, unable to execute"
-            )
+        content = await valorant_helper.wait(self.bot, inter, wait_user)
+        await inter.edit_original_message(content=content)
 
     @commands.slash_command(
         name="valorant-waitlist", description="prints valorant waitlist"
