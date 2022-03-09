@@ -25,11 +25,14 @@ class Background(commands.Cog):
         init_list = [key for key in player_data.keys()]
         for user_id in init_list:
             player_user = await self.bot.getch_user(int(user_id))
-            if player_user == None:  # player no longer exists
+            player_data = json_helper.load("playerData.json")
+            if (
+                player_user == None or user_id not in player_data
+            ):  # player no longer exists
                 # del player_data[user_id]
                 # json_helper.save(player_data, "playerData.json")
                 continue
-            player_data = json_helper.load("playerData.json")  # reloads player_data
+              # reloads player_data
             guild_data = json_helper.load("guildData.json")
             user_data = player_data[user_id]
             user_puuid = user_data["puuid"]
@@ -104,10 +107,8 @@ class Background(commands.Cog):
                                 and player["puuid"] == player_data[player_id]["puuid"]
                                 and player_data[player_id]["guild"] == user_guild
                             ):  # detects if multiple watched users who "watched" in the same guild (not 0) are in the same game
-                                kills = player["stats"]["kills"]
-                                deaths = player["stats"]["deaths"]
-                                assists = player["stats"]["assists"]
-                                score = player["stats"]["score"]
+                                player_stats = player["stats"]
+                                player_acs = player_stats["score"] / rounds_played
                                 team = player["team"]
                                 if team == "Red":
                                     party_red.append(player_id)
@@ -117,17 +118,42 @@ class Background(commands.Cog):
                                     team == player_data[player_id]["puuid"]
                                 ):  # deathmatch exception
                                     party_red.append(player_id)
+
                                 map_played = latest_game["metadata"]["map"]
-                                if deaths >= (
-                                    kills + (1.1 * math.e) ** (kills / 5) + 2.9
+
+                                if player_stats["deaths"] >= (
+                                    player_stats["kills"]
+                                    + (1.1 * math.e) ** (player_stats["kills"] / 5)
+                                    + 2.9
                                 ):  # formula for calculating feeding threshold
                                     feeders[player_id] = {
-                                        "kills": kills,
-                                        "deaths": deaths,
-                                        "assists": assists,
-                                        "acs": int(score / rounds_played),
-                                        "kd": "{:.2f}".format(kills / deaths),
+                                        "kills": player_stats["kills"],
+                                        "deaths": player_stats["deaths"],
+                                        "assists": player_stats["assists"],
+                                        "acs": int(player_acs),
+                                        "kd": "{:.2f}".format(
+                                            player_stats["kills"]
+                                            / player_stats["deaths"]
+                                        ),
                                     }
+
+                                if mode == "Competitive" or mode == "Unrated":
+                                    # save stats
+                                    player_data[player_id]["headshots"] = player_data[
+                                        player_id
+                                    ]["headshots"][-4:] + [player_stats["headshots"]]
+
+                                    player_data[player_id]["bodyshots"] = player_data[
+                                        player_id
+                                    ]["bodyshots"][-4:] + [player_stats["bodyshots"]]
+
+                                    player_data[player_id]["legshots"] = player_data[
+                                        player_id
+                                    ]["legshots"][-4:] + [player_stats["legshots"]]
+
+                                    player_data[player_id]["acs"] = player_data[
+                                        player_id
+                                    ]["acs"][-4:] + [player_acs]
 
                     async with session.get(
                         "https://api.henrikdev.xyz/valorant/v1/content"

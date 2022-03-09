@@ -37,9 +37,28 @@ async def info(message, user):
             title="valorant info", description=f"<@{user_id}> saved info"
         )
         embed.set_thumbnail(url=user.display_avatar.url)
-        embed.add_field(name="username", value=f"{user_data['name']}", inline=True)
-        embed.add_field(name="tag", value=f"#{user_data['tag']}", inline=True)
-        embed.add_field(name="last updated", value=f"<t:{int(user_data['lastTime'])}>")
+        embed.add_field(
+            name="username",
+            value=f"{user_data['name']}#{user_data['tag']}",
+            inline=True,
+        )
+        embed.add_field(
+            name="last updated", value=f"<t:{int(user_data['lastTime'])}>", inline=True
+        )
+        if len(user_data["headshots"]):
+            embed.add_field(
+                name="headshot %",
+                value=f"{int(100 * sum(filter(None, user_data['headshots'])) / (sum(filter(None, user_data['headshots'])) + sum(filter(None, user_data['bodyshots'])) + sum(filter(None, user_data['legshots']))))}%",
+                inline=False,
+            )
+            embed.add_field(
+                name="ACS",
+                value=f"{int(sum(user_data['acs']) / len(user_data['acs']))}",
+                inline=True,
+            )
+            embed.set_footer(
+                text=f"stats from last {len(user_data['headshots'])} recorded comp/unrated games"
+            )
         return None, embed
     else:
         return (
@@ -68,24 +87,67 @@ async def watch(message, name, tag):
     async with aiohttp.ClientSession() as session:
         async with session.get(
             f"https://api.henrikdev.xyz/valorant/v1/account/{name}/{tag}"
-        ) as request:
+        ) as account_request:
             # using this until access for riot api granted async with session.get(f'https://{region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{name}/{tag}?api_key={RIOT_TOKEN}') as request:
-            if request.status == 200:
-                data = await request.json()
-                player_data[user_id] = {
-                    "name": name,
-                    "tag": tag,
-                    "region": data["data"]["region"],
-                    "puuid": data["data"]["puuid"],
-                    "lastTime": time.time(),
-                    "streak": 0,
-                    "guild": guild_id,
-                }
-                json_helper.save(player_data, "playerData.json")
-                content = f"<@{user_id}> database updated, user added. remove using {message.prefix if isinstance(message, commands.Context) else '/'}valorant-unwatch"
-            else:
-                content = f"<@{user_id}> error connecting, database not updated. please try again"
-            return content
+            if account_request.status != 200:
+                return f"<@{user_id}> error connecting, database not updated. please try again (check if you have typed correctly)"
+            account_data = await account_request.json()
+            user_region = account_data["data"]["region"]
+            user_puuid = account_data["data"]["puuid"]
+        async with session.get(
+            f"https://api.henrikdev.xyz/valorant/v3/by-puuid/matches/{user_region}/{user_puuid}"
+        ) as match_request:
+            if account_request.status != 200:
+                return f"<@{user_id}> error connecting, database not updated. please try again (check if you have typed correctly)"
+            match_data = await match_request.json()
+            headshots, bodyshots, legshots, acs = [], [], [], []
+            rounds_played = rounds_red = rounds_blue = streak = 0
+            same_streak = True
+            for latest_game in match_data["data"]:
+                mode = latest_game["metadata"]["mode"]
+                for round in latest_game["rounds"]:
+                    rounds_played += round["end_type"] != "Surrendered"
+                    rounds_red += round["winning_team"] == "Red"
+                    rounds_blue += round["winning_team"] == "Blue"
+
+                for player in latest_game["players"]["all_players"]:
+                    if player["puuid"] == user_puuid:
+                        player_stats = player["stats"]
+                        player_team = player["team"]
+                        break
+                if same_streak and player_team == "Red":
+                    if streak == 0 or not (streak > 0) ^ (rounds_red > rounds_blue):
+                        streak += 1 if rounds_red > rounds_blue else -1
+                    else:
+                        same_streak = False
+                elif same_streak and player_team == "Blue":
+                    if streak == 0 or not (streak > 0) ^ (rounds_blue > rounds_red):
+                        streak += 1 if rounds_blue > rounds_red else -1
+                    else:
+                        same_streak = False
+
+                if mode != "Competitive" and mode != "Unrated":
+                    continue
+                acs.append(player_stats["score"] / rounds_played)
+                headshots.append(player_stats["headshots"])
+                bodyshots.append(player_stats["bodyshots"])
+                legshots.append(player_stats["legshots"])
+
+            player_data[user_id] = {
+                "guild": guild_id,
+                "name": name,
+                "tag": tag,
+                "region": user_region,
+                "puuid": user_puuid,
+                "lastTime": time.time(),
+                "streak": streak,
+                "headshots": headshots,
+                "bodyshots": bodyshots,
+                "legshots": legshots,
+                "acs": acs,
+            }
+            json_helper.save(player_data, "playerData.json")
+            return f"<@{user_id}> database updated, user added. remove using {message.prefix if isinstance(message, commands.Context) else '/'}valorant-unwatch"
 
 
 async def unwatch(message):
