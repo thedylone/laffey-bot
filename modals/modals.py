@@ -3,7 +3,7 @@ import disnake
 import aiohttp
 import time
 
-from helpers import json_helper
+from helpers import json_helper, valorant_helper
 
 
 class ValorantWatchModal(disnake.ui.Modal):
@@ -30,39 +30,8 @@ class ValorantWatchModal(disnake.ui.Modal):
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
-        """add user's valorant info to the database"""
-        if isinstance(inter.channel, disnake.channel.DMChannel):
-            guild_id = 0
-        else:
-            guild_id = inter.guild_id
-        player_data = json_helper.load("playerData.json")
-        user_id = str(inter.user.id)
-        name = inter.text_values["name"]
-        tag = inter.text_values["tag"]
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"https://api.henrikdev.xyz/valorant/v1/account/{name}/{tag}"
-            ) as request:
-                # using this until access for riot api granted async with session.get(f'https://{region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{name}/{tag}?api_key={RIOT_TOKEN}') as request:
-                if request.status == 200:
-                    data = await request.json()
-                    player_data[user_id] = {
-                        "name": name,
-                        "tag": tag,
-                        "region": data["data"]["region"],
-                        "puuid": data["data"]["puuid"],
-                        "lastTime": time.time(),
-                        "streak": 0,
-                        "guild": guild_id,
-                    }
-                    await inter.edit_original_message(
-                        content=f"<@{user_id}> database updated, user added. remove using /valorant-unwatch"
-                    )
-                    json_helper.save(player_data, "playerData.json")
-                else:
-                    await inter.edit_original_message(
-                        content=f"<@{user_id}> error connecting, database not updated. please try again"
-                    )
+        content = await valorant_helper.watch(inter, inter.text_values["name"], inter.text_values["tag"])
+        await inter.edit_original_message(content=content)
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         await inter.edit_original_message(content="Oops, something went wrong.")

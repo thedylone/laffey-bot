@@ -31,20 +31,7 @@ class Valorant(commands.Cog):
         name="valorant-watch", description="adds user into database"
     )
     async def valorant_watch(self, inter: disnake.ApplicationCommandInteraction):
-        if isinstance(inter.channel, disnake.channel.DMChannel):
-            guild_id = 0
-        else:
-            guild_data = json_helper.load("guildData.json")
-            guild_id = inter.guild_id
-            if (
-                str(guild_id) not in guild_data
-                or "watch_channel" not in guild_data[str(guild_id)]
-                or guild_data[str(guild_id)]["watch_channel"] == 0
-            ):
-                await inter.send(
-                    content="Please set the watch channel for the guild first using valorant-set-channel! You can also DM me and I will DM you for each update instead!"
-                )
-                return
+        """add user's valorant info to the database"""
         await inter.response.send_modal(modal=ValorantWatchModal())
 
     @commands.slash_command(

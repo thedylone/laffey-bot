@@ -44,50 +44,10 @@ class Valorant(commands.Cog, name="valorant"):
     ):
         """add user's valorant info to the database"""
         if name == None or tag == None:
-            await ctx.send(
-                content=f"use {ctx.prefix}valorant-watch <name> <tag without #>"
-            )
-            return
-        if isinstance(ctx.channel, disnake.channel.DMChannel):
-            guild_id = 0
+            content = f"use {ctx.prefix}valorant-watch <name> <tag without #>"
         else:
-            guild_data = json_helper.load("guildData.json")
-            guild_id = ctx.guild.id
-            if (
-                str(guild_id) not in guild_data
-                or "watch_channel" not in guild_data[str(guild_id)]
-                or guild_data[str(guild_id)]["watch_channel"] == 0
-            ):
-                await ctx.send(
-                    f"please set the watch channel for the guild first using {ctx.prefix}valorant-set-channel! you can also DM me and i will DM you for each update instead!"
-                )
-                return
-        player_data = json_helper.load("playerData.json")
-        user_id = str(ctx.author.id)
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"https://api.henrikdev.xyz/valorant/v1/account/{name}/{tag}"
-            ) as request:
-                # using this until access for riot api granted async with session.get(f'https://{region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{name}/{tag}?api_key={RIOT_TOKEN}') as request:
-                if request.status == 200:
-                    data = await request.json()
-                    player_data[user_id] = {
-                        "name": name,
-                        "tag": tag,
-                        "region": data["data"]["region"],
-                        "puuid": data["data"]["puuid"],
-                        "lastTime": time.time(),
-                        "streak": 0,
-                        "guild": guild_id,
-                    }
-                    await ctx.send(
-                        content=f"<@{user_id}> database updated, user added. remove using {ctx.prefix}valorant-unwatch"
-                    )
-                    json_helper.save(player_data, "playerData.json")
-                else:
-                    await ctx.send(
-                        content=f"<@{user_id}> error connecting, database not updated. please try again"
-                    )
+            content = await valorant_helper.watch(ctx, name, tag)
+        await ctx.send(content=content)
 
     @commands.command(
         name="valorant-unwatch",
