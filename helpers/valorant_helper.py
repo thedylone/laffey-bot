@@ -181,6 +181,28 @@ async def waitlist(bot, message):
     return embed
 
 
+async def set_channel(message, channel):
+    """set the channel the bot will send updates to"""
+    """returns [content]"""
+    if channel == None:
+        channel = message.channel
+    guild = message.guild
+    guild_data = json_helper.load("guildData.json")
+    guild_data[str(guild.id)]["watch_channel"] = channel.id
+    json_helper.save(guild_data, "guildData.json")
+    return f"successfully set `#{channel}` as watch channel for `{guild}`"
+
+
+async def set_role(message, role):
+    if role == None:
+        return f"use {message.prefix if isinstance(message, commands.Context) else '/'}set-role <tag the role>"
+    guild = message.guild
+    guild_data = json_helper.load("guildData.json")
+    guild_data[str(guild.id)]["ping_role"] = role.id
+    json_helper.save(guild_data, "guildData.json")
+    return f"successfully set role `{role}` as watch channel for `{guild}`"
+
+
 async def feeder_message_add(message, new_message: str):
     """add custom message for feeder alert"""
     """returns [content]"""

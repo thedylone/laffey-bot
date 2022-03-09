@@ -70,44 +70,32 @@ class ValorantAdmin(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(
-        name="valorant-set-channel",
+        name="set-channel",
         description="set the channel the bot will send updates to",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_set_channel(
+    async def set_channel(
         self,
         inter: disnake.ApplicationCommandInteraction,
         channel: disnake.TextChannel = None,
     ):
         await inter.response.defer()
         """set the channel the bot will send updates to"""
-        if channel == None:
-            channel = inter.channel
-        guild = inter.guild
-        guild_data = json_helper.load("guildData.json")
-        guild_data[str(guild.id)]["watch_channel"] = channel.id
-        json_helper.save(guild_data, "guildData.json")
-        await inter.edit_original_message(
-            content=f"Successfully set `#{channel}` as watch channel for `{guild}`"
-        )
+        content = await valorant_helper.set_channel(inter, channel)
+        await inter.edit_original_message(content=content)
 
     @commands.slash_command(
-        name="valorant-set-role",
+        name="set-role",
         description="set the role the bot will ping",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def valorant_set_role(
+    async def set_role(
         self, inter: disnake.ApplicationCommandInteraction, role: disnake.Role
     ):
         await inter.response.defer()
         "set the role the bot will ping"
-        guild = inter.guild
-        guild_data = json_helper.load("guildData.json")
-        guild_data[str(guild.id)]["ping_role"] = role.id
-        json_helper.save(guild_data, "guildData.json")
-        await inter.edit_original_message(
-            content=f"successfully set role `{role}` as watch channel for `{guild}`"
-        )
+        content = await valorant_helper.set_role(inter, role)
+        await inter.edit_original_message(content=content)
 
     @commands.slash_command(
         name="feeder-message",

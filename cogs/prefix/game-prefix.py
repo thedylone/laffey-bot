@@ -94,13 +94,8 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         self, ctx: commands.Context, channel: disnake.TextChannel = None
     ):
         """set the channel the bot will send updates to"""
-        if channel == None:
-            channel = ctx.channel
-        guild = ctx.guild
-        guild_data = json_helper.load("guildData.json")
-        guild_data[str(guild.id)]["watch_channel"] = channel.id
-        json_helper.save(guild_data, "guildData.json")
-        await ctx.send(f"successfully set `#{channel}` as watch channel for `{guild}`")
+        content = await valorant_helper.set_channel(ctx, channel)
+        await ctx.send(content=content)
 
     @commands.command(
         name="set-role",
@@ -110,14 +105,8 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     @commands.has_guild_permissions(manage_messages=True)
     async def set_role(self, ctx: commands.Context, role: disnake.Role = None):
         "set the role the bot will ping"
-        if role == None:
-            await ctx.send(content=f"use {ctx.prefix}set-role <tag the role>")
-            return
-        guild = ctx.guild
-        guild_data = json_helper.load("guildData.json")
-        guild_data[str(guild.id)]["ping_role"] = role.id
-        json_helper.save(guild_data, "guildData.json")
-        await ctx.send(f"successfully set role `{role}` as watch channel for `{guild}`")
+        content = await valorant_helper.set_role(ctx, role)
+        await ctx.send(content=content)
 
     @commands.command(
         name="feeder-message",
