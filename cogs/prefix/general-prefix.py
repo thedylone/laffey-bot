@@ -2,8 +2,6 @@ import disnake
 from disnake.ext import commands
 
 import os
-import json
-import sys
 import aiohttp
 import re
 import random
@@ -11,12 +9,6 @@ import random
 from views.views import Menu
 
 from helpers import json_helper
-
-if not os.path.isfile("config.json"):
-    sys.exit("'config.json' not found!")
-else:
-    with open("config.json", encoding="utf-8") as file:
-        config = json.load(file)
 
 HOLODEX_TOKEN = os.environ["HOLODEX_TOKEN"]
 

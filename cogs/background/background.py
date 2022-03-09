@@ -1,24 +1,15 @@
 import disnake
 from disnake.ext import tasks, commands
 
-import os
-import json
 import aiohttp
 import asyncio
 import time
-import sys
 import math
 import random
 
 from helpers import json_helper
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
-
-if not os.path.isfile("config.json"):
-    sys.exit("'config.json' not found!")
-else:
-    with open("config.json", encoding="utf-8") as file:
-        config = json.load(file)
 
 
 class Background(commands.Cog):

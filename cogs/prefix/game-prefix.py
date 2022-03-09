@@ -1,23 +1,12 @@
 import disnake
 from disnake.ext import commands
 
-import os
-import json
 import aiohttp
 import time
-import sys
-
-from views.views import Menu, FeederMessagesView, FeederImagesView
 
 from helpers import json_helper, valorant_helper
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
-
-if not os.path.isfile("config.json"):
-    sys.exit("'config.json' not found!")
-else:
-    with open("config.json", encoding="utf-8") as file:
-        config = json.load(file)
 
 
 class Valorant(commands.Cog, name="valorant"):

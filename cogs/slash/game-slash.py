@@ -1,9 +1,6 @@
 import disnake
 from disnake.ext import commands
 
-import os
-import json
-import sys
 
 from helpers import json_helper, valorant_helper
 from modals.modals import (
@@ -11,15 +8,8 @@ from modals.modals import (
     ValorantFeederMessageModal,
     ValorantFeederImageModal,
 )
-from views.views import FeederImagesView, FeederMessagesView, Menu
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
-
-if not os.path.isfile("config.json"):
-    sys.exit("'config.json' not found!")
-else:
-    with open("config.json", encoding="utf-8") as file:
-        config = json.load(file)
 
 
 class Valorant(commands.Cog):
