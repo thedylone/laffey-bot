@@ -16,22 +16,6 @@ class Valorant(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.slash_command(name="jewels", description="pings role")
-    @commands.guild_only()
-    async def jewels_ping(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.response.defer()
-        """pings @jewels role and sends image"""
-        guild_id = inter.guild.id
-        guild_data = json_helper.load("guildData.json")
-        if "ping_role" not in guild_data[str(guild_id)]:
-            await inter.edit_original_message(
-                content="please set the role to ping first using valorant-set-role!"
-            )
-        else:
-            ping_role = guild_data[str(guild_id)]["ping_role"]
-            await inter.edit_original_message(
-                content=f"<@&{ping_role}>", file=disnake.File("jewelsignal.jpg")
-            )
 
     @commands.slash_command(
         name="valorant-info", description="view valorant data in database"

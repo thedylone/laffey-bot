@@ -6,6 +6,21 @@ from views.views import Menu, FeederMessagesView, FeederImagesView
 from helpers import json_helper
 
 
+async def ping(message):
+    """pings role and sends optional image"""
+    """returns [content, file]"""
+    guild_id = message.guild.id
+    guild_data = json_helper.load("guildData.json")
+    if "ping_role" not in guild_data[str(guild_id)]:
+        return (
+            f'please set the role to ping first using {message.prefix if isinstance(message, commands.Context) else "/"}set-role!',
+            None,
+        )
+    else:
+        ping_role = guild_data[str(guild_id)]["ping_role"]
+        return f"<@&{ping_role}>", disnake.File("jewelsignal.jpg")
+
+
 async def feeder_message_add(message, new_message: str):
     """add custom message for feeder alert"""
     """returns [content]"""

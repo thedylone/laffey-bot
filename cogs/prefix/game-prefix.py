@@ -21,15 +21,8 @@ class Valorant(commands.Cog, name="valorant"):
     @commands.guild_only()
     async def valorant_ping(self, ctx: commands.Context):
         """pings role and sends optional image"""
-        guild_id = ctx.guild.id
-        guild_data = json_helper.load("guildData.json")
-        if "ping_role" not in guild_data[str(guild_id)]:
-            await ctx.send(
-                f"please set the role to ping first using {ctx.prefix}valorant-set-role!"
-            )
-        else:
-            ping_role = guild_data[str(guild_id)]["ping_role"]
-            await ctx.send(f"<@&{ping_role}>", file=disnake.File("jewelsignal.jpg"))
+        content, file = await valorant_helper.ping(ctx)
+        await ctx.send(content=content, file=file)
 
     @commands.command(
         name="valorant-info",
