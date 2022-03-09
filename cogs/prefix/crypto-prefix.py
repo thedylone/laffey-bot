@@ -1,7 +1,7 @@
 import disnake
 from disnake.ext import commands
 
-import aiohttp
+from helpers import crypto_helper
 
 
 class Crypto(commands.Cog, name="crypto"):
@@ -11,41 +11,20 @@ class Crypto(commands.Cog, name="crypto"):
     @commands.command(name="sol", description="solprice")
     async def sol(self, ctx: commands.Context):
         """get the current price of SOL in USD."""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                "https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT"
-            ) as request:
-                if request.status == 200:
-                    data = await request.json()
-                    await ctx.send("1 SOL is {:.2f} USD".format(float(data["price"])))
-                else:
-                    await ctx.send("error getting price")
+        content = await crypto_helper.price("SOLUSDT")
+        await ctx.send(content=content)
 
-    @commands.command(name="btc", description="btcprice")
+    @commands.command(name="btc", description="btc price")
     async def btc(self, ctx: commands.Context):
         """get the current price of BTC in USD."""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
-            ) as request:
-                if request.status == 200:
-                    data = await request.json()
-                    await ctx.send("1 BTC is {:.2f} USD".format(float(data["price"])))
-                else:
-                    await ctx.send("error getting price")
+        content = await crypto_helper.price("BTCUSDT")
+        await ctx.send(content=content)
 
-    @commands.command(name="eth", description="ethprice")
+    @commands.command(name="eth", description="eth price")
     async def eth(self, ctx: commands.Context):
         """get the current price of ETH in USD."""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                "https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT"
-            ) as request:
-                if request.status == 200:
-                    data = await request.json()
-                    await ctx.send("1 ETH is {:.2f} USD".format(float(data["price"])))
-                else:
-                    await ctx.send("error getting price")
+        content = await crypto_helper.price("ETHUSDT")
+        await ctx.send(content=content)
 
 
 def setup(bot: commands.Bot):

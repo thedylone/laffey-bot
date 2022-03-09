@@ -4,7 +4,7 @@ from disnake.ext import commands
 import os
 import random
 
-from helpers import json_helper, general_helper
+from helpers import general_helper
 
 HOLODEX_TOKEN = os.environ["HOLODEX_TOKEN"]
 

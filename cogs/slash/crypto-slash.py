@@ -1,16 +1,7 @@
 import disnake
 from disnake.ext import commands
 
-import os
-import json
-import sys
-import aiohttp
-
-if not os.path.isfile("config.json"):
-    sys.exit("'config.json' not found!")
-else:
-    with open("config.json", encoding="utf-8") as file:
-        config = json.load(file)
+from helpers import crypto_helper
 
 
 class Crypto(commands.Cog):
@@ -19,18 +10,24 @@ class Crypto(commands.Cog):
 
     @commands.slash_command(name="sol", description="sol price")
     async def sol(self, inter: disnake.ApplicationCommandInteraction):
+        await inter.response.defer()
         """get the current price of SOL in USD."""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                "https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT"
-            ) as request:
-                if request.status == 200:
-                    data = await request.json()
-                    await inter.response.send_message(
-                        "1 SOL is {:.2f} USD".format(float(data["price"]))
-                    )
-                else:
-                    await inter.response.send_message("error getting price")
+        content = await crypto_helper.price("SOLUSDT")
+        await inter.edit_original_message(content=content)
+
+    @commands.slash_command(name="btc", description="btc price")
+    async def btc(self, inter: disnake.ApplicationCommandInteraction):
+        await inter.response.defer()
+        """get the current price of BTC in USD."""
+        content = await crypto_helper.price("BTCUSDT")
+        await inter.edit_original_message(content=content)
+
+    @commands.slash_command(name="eth", description="eth price")
+    async def eth(self, inter: disnake.ApplicationCommandInteraction):
+        await inter.response.defer()
+        """get the current price of ETH in USD."""
+        content = await crypto_helper.price("ETHUSDT")
+        await inter.edit_original_message(content=content)
 
 
 def setup(bot: commands.Bot):
