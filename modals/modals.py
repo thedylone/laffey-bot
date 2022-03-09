@@ -30,7 +30,9 @@ class ValorantWatchModal(disnake.ui.Modal):
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
-        content = await valorant_helper.watch(inter, inter.text_values["name"], inter.text_values["tag"])
+        content = await valorant_helper.watch(
+            inter, inter.text_values["name"], inter.text_values["tag"]
+        )
         await inter.edit_original_message(content=content)
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
@@ -56,18 +58,10 @@ class ValorantFeederMessageModal(disnake.ui.Modal):
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
-        """add custom message for feeder alert"""
-        message = inter.text_values["message"]
-        guild = inter.guild
-        guild_data = json_helper.load("guildData.json")
-        if "feeder_messages" not in guild_data[str(guild.id)]:
-            guild_data[str(guild.id)]["feeder_messages"] = [message]
-        else:
-            guild_data[str(guild.id)]["feeder_messages"] += [message]
-        json_helper.save(guild_data, "guildData.json")
-        await inter.edit_original_message(
-            content=f"successfully added custom feeder message for `{guild}`"
+        content = await valorant_helper.feeder_message_add(
+            inter, inter.text_values["message"]
         )
+        await inter.edit_original_message(content=content)
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         await inter.edit_original_message(content="Oops, something went wrong.")
@@ -92,18 +86,10 @@ class ValorantFeederImageModal(disnake.ui.Modal):
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
-        """add custom image for feeder alert"""
-        image = inter.text_values["url"]
-        guild = inter.guild
-        guild_data = json_helper.load("guildData.json")
-        if "feeder_images" not in guild_data[str(guild.id)]:
-            guild_data[str(guild.id)]["feeder_images"] = [image]
-        else:
-            guild_data[str(guild.id)]["feeder_images"] += [image]
-        json_helper.save(guild_data, "guildData.json")
-        await inter.edit_original_message(
-            content=f"successfully added custom feeder image for `{guild}`"
+        content = await valorant_helper.feeder_image_add(
+            inter, inter.text_values["url"]
         )
+        await inter.edit_original_message(content=content)
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         await inter.edit_original_message(content="Oops, something went wrong.")

@@ -178,7 +178,7 @@ class ValorantAdmin(commands.Cog):
     ):
         """custom feeder messages functions"""
         if option == "add":
-            await self.valorant_add_feeder_message(inter)
+            await inter.response.send_modal(modal=ValorantFeederMessageModal())
         elif option == "show":
             await inter.response.defer()
             content, embed, view = await valorant_helper.feeder_message_show(inter)
@@ -201,22 +201,6 @@ class ValorantAdmin(commands.Cog):
             option for option in ["add", "show", "delete"] if string in option.lower()
         ]
 
-    async def valorant_add_feeder_message(
-        self, inter: disnake.ApplicationCommandInteraction
-    ):
-        """add custom message for feeder alert"""
-        guild = inter.guild
-        guild_data = json_helper.load("guildData.json")
-        if (
-            "feeder_messages" in guild_data[str(guild.id)]
-            and len(guild_data[str(guild.id)]["feeder_messages"]) == 25
-        ):
-            await inter.response.send_message(
-                content="max number of messages reached! delete one before adding a new one!"
-            )
-            return
-        await inter.response.send_modal(modal=ValorantFeederMessageModal())
-
     @commands.slash_command(
         name="feeder-image",
         description="custom image for feeder alert functions",
@@ -227,7 +211,7 @@ class ValorantAdmin(commands.Cog):
     ):
         """custom feeder images functions"""
         if option == "add":
-            await self.valorant_add_feeder_image(inter)
+            await inter.response.send_modal(modal=ValorantFeederImageModal())
         elif option == "show":
             await inter.response.defer()
             content, embed, view = await valorant_helper.feeder_image_show(inter)
@@ -249,22 +233,6 @@ class ValorantAdmin(commands.Cog):
         return [
             option for option in ["add", "show", "delete"] if string in option.lower()
         ]
-
-    async def valorant_add_feeder_image(
-        self, inter: disnake.ApplicationCommandInteraction
-    ):
-        """add custom image for feeder alert"""
-        guild = inter.guild
-        guild_data = json_helper.load("guildData.json")
-        if (
-            "feeder_images" in guild_data[str(guild.id)]
-            and len(guild_data[str(guild.id)]["feeder_images"]) == 10
-        ):
-            await inter.response.send_message(
-                content="max number of images reached! delete one before adding a new one!"
-            )
-        else:
-            await inter.response.send_modal(modal=ValorantFeederImageModal())
 
 
 def setup(bot: commands.Bot):
