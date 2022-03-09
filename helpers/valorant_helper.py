@@ -88,6 +88,20 @@ async def watch(message, name, tag):
             return content
 
 
+async def unwatch(message):
+    """removes user's valorant info from the database"""
+    """returns [content]"""
+    player_data = json_helper.load("playerData.json")
+    user_id = str(message.author.id)
+    if user_id in player_data:
+        del player_data[user_id]
+        json_helper.save(player_data, "playerData.json")
+        content = f"<@{user_id}> database updated, user removed. add again using {message.prefix if isinstance(message, commands.Context) else '/'}valorant-watch"
+    else:
+        content = f"<@{user_id}> error updating, user not in database"
+    return content
+
+
 async def feeder_message_add(message, new_message: str):
     """add custom message for feeder alert"""
     """returns [content]"""

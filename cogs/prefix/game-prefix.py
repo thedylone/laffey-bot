@@ -56,16 +56,8 @@ class Valorant(commands.Cog, name="valorant"):
     )
     async def valorant_unwatch(self, ctx: commands.Context):
         """removes user's valorant info from the database"""
-        player_data = json_helper.load("playerData.json")
-        user_id = str(ctx.author.id)
-        if user_id in player_data:
-            del player_data[user_id]
-            json_helper.save(player_data, "playerData.json")
-            await ctx.send(
-                content=f"<@{user_id}> database updated, user removed. add again using {ctx.prefix}valorant-watch"
-            )
-        else:
-            await ctx.send(content=f"<@{user_id}> error updating, user not in database")
+        content = await valorant_helper.unwatch(ctx)
+        await ctx.send(content=content)
 
     @commands.command(
         name="valorant-wait",

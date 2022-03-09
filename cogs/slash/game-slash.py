@@ -41,18 +41,8 @@ class Valorant(commands.Cog):
     async def valorant_unwatch(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """removes user's valorant info from the database"""
-        player_data = json_helper.load("playerData.json")
-        user_id = str(inter.user.id)
-        if user_id in player_data:
-            del player_data[user_id]
-            json_helper.save(player_data, "playerData.json")
-            await inter.edit_original_message(
-                content=f"<@{user_id}> database updated, user removed. add again using /valorant-watch"
-            )
-        else:
-            await inter.edit_original_message(
-                content=f"<@{user_id}> error updating, user not in database"
-            )
+        content = await valorant_helper.unwatch(inter)
+        await inter.edit_original_message(content=content)
 
     @commands.slash_command(
         name="valorant-wait", description="pings you when tagged user is done"
