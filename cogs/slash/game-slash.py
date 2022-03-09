@@ -16,7 +16,6 @@ class Valorant(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-
     @commands.slash_command(
         name="valorant-info", description="view valorant data in database"
     )
@@ -25,26 +24,8 @@ class Valorant(commands.Cog):
     ):
         await inter.response.defer()
         """returns user's valorant info from the database"""
-        player_data = json_helper.load("playerData.json")
-        if user == None:
-            user = inter.user
-        user_id = str(user.id)
-        if user_id in player_data:
-            user_data = player_data[user_id]
-            embed = disnake.Embed(
-                title="valorant info", description=f"<@{user_id}> saved info"
-            )
-            embed.set_thumbnail(url=user.display_avatar.url)
-            embed.add_field(name="username", value=f"{user_data['name']}", inline=True)
-            embed.add_field(name="tag", value=f"#{user_data['tag']}", inline=True)
-            embed.add_field(
-                name="last updated", value=f"<t:{int(user_data['lastTime'])}>"
-            )
-            await inter.edit_original_message(embed=embed)
-        else:
-            await inter.edit_original_message(
-                content=f"<@{user_id}> not in database! do /valorant-watch first"
-            )
+        content, embed = await valorant_helper.info(inter, user)
+        await inter.edit_original_message(content=content, embed=embed)
 
     @commands.slash_command(
         name="valorant-watch", description="adds user into database"

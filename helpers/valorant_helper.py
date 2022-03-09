@@ -21,6 +21,30 @@ async def ping(message):
         return f"<@&{ping_role}>", disnake.File("jewelsignal.jpg")
 
 
+async def info(message, user):
+    """returns user's valorant info from the database"""
+    """returns [content, embed]"""
+    player_data = json_helper.load("playerData.json")
+    if user == None:
+        user = message.author
+    user_id = str(user.id)
+    if user_id in player_data:
+        user_data = player_data[user_id]
+        embed = disnake.Embed(
+            title="valorant info", description=f"<@{user_id}> saved info"
+        )
+        embed.set_thumbnail(url=user.display_avatar.url)
+        embed.add_field(name="username", value=f"{user_data['name']}", inline=True)
+        embed.add_field(name="tag", value=f"#{user_data['tag']}", inline=True)
+        embed.add_field(name="last updated", value=f"<t:{int(user_data['lastTime'])}>")
+        return None, embed
+    else:
+        return (
+            f'<@{user_id}> not in database! do {message.prefix if isinstance(message, commands.Context) else "/"}valorant-watch first',
+            None,
+        )
+
+
 async def feeder_message_add(message, new_message: str):
     """add custom message for feeder alert"""
     """returns [content]"""

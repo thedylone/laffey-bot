@@ -31,26 +31,8 @@ class Valorant(commands.Cog, name="valorant"):
     )
     async def valorant_info(self, ctx: commands.Context, user: disnake.User = None):
         """returns user's valorant info from the database"""
-        player_data = json_helper.load("playerData.json")
-        if user == None:
-            user = ctx.author
-        user_id = str(user.id)
-        if user_id in player_data:
-            user_data = player_data[user_id]
-            embed = disnake.Embed(
-                title="valorant info", description=f"<@{user_id}> saved info"
-            )
-            embed.set_thumbnail(url=user.display_avatar.url)
-            embed.add_field(name="username", value=f"{user_data['name']}", inline=True)
-            embed.add_field(name="tag", value=f"#{user_data['tag']}", inline=True)
-            embed.add_field(
-                name="last updated", value=f"<t:{int(user_data['lastTime'])}>"
-            )
-            await ctx.send(embed=embed)
-        else:
-            await ctx.send(
-                content=f"<@{user_id}> not in database! do {ctx.prefix}valorant-watch first"
-            )
+        content, embed = await valorant_helper.info(ctx, user)
+        await ctx.send(content=content, embed=embed)
 
     @commands.command(
         name="valorant-watch",
