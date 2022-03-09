@@ -1,15 +1,12 @@
 import disnake
 from disnake.ext import commands
 
-
-from helpers import json_helper, valorant_helper
+from helpers import valorant_helper
 from modals.modals import (
     ValorantWatchModal,
     ValorantFeederMessageModal,
     ValorantFeederImageModal,
 )
-
-# RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
 
 
 class Valorant(commands.Cog):

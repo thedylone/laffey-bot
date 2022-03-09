@@ -1,12 +1,7 @@
 import disnake
 from disnake.ext import commands
 
-import aiohttp
-import time
-
-from helpers import json_helper, valorant_helper
-
-# RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
+from helpers import valorant_helper
 
 
 class Valorant(commands.Cog, name="valorant"):
