@@ -61,34 +61,7 @@ class Valorant(commands.Cog):
     async def valorant_waitlist(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """prints valorant waitlist"""
-        if isinstance(inter.channel, disnake.channel.DMChannel):
-            guild_id = 0
-        else:
-            guild_id = inter.guild.id
-        player_data = json_helper.load("playerData.json")
-        embed = disnake.Embed(
-            title="valorant waitlist", description="waitlist of watched users"
-        )
-        embed.set_thumbnail(
-            url="https://cdn.vox-cdn.com/uploads/chorus_image/image/66615355/VALORANT_Jett_Red_crop.0.jpg"
-        )
-        for user_id in self.bot.valorant_waitlist:
-            if guild_id == 0 and inter.author.id in self.bot.valorant_waitlist[user_id]:
-                embed.add_field(name="user", value=f"<@{user_id}>", inline=False)
-                embed.add_field(
-                    name="waiters",
-                    value=f"<@{inter.author.id}>",
-                )
-            elif (
-                user_id == str(inter.author.id)
-                or guild_id
-                and player_data[user_id]["guild"] == guild_id
-            ):
-                embed.add_field(name="user", value=f"<@{user_id}>", inline=False)
-                embed.add_field(
-                    name="waiters",
-                    value=f"<@{'> <@'.join(self.bot.valorant_waitlist[user_id])}>",
-                )
+        embed = await valorant_helper.waitlist(self.bot, inter)
         await inter.edit_original_message(embed=embed)
 
 

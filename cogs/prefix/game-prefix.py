@@ -76,34 +76,7 @@ class Valorant(commands.Cog, name="valorant"):
     )
     async def valorant_waitlist(self, ctx: commands.Context):
         """prints valorant waitlist"""
-        if isinstance(ctx.channel, disnake.channel.DMChannel):
-            guild_id = 0
-        else:
-            guild_id = ctx.guild.id
-        player_data = json_helper.load("playerData.json")
-        embed = disnake.Embed(
-            title="valorant waitlist", description="waitlist of watched users"
-        )
-        embed.set_thumbnail(
-            url="https://cdn.vox-cdn.com/uploads/chorus_image/image/66615355/VALORANT_Jett_Red_crop.0.jpg"
-        )
-        for user_id in self.bot.valorant_waitlist:
-            if guild_id == 0 and ctx.author.id in self.bot.valorant_waitlist[user_id]:
-                embed.add_field(name="user", value=f"<@{user_id}>", inline=False)
-                embed.add_field(
-                    name="waiters",
-                    value=f"<@{ctx.author.id}>",
-                )
-            elif (
-                user_id == str(ctx.author.id)
-                or guild_id
-                and player_data[user_id]["guild"] == guild_id
-            ):
-                embed.add_field(name="user", value=f"<@{user_id}>", inline=False)
-                embed.add_field(
-                    name="waiters",
-                    value=f"<@{'> <@'.join(self.bot.valorant_waitlist[user_id])}>",
-                )
+        embed = await valorant_helper.waitlist(self.bot, ctx)
         await ctx.send(embed=embed)
 
 

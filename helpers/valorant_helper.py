@@ -144,9 +144,41 @@ async def wait(bot, message, *wait_users):
         if not_in_database
         else ""
     )
-    return(
-        f"{extra_message}<@{message_user_id}> {success_message}{already_message}{not_in_database_message}"
+    return f"{extra_message}<@{message_user_id}> {success_message}{already_message}{not_in_database_message}"
+
+
+async def waitlist(bot, message):
+    """prints valorant waitlist"""
+    """returns [embed]"""
+    if isinstance(message.channel, disnake.channel.DMChannel):
+        guild_id = 0
+    else:
+        guild_id = message.guild.id
+    player_data = json_helper.load("playerData.json")
+    embed = disnake.Embed(
+        title="valorant waitlist", description="waitlist of watched users"
     )
+    embed.set_thumbnail(
+        url="https://cdn.vox-cdn.com/uploads/chorus_image/image/66615355/VALORANT_Jett_Red_crop.0.jpg"
+    )
+    for user_id in bot.valorant_waitlist:
+        if guild_id == 0 and message.author.id in bot.valorant_waitlist[user_id]:
+            embed.add_field(name="user", value=f"<@{user_id}>", inline=False)
+            embed.add_field(
+                name="waiters",
+                value=f"<@{message.author.id}>",
+            )
+        elif (
+            user_id == str(message.author.id)
+            or guild_id
+            and player_data[user_id]["guild"] == guild_id
+        ):
+            embed.add_field(name="user", value=f"<@{user_id}>", inline=False)
+            embed.add_field(
+                name="waiters",
+                value=f"<@{'> <@'.join(bot.valorant_waitlist[user_id])}>",
+            )
+    return embed
 
 
 async def feeder_message_add(message, new_message: str):
