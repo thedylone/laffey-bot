@@ -7,6 +7,8 @@ import re
 
 from views.views import Menu
 
+from helpers import json_helper
+
 
 HOLODEX_TOKEN = os.environ["HOLODEX_TOKEN"]
 
@@ -76,3 +78,15 @@ async def holo(message):
     params = {"status": "live", "org": "Hololive", "limit": "50"}
     headers = {"Content-Type": "application/json", "X-APIKEY": HOLODEX_TOKEN}
     return await holodex(message, url, params, headers)
+
+
+async def prefix(message, prefix):
+    """set prefix for the server"""
+    """returns [content]"""
+    guild_data = json_helper.load("guildData.json")
+    if prefix == None:
+        current_prefix = guild_data[str(message.guild.id)]["prefix"]
+        return f'current prefix: {current_prefix}\nuse {message.prefix if isinstance(message, commands.Context) else "/"}prefix "<new prefix>" (include "" for multiple worded prefix)'
+    guild_data[str(message.guild.id)]["prefix"] = prefix
+    json_helper.save(guild_data, "guildData.json")
+    return f"<@{message.author.id}> successfully saved {prefix} as new server prefix"

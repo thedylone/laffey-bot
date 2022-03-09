@@ -52,18 +52,8 @@ class GeneralAdmin(commands.Cog):
     ):
         await inter.response.defer()
         """set prefix for the server"""
-        guild_data = json_helper.load("guildData.json")
-        if prefix == None:
-            current_prefix = guild_data[str(inter.guild.id)]["prefix"]
-            await inter.edit_original_message(
-                content=f'current prefix: {current_prefix}\nuse {current_prefix}prefix "<new prefix>" to change the prefix (include "" for multiple worded prefix)'
-            )
-        else:
-            guild_data[str(inter.guild.id)]["prefix"] = prefix
-            json_helper.save(guild_data, "guildData.json")
-            await inter.edit_original_message(
-                content=f"<@{inter.author.id}> successfully saved {prefix} as new server prefix"
-            )
+        content = await general_helper.prefix(inter, prefix)
+        await inter.edit_original_message(content=content)
 
 
 def setup(bot: commands.Bot):
