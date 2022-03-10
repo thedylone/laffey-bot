@@ -231,17 +231,18 @@ class Background(commands.Cog):
 
                     for member_id in party_red:
                         # streak function
-                        if rounds_red > rounds_blue:
-                            new_streak = max(player_data[member_id]["streak"] + 1, 1)
-                        elif rounds_red < rounds_blue:
-                            new_streak = min(player_data[member_id]["streak"] - 1, -1)
-                        if abs(new_streak) >= 3:
-                            is_streak = True
-                            streak_embed.add_field(
-                                name="streaker",
-                                value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
-                            )
-                        player_data[member_id]["streak"] = new_streak
+                        if rounds_red != rounds_blue:
+                            if rounds_red > rounds_blue:
+                                new_streak = max(player_data[member_id]["streak"] + 1, 1)
+                            elif rounds_red < rounds_blue:
+                                new_streak = min(player_data[member_id]["streak"] - 1, -1)
+                            if abs(new_streak) >= 3:
+                                is_streak = True
+                                streak_embed.add_field(
+                                    name="streaker",
+                                    value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
+                                )
+                            player_data[member_id]["streak"] = new_streak
 
                         # sets party members to update last updated time if more recent
                         player_data[member_id]["lastTime"] = max(
@@ -254,18 +255,19 @@ class Background(commands.Cog):
 
                     for member_id in party_blue:
                         # streak function
-                        if rounds_blue > rounds_red:
-                            new_streak = max(player_data[member_id]["streak"] + 1, 1)
-                        elif rounds_blue < rounds_red:
-                            new_streak = min(player_data[member_id]["streak"] - 1, -1)
-                        if abs(new_streak) >= 3:
-                            is_streak = True
-                            streak_embed.add_field(
-                                name="streaker",
-                                value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
-                                inline=False,
-                            )
-                        player_data[member_id]["streak"] = new_streak
+                        if rounds_red != rounds_blue:
+                            if rounds_blue > rounds_red:
+                                new_streak = max(player_data[member_id]["streak"] + 1, 1)
+                            elif rounds_blue < rounds_red:
+                                new_streak = min(player_data[member_id]["streak"] - 1, -1)
+                            if abs(new_streak) >= 3:
+                                is_streak = True
+                                streak_embed.add_field(
+                                    name="streaker",
+                                    value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
+                                    inline=False,
+                                )
+                            player_data[member_id]["streak"] = new_streak
 
                         # sets party members to update last updated time if more recent
                         player_data[member_id]["lastTime"] = max(
