@@ -87,7 +87,7 @@ async def prefix(bot: commands.Bot, message, prefix):
         prefix = re.sub("[^ !#-&(-~]", "", prefix)
     guild_id = message.guild.id
     if prefix:
-        await db_helper.update_guild_prefix(bot, guild_id, prefix)
+        await db_helper.update_guild_data(bot, guild_id, "prefix", prefix)
         return f"<@{message.author.id}> successfully saved {prefix} as new server prefix"
     else:
         guild_data = await db_helper.get_guild_data(bot, guild_id)

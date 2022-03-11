@@ -22,8 +22,8 @@ async def get_prefix(bot, message):
         guild_id = message.guild.id
         guild_data = await db_helper.get_guild_data(bot, guild_id)
         if len(guild_data) == 0:
-            await db_helper.update_guild_prefix(
-                bot, guild_id, os.environ["DEFAULT_PREFIX"]
+            await db_helper.update_guild_data(
+                bot, guild_id, "prefix", os.environ["DEFAULT_PREFIX"]
             )
         else:
             custom_prefix = guild_data[0].get("prefix")
@@ -39,15 +39,15 @@ bot = commands.Bot(
 
 
 @bot.event
-async def on_guild_join(guild):
-    bot.guild_data[str(guild.id)] = {"prefix": os.environ["DEFAULT_PREFIX"]}
-    json_helper.save(bot.guild_data, "guildData.json")
+async def on_guild_join(guild: disnake.Guild):
+    await db_helper.update_guild_data(bot, guild.id, "prefix", os.environ["DEFAULT_PREFIX"])
+    print(f"joined server {guild.name}")
 
 
 @bot.event
-async def on_guild_remove(guild):
-    del bot.guild_data[str(guild.id)]
-    json_helper.save(bot.guild_data, "guildData.json")
+async def on_guild_remove(guild: disnake.Guild):
+    await db_helper.delete_guild_data(bot, guild.id)
+    print(f"left server {guild.name}")
 
 
 # When the bot is ready, run this code.
