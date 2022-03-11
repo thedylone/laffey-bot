@@ -49,7 +49,7 @@ class GeneralAdmin(commands.Cog):
     ):
         await inter.response.defer()
         """set prefix for the server"""
-        content = await general_helper.prefix(inter, prefix)
+        content = await general_helper.prefix(self.bot, inter, prefix)
         await inter.edit_original_message(content=content)
 
 

@@ -17,14 +17,13 @@ else:
 
 
 def get_prefix(bot, message):
-    guild_data = json_helper.load("guildData.json")
     if (
         isinstance(message.channel, disnake.channel.DMChannel)
-        or str(message.guild.id) not in guild_data
+        or str(message.guild.id) not in bot.guild_data
     ):
         custom_prefix = os.environ["DEFAULT_PREFIX"]
     else:
-        custom_prefix = guild_data[str(message.guild.id)]["prefix"]
+        custom_prefix = bot.guild_data[str(message.guild.id)]["prefix"]
     return commands.when_mentioned_or(custom_prefix)(bot, message)
 
 
@@ -38,16 +37,14 @@ bot = commands.Bot(
 
 @bot.event
 async def on_guild_join(guild):
-    guild_data = json_helper.load("guildData.json")
-    guild_data[str(guild.id)] = {"prefix": os.environ["DEFAULT_PREFIX"]}
-    json_helper.save(guild_data, "guildData.json")
+    bot.guild_data[str(guild.id)] = {"prefix": os.environ["DEFAULT_PREFIX"]}
+    json_helper.save(bot.guild_data, "guildData.json")
 
 
 @bot.event
 async def on_guild_remove(guild):
-    guild_data = json_helper.load("guildData.json")
-    del guild_data[str(guild.id)]
-    json_helper.save(guild_data, "guildData.json")
+    del bot.guild_data[str(guild.id)]
+    json_helper.save(bot.guild_data, "guildData.json")
 
 
 # When the bot is ready, run this code.
@@ -58,6 +55,9 @@ async def on_ready():
     await bot.change_presence(
         activity=disnake.Game(f"with lolis | {os.environ['DEFAULT_PREFIX']}help")
     )
+    # cache data
+    bot.guild_data = json_helper.load("guildData.json")
+    bot.player_data = json_helper.load("playerData.json")
 
 
 # removes default help command

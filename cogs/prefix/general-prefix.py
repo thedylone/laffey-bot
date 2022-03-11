@@ -42,7 +42,7 @@ class GeneralAdmin(commands.Cog, name="general admin"):
     @commands.has_guild_permissions(manage_messages=True)
     async def prefix(self, ctx: commands.Context, prefix: str = None):
         """set prefix for the server"""
-        content = await general_helper.prefix(ctx, prefix)
+        content = await general_helper.prefix(self.bot, ctx, prefix)
         await ctx.send(content=content)
 
 
