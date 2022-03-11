@@ -14,7 +14,7 @@ from helpers import json_helper
 class Background(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.bot.valorant_waitlist = {}
+        self.bot.valorant_waitlist = json_helper.load("waitlist.json")
         self.valorant_watch_cycle.start()
 
     @tasks.loop(seconds=30)
@@ -261,6 +261,7 @@ class Background(commands.Cog):
                                 streak_embed.add_field(
                                     name="streaker",
                                     value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
+                                    inline=False,
                                 )
                             self.bot.player_data[member_id]["streak"] = new_streak
 
@@ -317,8 +318,9 @@ class Background(commands.Cog):
                                     await waiter_user.send(
                                         "A player you were waiting for is done!"
                                     )
-
+                        json_helper.save(self.bot.valorant_waitlist, "waitlist.json")
                     json_helper.save(self.bot.player_data, "playerData.json")
+                    
             await asyncio.sleep(0.5)  # sleeps for number of seconds (avoid rate limit)
 
 
