@@ -21,7 +21,7 @@ class Valorant(commands.Cog):
     ):
         await inter.response.defer()
         """returns user's valorant info from the database"""
-        content, embed = await valorant_helper.info(inter, user)
+        content, embed = await valorant_helper.info(self.bot, inter, user)
         await inter.edit_original_message(content=content, embed=embed)
 
     @commands.slash_command(
@@ -29,7 +29,7 @@ class Valorant(commands.Cog):
     )
     async def valorant_watch(self, inter: disnake.ApplicationCommandInteraction):
         """add user's valorant info to the database"""
-        await inter.response.send_modal(modal=ValorantWatchModal())
+        await inter.response.send_modal(modal=ValorantWatchModal(self.bot))
 
     @commands.slash_command(
         name="valorant-unwatch",
@@ -38,7 +38,7 @@ class Valorant(commands.Cog):
     async def valorant_unwatch(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer()
         """removes user's valorant info from the database"""
-        content = await valorant_helper.unwatch(inter)
+        content = await valorant_helper.unwatch(self.bot, inter)
         await inter.edit_original_message(content=content)
 
     @commands.slash_command(
@@ -78,7 +78,7 @@ class ValorantAdmin(commands.Cog):
     ):
         await inter.response.defer()
         """set the channel the bot will send updates to"""
-        content = await valorant_helper.set_channel(inter, channel)
+        content = await valorant_helper.set_channel(self.bot, inter, channel)
         await inter.edit_original_message(content=content)
 
     @commands.slash_command(
@@ -91,7 +91,7 @@ class ValorantAdmin(commands.Cog):
     ):
         await inter.response.defer()
         "set the role the bot will ping"
-        content = await valorant_helper.set_role(inter, role)
+        content = await valorant_helper.set_role(self.bot, inter, role)
         await inter.edit_original_message(content=content)
 
     @commands.slash_command(
@@ -104,14 +104,16 @@ class ValorantAdmin(commands.Cog):
     ):
         """custom feeder messages functions"""
         if option == "add":
-            await inter.response.send_modal(modal=ValorantFeederMessageModal())
+            await inter.response.send_modal(modal=ValorantFeederMessageModal(self.bot))
         elif option == "show":
             await inter.response.defer()
-            content, embed, view = await valorant_helper.feeder_message_show(inter)
+            content, embed, view = await valorant_helper.feeder_message_show(
+                self.bot, inter
+            )
             await inter.edit_original_message(content=content, embed=embed, view=view)
         elif option == "delete" or option == "del":
             await inter.response.defer()
-            content, view = await valorant_helper.feeder_message_delete(inter)
+            content, view = await valorant_helper.feeder_message_delete(self.bot, inter)
             await inter.edit_original_message(content=content, view=view)
         else:
             await inter.response.send_message(
@@ -137,14 +139,16 @@ class ValorantAdmin(commands.Cog):
     ):
         """custom feeder images functions"""
         if option == "add":
-            await inter.response.send_modal(modal=ValorantFeederImageModal())
+            await inter.response.send_modal(modal=ValorantFeederImageModal(self.bot))
         elif option == "show":
             await inter.response.defer()
-            content, embed, view = await valorant_helper.feeder_image_show(inter)
+            content, embed, view = await valorant_helper.feeder_image_show(
+                self.bot, inter
+            )
             await inter.edit_original_message(content=content, embed=embed, view=view)
         elif option == "delete" or option == "del":
             await inter.response.defer()
-            content, view = await valorant_helper.feeder_image_delete(inter)
+            content, view = await valorant_helper.feeder_image_delete(self.bot, inter)
             await inter.edit_original_message(content=content, view=view)
         else:
             await inter.response.send_message(

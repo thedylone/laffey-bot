@@ -1,11 +1,12 @@
 import disnake
-
+from disnake.ext import commands
 
 from helpers import valorant_helper
 
 
 class ValorantWatchModal(disnake.ui.Modal):
-    def __init__(self) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot = bot
         components = [
             disnake.ui.TextInput(
                 label="Username",
@@ -29,7 +30,7 @@ class ValorantWatchModal(disnake.ui.Modal):
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
         content = await valorant_helper.watch(
-            inter, inter.text_values["name"], inter.text_values["tag"]
+            self.bot, inter, inter.text_values["name"], inter.text_values["tag"]
         )
         await inter.edit_original_message(content=content)
 
@@ -38,7 +39,8 @@ class ValorantWatchModal(disnake.ui.Modal):
 
 
 class ValorantFeederMessageModal(disnake.ui.Modal):
-    def __init__(self) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot = bot
         components = [
             disnake.ui.TextInput(
                 label="Custom Message",
@@ -57,7 +59,7 @@ class ValorantFeederMessageModal(disnake.ui.Modal):
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
         content = await valorant_helper.feeder_message_add(
-            inter, inter.text_values["message"]
+            self.bot, inter, inter.text_values["message"]
         )
         await inter.edit_original_message(content=content)
 
@@ -66,7 +68,8 @@ class ValorantFeederMessageModal(disnake.ui.Modal):
 
 
 class ValorantFeederImageModal(disnake.ui.Modal):
-    def __init__(self) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot = bot
         components = [
             disnake.ui.TextInput(
                 label="Custom Image URL",
@@ -85,7 +88,7 @@ class ValorantFeederImageModal(disnake.ui.Modal):
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
         content = await valorant_helper.feeder_image_add(
-            inter, inter.text_values["url"]
+            self.bot, inter, inter.text_values["url"]
         )
         await inter.edit_original_message(content=content)
 

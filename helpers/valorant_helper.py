@@ -9,30 +9,28 @@ from views.views import Menu, FeederMessagesView, FeederImagesView
 from helpers import json_helper
 
 
-async def ping(message):
+async def ping(bot, message):
     """pings role and sends optional image"""
     """returns [content, file]"""
     guild_id = message.guild.id
-    guild_data = json_helper.load("guildData.json")
-    if "ping_role" not in guild_data[str(guild_id)]:
+    if "ping_role" not in bot.guild_data[str(guild_id)]:
         return (
             f"please set the role to ping first using {message.prefix if isinstance(message, commands.Context) else '/'}set-role!",
             None,
         )
     else:
-        ping_role = guild_data[str(guild_id)]["ping_role"]
+        ping_role = bot.guild_data[str(guild_id)]["ping_role"]
         return f"<@&{ping_role}>", disnake.File("jewelsignal.jpg")
 
 
-async def info(message, user):
+async def info(bot, message, user):
     """returns user's valorant info from the database"""
     """returns [content, embed]"""
-    player_data = json_helper.load("playerData.json")
     if user == None:
         user = message.author
     user_id = str(user.id)
-    if user_id in player_data:
-        user_data = player_data[user_id]
+    if user_id in bot.player_data:
+        user_data = bot.player_data[user_id]
         embed = disnake.Embed(
             title="valorant info", description=f"<@{user_id}> saved info"
         )
@@ -67,22 +65,20 @@ async def info(message, user):
         )
 
 
-async def watch(message, name, tag):
+async def watch(bot, message, name, tag):
     """add user's valorant info to the database"""
     """returns [content]"""
     if isinstance(message.channel, disnake.channel.DMChannel):
         guild_id = 0
     else:
-        guild_data = json_helper.load("guildData.json")
         guild_id = message.guild.id
         if (
-            str(guild_id) not in guild_data
-            or "watch_channel" not in guild_data[str(guild_id)]
-            or guild_data[str(guild_id)]["watch_channel"] == 0
+            str(guild_id) not in bot.guild_data
+            or "watch_channel" not in bot.guild_data[str(guild_id)]
+            or bot.guild_data[str(guild_id)]["watch_channel"] == 0
         ):
             return f"Please set the watch channel for the guild first using {message.prefix if isinstance(message, commands.Context) else '/'}set-channel! You can also DM me and I will DM you for each update instead!"
 
-    player_data = json_helper.load("playerData.json")
     user_id = str(message.author.id)
     async with aiohttp.ClientSession() as session:
         async with session.get(
@@ -133,7 +129,7 @@ async def watch(message, name, tag):
                 bodyshots.append(player_stats["bodyshots"])
                 legshots.append(player_stats["legshots"])
 
-            player_data[user_id] = {
+            bot.player_data[user_id] = {
                 "guild": guild_id,
                 "name": name,
                 "tag": tag,
@@ -146,18 +142,17 @@ async def watch(message, name, tag):
                 "legshots": legshots,
                 "acs": acs,
             }
-            json_helper.save(player_data, "playerData.json")
+            json_helper.save(bot.player_data, "playerData.json")
             return f"<@{user_id}> database updated, user added. remove using {message.prefix if isinstance(message, commands.Context) else '/'}valorant-unwatch"
 
 
-async def unwatch(message):
+async def unwatch(bot, message):
     """removes user's valorant info from the database"""
     """returns [content]"""
-    player_data = json_helper.load("playerData.json")
     user_id = str(message.author.id)
-    if user_id in player_data:
-        del player_data[user_id]
-        json_helper.save(player_data, "playerData.json")
+    if user_id in bot.player_data:
+        del bot.player_data[user_id]
+        json_helper.save(bot.player_data, "playerData.json")
         content = f"<@{user_id}> database updated, user removed. add again using {message.prefix if isinstance(message, commands.Context) else '/'}valorant-watch"
     else:
         content = f"<@{user_id}> error updating, user not in database"
@@ -170,7 +165,6 @@ async def wait(bot, message, *wait_users):
     message_user_id = str(message.author.id)
     if len(wait_users) == 0:
         return f"<@{message_user_id}> use {message.prefix if isinstance(message, commands.Context) else '/'}valorant-wait <tag the user you are waiting for>"
-    player_data = json_helper.load("playerData.json")
     extra_message = ""
     success_waiting = []
     already_waiting = []
@@ -179,7 +173,7 @@ async def wait(bot, message, *wait_users):
         wait_user_id = str(wait_user.id)
         if wait_user_id == message_user_id:
             extra_message = "interesting but ok. "
-        if wait_user_id in player_data:
+        if wait_user_id in bot.player_data:
             if wait_user_id in bot.valorant_waitlist:
                 if message_user_id in bot.valorant_waitlist[wait_user_id]:
                     already_waiting.append(wait_user_id)
@@ -216,7 +210,6 @@ async def waitlist(bot, message):
         guild_id = 0
     else:
         guild_id = message.guild.id
-    player_data = json_helper.load("playerData.json")
     embed = disnake.Embed(
         title="valorant waitlist", description="waitlist of watched users"
     )
@@ -233,7 +226,7 @@ async def waitlist(bot, message):
         elif (
             user_id == str(message.author.id)
             or guild_id
-            and player_data[user_id]["guild"] == guild_id
+            and bot.player_data[user_id]["guild"] == guild_id
         ):
             embed.add_field(name="user", value=f"<@{user_id}>", inline=False)
             embed.add_field(
@@ -243,62 +236,58 @@ async def waitlist(bot, message):
     return embed
 
 
-async def set_channel(message, channel):
+async def set_channel(bot, message, channel):
     """set the channel the bot will send updates to"""
     """returns [content]"""
     if channel == None:
         channel = message.channel
     guild = message.guild
-    guild_data = json_helper.load("guildData.json")
-    guild_data[str(guild.id)]["watch_channel"] = channel.id
-    json_helper.save(guild_data, "guildData.json")
+    bot.guild_data[str(guild.id)]["watch_channel"] = channel.id
+    json_helper.save(bot.guild_data, "guildData.json")
     return f"successfully set `#{channel}` as watch channel for `{guild}`"
 
 
-async def set_role(message, role):
+async def set_role(bot, message, role):
     if role == None:
         return f"use {message.prefix if isinstance(message, commands.Context) else '/'}set-role <tag the role>"
     guild = message.guild
-    guild_data = json_helper.load("guildData.json")
-    guild_data[str(guild.id)]["ping_role"] = role.id
-    json_helper.save(guild_data, "guildData.json")
+    bot.guild_data[str(guild.id)]["ping_role"] = role.id
+    json_helper.save(bot.guild_data, "guildData.json")
     return f"successfully set role `{role}` as watch channel for `{guild}`"
 
 
-async def feeder_message_add(message, new_message: str):
+async def feeder_message_add(bot, message, new_message: str):
     """add custom message for feeder alert"""
     """returns [content]"""
     if len(new_message) > 100:
         return "message is too long!"
     guild = message.guild
-    guild_data = json_helper.load("guildData.json")
-    if "feeder_messages" not in guild_data[str(guild.id)]:
-        guild_data[str(guild.id)]["feeder_messages"] = [new_message]
+    if "feeder_messages" not in bot.guild_data[str(guild.id)]:
+        bot.guild_data[str(guild.id)]["feeder_messages"] = [new_message]
     elif (
-        len(guild_data[str(guild.id)]["feeder_messages"]) == 25
+        len(bot.guild_data[str(guild.id)]["feeder_messages"]) == 25
     ):  # max number of choices for select
         return "max number of messages reached! delete one before adding a new one!"
     else:
-        guild_data[str(guild.id)]["feeder_messages"] += [new_message]
-    json_helper.save(guild_data, "guildData.json")
+        bot.guild_data[str(guild.id)]["feeder_messages"] += [new_message]
+    json_helper.save(bot.guild_data, "guildData.json")
     return f"successfully added custom feeder message for `{guild}`"
 
 
-async def feeder_message_show(message):
+async def feeder_message_show(bot, message):
     """show custom messages for feeder alert"""
     """returns [content, embed, view]"""
     guild = message.guild
-    guild_data = json_helper.load("guildData.json")
     if (
-        "feeder_messages" not in guild_data[str(guild.id)]
-        or not guild_data[str(guild.id)]["feeder_messages"]
+        "feeder_messages" not in bot.guild_data[str(guild.id)]
+        or not bot.guild_data[str(guild.id)]["feeder_messages"]
     ):
         return (
             f'no custom messages for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}feeder-message add "<custom message>"!',
             None,
             None,
         )
-    feeder_messages = guild_data[str(guild.id)]["feeder_messages"]
+    feeder_messages = bot.guild_data[str(guild.id)]["feeder_messages"]
     embeds = []
     step = 5  # number of messages per embed
     for i in range(0, len(feeder_messages), step):
@@ -315,14 +304,13 @@ async def feeder_message_show(message):
     return None, embeds[0], view
 
 
-async def feeder_message_delete(message):
+async def feeder_message_delete(bot, message):
     """delete custom message for feeder alert"""
     """returns [content, view]"""
     guild = message.guild
-    guild_data = json_helper.load("guildData.json")
     if (
-        "feeder_messages" not in guild_data[str(guild.id)]
-        or not guild_data[str(guild.id)]["feeder_messages"]
+        "feeder_messages" not in bot.guild_data[str(guild.id)]
+        or not bot.guild_data[str(guild.id)]["feeder_messages"]
     ):
         return (
             f'no custom messages for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}feeder-message add "<custom message>"!',
@@ -333,39 +321,37 @@ async def feeder_message_delete(message):
         return "choose messages to delete", view
 
 
-async def feeder_image_add(message, new_image: str):
+async def feeder_image_add(bot, message, new_image: str):
     """add custom image for feeder alert"""
     if len(new_image) > 100:
         return "url is too long!"
     guild = message.guild
-    guild_data = json_helper.load("guildData.json")
-    if "feeder_images" not in guild_data[str(guild.id)]:
-        guild_data[str(guild.id)]["feeder_images"] = [new_image]
+    if "feeder_images" not in bot.guild_data[str(guild.id)]:
+        bot.guild_data[str(guild.id)]["feeder_images"] = [new_image]
     elif (
-        len(guild_data[str(guild.id)]["feeder_images"]) == 10
+        len(bot.guild_data[str(guild.id)]["feeder_images"]) == 10
     ):  # max number of embeds in one message
         return "max number of images reached! delete one before adding a new one!"
     else:
-        guild_data[str(guild.id)]["feeder_images"] += [new_image]
-    json_helper.save(guild_data, "guildData.json")
+        bot.guild_data[str(guild.id)]["feeder_images"] += [new_image]
+    json_helper.save(bot.guild_data, "guildData.json")
     return f"successfully added custom feeder image for `{guild}`"
 
 
-async def feeder_image_show(message):
+async def feeder_image_show(bot, message):
     """show custom images for feeder alert"""
     """returns [content, embed, view]"""
     guild = message.guild
-    guild_data = json_helper.load("guildData.json")
     if (
-        "feeder_images" not in guild_data[str(guild.id)]
-        or not guild_data[str(guild.id)]["feeder_images"]
+        "feeder_images" not in bot.guild_data[str(guild.id)]
+        or not bot.guild_data[str(guild.id)]["feeder_images"]
     ):
         return (
             f'no custom images for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}feeder-image add "<custom image>"!',
             None,
             None,
         )
-    feeder_images = guild_data[str(guild.id)]["feeder_images"]
+    feeder_images = bot.guild_data[str(guild.id)]["feeder_images"]
     embeds = []
     for image in feeder_images:
         embed = disnake.Embed(
@@ -378,14 +364,13 @@ async def feeder_image_show(message):
     return None, embeds[0], view
 
 
-async def feeder_image_delete(message):
+async def feeder_image_delete(bot, message):
     """delete custom image for feeder alert"""
     """returns [content, view]"""
     guild = message.guild
-    guild_data = json_helper.load("guildData.json")
     if (
-        "feeder_images" not in guild_data[str(guild.id)]
-        or not guild_data[str(guild.id)]["feeder_images"]
+        "feeder_images" not in bot.guild_data[str(guild.id)]
+        or not bot.guild_data[str(guild.id)]["feeder_images"]
     ):
         return (
             f'no custom images for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}feeder-image add "<custom image>"!',
