@@ -6,7 +6,7 @@ import asyncio
 import math
 import random
 
-from helpers import json_helper
+from helpers import json_helper, db_helper
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
 
@@ -37,9 +37,10 @@ class Background(commands.Cog):
             channel_safe = False
 
             guild_exists = self.bot.get_guild(user_guild)
-            if guild_exists in self.bot.guilds:
+            guild_data = await db_helper.get_guild_data(self.bot, user_guild)
+            if guild_exists in self.bot.guilds and len(guild_data):
                 # check if bot is still in the guild
-                watch_channel_id = self.bot.guild_data[str(user_guild)]["watch_channel"]
+                watch_channel_id = guild_data[0].get("watch_channel")
                 channel_exists = self.bot.get_channel(watch_channel_id)
                 guild_exists_channels = guild_exists.text_channels
                 if channel_exists in guild_exists_channels:
@@ -48,8 +49,7 @@ class Background(commands.Cog):
                     channel_safe = True
                 elif watch_channel_id:
                     # sends a warning that guild exists but channel is gone
-                    self.bot.guild_data[str(user_guild)]["watch_channel"] = 0
-                    json_helper.save(self.bot.guild_data, "guildData.json")
+                    await db_helper.update_guild_data(self.bot, user_guild, "watch_channel", 0)
                     if guild_exists_channels:
                         await guild_exists_channels[0].send(
                             "The channel I am set to no longer exists! Please use valorant-setchannel on another channel. I will send updates to members directly instead."

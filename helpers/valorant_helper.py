@@ -1,3 +1,4 @@
+from turtle import update
 import disnake
 from disnake.ext import commands
 
@@ -6,7 +7,7 @@ import time
 
 from views.views import Menu, FeederMessagesView, FeederImagesView
 
-from helpers import json_helper
+from helpers import json_helper, db_helper
 
 
 async def ping(bot: commands.Bot, message):
@@ -72,10 +73,10 @@ async def watch(bot: commands.Bot, message, name, tag):
         guild_id = 0
     else:
         guild_id = message.guild.id
+        guild_data = await db_helper.get_guild_data(bot, guild_id)
         if (
-            str(guild_id) not in bot.guild_data
-            or "watch_channel" not in bot.guild_data[str(guild_id)]
-            or bot.guild_data[str(guild_id)]["watch_channel"] == 0
+            len(guild_data) == 0
+            or not guild_data[0].get("watch_channel")
         ):
             return f"Please set the watch channel for the guild first using {message.prefix if isinstance(message, commands.Context) else '/'}set-channel! You can also DM me and I will DM you for each update instead!"
 
@@ -242,8 +243,7 @@ async def set_channel(bot: commands.Bot, message, channel):
     if channel == None:
         channel = message.channel
     guild = message.guild
-    bot.guild_data[str(guild.id)]["watch_channel"] = channel.id
-    json_helper.save(bot.guild_data, "guildData.json")
+    await db_helper.update_guild_data(bot, guild.id, "watch_channel", channel.id)
     return f"successfully set `#{channel}` as watch channel for `{guild}`"
 
 
