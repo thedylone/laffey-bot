@@ -55,9 +55,6 @@ async def on_ready():
     await bot.change_presence(
         activity=disnake.Game(f"with lolis | {os.environ['DEFAULT_PREFIX']}help")
     )
-    # cache data
-    bot.guild_data = json_helper.load("guildData.json")
-    bot.player_data = json_helper.load("playerData.json")
 
 
 # removes default help command
@@ -84,6 +81,9 @@ if __name__ == "__main__":
         autoload("slash")
     if int(os.environ["PREFIX_ENABLED"]):
         autoload("prefix")
+    # cache data
+    bot.guild_data = json_helper.load("guildData.json")
+    bot.player_data = json_helper.load("playerData.json")
 
 # Login to Discord with the bot's token.
 bot.run(BOT_TOKEN)
