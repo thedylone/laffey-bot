@@ -25,7 +25,7 @@ def get_prefix(bot, message):
         custom_prefix = os.environ["DEFAULT_PREFIX"]
     else:
         custom_prefix = guild_data[str(message.guild.id)]["prefix"]
-    return commands.when_mentioned_or(*custom_prefix)(bot, message)
+    return commands.when_mentioned_or(custom_prefix)(bot, message)
 
 
 # creating a commands.Bot() instance, and assigning it to "bot"
