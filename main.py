@@ -7,7 +7,7 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 import disnake
 from disnake.ext import commands
 
-from helpers import json_helper
+from helpers import json_helper, db_helper
 
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found!")
@@ -16,14 +16,17 @@ else:
         config = json.load(file)
 
 
-def get_prefix(bot, message):
-    if (
-        isinstance(message.channel, disnake.channel.DMChannel)
-        or str(message.guild.id) not in bot.guild_data
-    ):
-        custom_prefix = os.environ["DEFAULT_PREFIX"]
-    else:
-        custom_prefix = bot.guild_data[str(message.guild.id)]["prefix"]
+async def get_prefix(bot, message):
+    custom_prefix = os.environ["DEFAULT_PREFIX"]
+    if not isinstance(message.channel, disnake.channel.DMChannel):
+        guild_id = message.guild.id
+        guild_data = await db_helper.get_guild_data(bot, guild_id)
+        if len(guild_data) == 0:
+            await db_helper.update_guild_prefix(
+                bot, guild_id, os.environ["DEFAULT_PREFIX"]
+            )
+        else:
+            custom_prefix = guild_data[0].get("prefix")
     return commands.when_mentioned_or(custom_prefix)(bot, message)
 
 
@@ -55,6 +58,7 @@ async def on_ready():
     await bot.change_presence(
         activity=disnake.Game(f"with lolis | {os.environ['DEFAULT_PREFIX']}help")
     )
+    await db_helper.create_db_pool(bot)
 
 
 # removes default help command
