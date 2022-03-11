@@ -24,7 +24,7 @@ class Background(commands.Cog):
         player_data = json_helper.load("playerData.json")
         init_list = [key for key in player_data.keys()]
         for user_id in init_list:
-            player_user = await self.bot.getch_user(int(user_id))
+            player_user = await self.bot.getch_user(int(user_id)) # reloads player_data
             player_data = json_helper.load("playerData.json")
             if (
                 player_user == None or user_id not in player_data
@@ -32,7 +32,6 @@ class Background(commands.Cog):
                 # del player_data[user_id]
                 # json_helper.save(player_data, "playerData.json")
                 continue
-              # reloads player_data
             guild_data = json_helper.load("guildData.json")
             user_data = player_data[user_id]
             user_puuid = user_data["puuid"]
