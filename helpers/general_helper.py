@@ -80,7 +80,7 @@ async def holo(message):
     return await holodex(message, url, params, headers)
 
 
-async def prefix(bot, message, prefix):
+async def prefix(bot: commands.Bot, message, prefix):
     """set prefix for the server"""
     """returns [content]"""
     if prefix == None:

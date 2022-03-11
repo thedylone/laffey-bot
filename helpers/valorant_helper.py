@@ -9,7 +9,7 @@ from views.views import Menu, FeederMessagesView, FeederImagesView
 from helpers import json_helper
 
 
-async def ping(bot, message):
+async def ping(bot: commands.Bot, message):
     """pings role and sends optional image"""
     """returns [content, file]"""
     guild_id = message.guild.id
@@ -23,7 +23,7 @@ async def ping(bot, message):
         return f"<@&{ping_role}>", disnake.File("jewelsignal.jpg")
 
 
-async def info(bot, message, user):
+async def info(bot: commands.Bot, message, user):
     """returns user's valorant info from the database"""
     """returns [content, embed]"""
     if user == None:
@@ -65,7 +65,7 @@ async def info(bot, message, user):
         )
 
 
-async def watch(bot, message, name, tag):
+async def watch(bot: commands.Bot, message, name, tag):
     """add user's valorant info to the database"""
     """returns [content]"""
     if isinstance(message.channel, disnake.channel.DMChannel):
@@ -146,7 +146,7 @@ async def watch(bot, message, name, tag):
             return f"<@{user_id}> database updated, user added. remove using {message.prefix if isinstance(message, commands.Context) else '/'}valorant-unwatch"
 
 
-async def unwatch(bot, message):
+async def unwatch(bot: commands.Bot, message):
     """removes user's valorant info from the database"""
     """returns [content]"""
     user_id = str(message.author.id)
@@ -159,7 +159,7 @@ async def unwatch(bot, message):
     return content
 
 
-async def wait(bot, message, *wait_users):
+async def wait(bot: commands.Bot, message, *wait_users):
     """pings you when tagged user is done"""
     """returns [content]"""
     message_user_id = str(message.author.id)
@@ -203,7 +203,7 @@ async def wait(bot, message, *wait_users):
     return f"{extra_message}<@{message_user_id}> {success_message}{already_message}{not_in_database_message}"
 
 
-async def waitlist(bot, message):
+async def waitlist(bot: commands.Bot, message):
     """prints valorant waitlist"""
     """returns [embed]"""
     if isinstance(message.channel, disnake.channel.DMChannel):
@@ -236,7 +236,7 @@ async def waitlist(bot, message):
     return embed
 
 
-async def set_channel(bot, message, channel):
+async def set_channel(bot: commands.Bot, message, channel):
     """set the channel the bot will send updates to"""
     """returns [content]"""
     if channel == None:
@@ -247,7 +247,7 @@ async def set_channel(bot, message, channel):
     return f"successfully set `#{channel}` as watch channel for `{guild}`"
 
 
-async def set_role(bot, message, role):
+async def set_role(bot: commands.Bot, message, role):
     if role == None:
         return f"use {message.prefix if isinstance(message, commands.Context) else '/'}set-role <tag the role>"
     guild = message.guild
@@ -256,7 +256,7 @@ async def set_role(bot, message, role):
     return f"successfully set role `{role}` as watch channel for `{guild}`"
 
 
-async def feeder_message_add(bot, message, new_message: str):
+async def feeder_message_add(bot: commands.Bot, message, new_message: str):
     """add custom message for feeder alert"""
     """returns [content]"""
     if len(new_message) > 100:
@@ -274,7 +274,7 @@ async def feeder_message_add(bot, message, new_message: str):
     return f"successfully added custom feeder message for `{guild}`"
 
 
-async def feeder_message_show(bot, message):
+async def feeder_message_show(bot: commands.Bot, message):
     """show custom messages for feeder alert"""
     """returns [content, embed, view]"""
     guild = message.guild
@@ -304,7 +304,7 @@ async def feeder_message_show(bot, message):
     return None, embeds[0], view
 
 
-async def feeder_message_delete(bot, message):
+async def feeder_message_delete(bot: commands.Bot, message):
     """delete custom message for feeder alert"""
     """returns [content, view]"""
     guild = message.guild
@@ -321,7 +321,7 @@ async def feeder_message_delete(bot, message):
         return "choose messages to delete", view
 
 
-async def feeder_image_add(bot, message, new_image: str):
+async def feeder_image_add(bot: commands.Bot, message, new_image: str):
     """add custom image for feeder alert"""
     if len(new_image) > 100:
         return "url is too long!"
@@ -338,7 +338,7 @@ async def feeder_image_add(bot, message, new_image: str):
     return f"successfully added custom feeder image for `{guild}`"
 
 
-async def feeder_image_show(bot, message):
+async def feeder_image_show(bot: commands.Bot, message):
     """show custom images for feeder alert"""
     """returns [content, embed, view]"""
     guild = message.guild
@@ -364,7 +364,7 @@ async def feeder_image_show(bot, message):
     return None, embeds[0], view
 
 
-async def feeder_image_delete(bot, message):
+async def feeder_image_delete(bot: commands.Bot, message):
     """delete custom image for feeder alert"""
     """returns [content, view]"""
     guild = message.guild
