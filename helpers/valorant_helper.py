@@ -14,14 +14,15 @@ async def ping(bot: commands.Bot, message):
     """pings role and sends optional image"""
     """returns [content, file]"""
     guild_id = message.guild.id
-    if "ping_role" not in bot.guild_data[str(guild_id)]:
+    guild_data = await db_helper.get_guild_data(bot, guild_id)
+    if len(guild_data) and guild_data[0].get("ping_role"):
+        ping_role = guild_data[0].get("ping_role")
+        return f"<@&{ping_role}>", disnake.File("jewelsignal.jpg")
+    else:
         return (
             f"please set the role to ping first using {message.prefix if isinstance(message, commands.Context) else '/'}set-role!",
             None,
         )
-    else:
-        ping_role = bot.guild_data[str(guild_id)]["ping_role"]
-        return f"<@&{ping_role}>", disnake.File("jewelsignal.jpg")
 
 
 async def info(bot: commands.Bot, message, user):
@@ -74,10 +75,7 @@ async def watch(bot: commands.Bot, message, name, tag):
     else:
         guild_id = message.guild.id
         guild_data = await db_helper.get_guild_data(bot, guild_id)
-        if (
-            len(guild_data) == 0
-            or not guild_data[0].get("watch_channel")
-        ):
+        if len(guild_data) == 0 or not guild_data[0].get("watch_channel"):
             return f"Please set the watch channel for the guild first using {message.prefix if isinstance(message, commands.Context) else '/'}set-channel! You can also DM me and I will DM you for each update instead!"
 
     user_id = str(message.author.id)
@@ -251,8 +249,7 @@ async def set_role(bot: commands.Bot, message, role):
     if role == None:
         return f"use {message.prefix if isinstance(message, commands.Context) else '/'}set-role <tag the role>"
     guild = message.guild
-    bot.guild_data[str(guild.id)]["ping_role"] = role.id
-    json_helper.save(bot.guild_data, "guildData.json")
+    await db_helper.update_guild_data(bot, guild.id, "ping_role", role.id)
     return f"successfully set role `{role}` as watch channel for `{guild}`"
 
 
