@@ -3,4 +3,5 @@ __pycache__/
 config.json
 playerData.json
 guildData.json
+waitlist.json
 .replit

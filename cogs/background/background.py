@@ -245,6 +245,7 @@ class Background(commands.Cog):
                                 streak_embed.add_field(
                                     name="streaker",
                                     value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
+                                    inline=False,
                                 )
                             await db_helper.update_player_data(
                                 self.bot, member_id, streak=new_streak
@@ -312,7 +313,6 @@ class Background(commands.Cog):
                                     await waiter_user.send(
                                         "A player you were waiting for is done!"
                                     )
-
             await asyncio.sleep(0.5)  # sleeps for number of seconds (avoid rate limit)
 
 

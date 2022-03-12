@@ -204,12 +204,14 @@ async def wait(bot: commands.Bot, message, *wait_users):
         if not_in_database
         else ""
     )
+    json_helper.save(bot.valorant_waitlist, "waitlist.json")
     return f"{extra_message}<@{message_user_id}> {success_message}{already_message}{not_in_database_message}"
 
 
 async def waitlist(bot: commands.Bot, message):
     """prints valorant waitlist"""
     """returns [embed]"""
+    bot.valorant_waitlist = json_helper.load("waitlist.json")
     if isinstance(message.channel, disnake.channel.DMChannel):
         guild_id = 0
     else:
