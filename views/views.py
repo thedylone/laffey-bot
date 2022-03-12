@@ -3,7 +3,7 @@ import disnake
 from disnake.ext import commands
 
 
-from helpers import json_helper, db_helper
+from helpers import db_helper
 
 
 class Menu(disnake.ui.View):
@@ -96,12 +96,16 @@ class FeederMessages(disnake.ui.Select):
 
     async def callback(self, inter: disnake.MessageInteraction):
         if inter.author.id != self.message.author.id:
-            await inter.response.send_message("only the user who sent this can use it!")
+            await inter.response.send_message(
+                "only the user who sent this can use it!", ephemeral=True
+            )
             return
         await inter.response.defer()
         for i in sorted(self.values, reverse=True):
             del self.feeder_messages[int(i)]
-        await db_helper.update_guild_data(self.bot, self.message.guild.id, "feeder_messages", self.feeder_messages)
+        await db_helper.update_guild_data(
+            self.bot, self.message.guild.id, "feeder_messages", self.feeder_messages
+        )
         await inter.edit_original_message(
             content=f"successfully deleted {len(self.values)} custom messages",
             view=None,
@@ -117,11 +121,11 @@ class FeederMessagesView(disnake.ui.View):
 
 
 class FeederImages(disnake.ui.Select):
-    def __init__(self, message):
+    def __init__(self, bot, message, feeder_images):
 
+        self.bot = bot
         self.message = message
-        guild_data = json_helper.load("guildData.json")
-        self.feeder_images = guild_data[str(message.guild.id)]["feeder_images"]
+        self.feeder_images = feeder_images
 
         options = [
             disnake.SelectOption(label=i, description=image)
@@ -137,14 +141,16 @@ class FeederImages(disnake.ui.Select):
 
     async def callback(self, inter: disnake.MessageInteraction):
         if inter.author.id != self.message.author.id:
-            await inter.response.send_message("only the user who sent this can use it!")
+            await inter.response.send_message(
+                "only the user who sent this can use it!", ephemeral=True
+            )
             return
         await inter.response.defer()
-        guild_data = json_helper.load("guildData.json")
         for i in sorted(self.values, reverse=True):
             del self.feeder_images[int(i)]
-        guild_data[str(self.message.guild.id)]["feeder_images"] = self.feeder_images
-        json_helper.save(guild_data, "guildData.json")
+        await db_helper.update_guild_data(
+            self.bot, self.message.guild.id, "feeder_images", self.feeder_images
+        )
         await inter.edit_original_message(
             content=f"successfully deleted {len(self.values)} custom images",
             view=None,
@@ -152,8 +158,8 @@ class FeederImages(disnake.ui.Select):
 
 
 class FeederImagesView(disnake.ui.View):
-    def __init__(self, message):
+    def __init__(self, bot, message, feeder_images):
         super().__init__()
 
         # Adds the dropdown to our view object.
-        self.add_item(FeederImages(message))
+        self.add_item(FeederImages(bot, message, feeder_images))

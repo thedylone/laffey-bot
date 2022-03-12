@@ -273,7 +273,7 @@ async def feeder_message_add(bot: commands.Bot, message, new_message: str):
                 bot, guild.id, "feeder_messages", feeder_messages
             )
         return f"successfully added custom feeder message for `{guild}`"
-    return "error! guild not in database"
+    return "error! `{guild}` not in database"
 
 
 async def feeder_message_show(bot: commands.Bot, message):
@@ -281,7 +281,7 @@ async def feeder_message_show(bot: commands.Bot, message):
     """returns [content, embed, view]"""
     guild = message.guild
     guild_data = await db_helper.get_guild_data(bot, guild.id)
-    if len(guild_data) and len(guild_data[0].get("feeder_messages")):
+    if len(guild_data) and guild_data[0].get("feeder_messages"):
         feeder_messages = guild_data[0].get("feeder_messages")
         embeds = []
         step = 5  # number of messages per embed
@@ -310,7 +310,7 @@ async def feeder_message_delete(bot: commands.Bot, message):
     """returns [content, view]"""
     guild = message.guild
     guild_data = await db_helper.get_guild_data(bot, guild.id)
-    if len(guild_data) and len(guild_data[0].get("feeder_messages")):
+    if len(guild_data) and guild_data[0].get("feeder_messages"):
         view = FeederMessagesView(bot, message, guild_data[0].get("feeder_messages"))
         return "choose messages to delete", view
     else:
@@ -325,56 +325,58 @@ async def feeder_image_add(bot: commands.Bot, message, new_image: str):
     if len(new_image) > 100:
         return "url is too long!"
     guild = message.guild
-    if "feeder_images" not in bot.guild_data[str(guild.id)]:
-        bot.guild_data[str(guild.id)]["feeder_images"] = [new_image]
-    elif (
-        len(bot.guild_data[str(guild.id)]["feeder_images"]) == 10
-    ):  # max number of embeds in one message
-        return "max number of images reached! delete one before adding a new one!"
-    else:
-        bot.guild_data[str(guild.id)]["feeder_images"] += [new_image]
-    json_helper.save(bot.guild_data, "guildData.json")
-    return f"successfully added custom feeder image for `{guild}`"
+    guild_data = await db_helper.get_guild_data(bot, guild.id)
+    if len(guild_data):
+        feeder_images = guild_data[0].get("feeder_images")
+        if feeder_images and len(feeder_images) >= 10:
+            return "max number of images reached! delete one before adding a new one!"
+        else:
+            if feeder_images:
+                feeder_images.append(new_image)
+            else:
+                feeder_images = [new_image]
+            await db_helper.update_guild_data(
+                bot, guild.id, "feeder_images", feeder_images
+            )
+        return f"successfully added custom feeder image for `{guild}`"
+    return "error! `{guild}` not in database"
 
 
 async def feeder_image_show(bot: commands.Bot, message):
     """show custom images for feeder alert"""
     """returns [content, embed, view]"""
     guild = message.guild
-    if (
-        "feeder_images" not in bot.guild_data[str(guild.id)]
-        or not bot.guild_data[str(guild.id)]["feeder_images"]
-    ):
+    guild_data = await db_helper.get_guild_data(bot, guild.id)
+    if len(guild_data) and guild_data[0].get("feeder_images"):
+        feeder_images = guild_data[0].get("feeder_images")
+        embeds = []
+        for image in feeder_images:
+            embed = disnake.Embed(
+                title="custom feeder images",
+                description="images randomly sent with the feeder alert",
+            )
+            embed.set_image(url=image)
+            embeds.append(embed)
+        view = Menu(embeds) if len(feeder_images) > 1 else None
+        return None, embeds[0], view
+    else:
         return (
             f'no custom images for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}feeder-image add "<custom image>"!',
             None,
             None,
         )
-    feeder_images = bot.guild_data[str(guild.id)]["feeder_images"]
-    embeds = []
-    for image in feeder_images:
-        embed = disnake.Embed(
-            title="custom feeder images",
-            description="images randomly sent with the feeder alert",
-        )
-        embed.set_image(url=image)
-        embeds.append(embed)
-    view = Menu(embeds) if len(feeder_images) > 1 else None
-    return None, embeds[0], view
 
 
 async def feeder_image_delete(bot: commands.Bot, message):
     """delete custom image for feeder alert"""
     """returns [content, view]"""
     guild = message.guild
-    if (
-        "feeder_images" not in bot.guild_data[str(guild.id)]
-        or not bot.guild_data[str(guild.id)]["feeder_images"]
-    ):
+    guild_data = await db_helper.get_guild_data(bot, guild.id)
+    if len(guild_data) and guild_data[0].get("feeder_images"):
+        view = FeederImagesView(bot, message, guild_data[0].get("feeder_images"))
+        return "choose images to delete", view
+    else:
         return (
             f'no custom images for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}feeder-image add "<custom image>"!',
             None,
         )
-    else:
-        view = FeederImagesView(message)
-        return "choose images to delete", view
