@@ -7,7 +7,7 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 import disnake
 from disnake.ext import commands
 
-from helpers import json_helper, db_helper
+from helpers import db_helper
 
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found!")
@@ -23,7 +23,7 @@ async def get_prefix(bot, message):
         guild_data = await db_helper.get_guild_data(bot, guild_id)
         if len(guild_data) == 0:
             await db_helper.update_guild_data(
-                bot, guild_id, "prefix", os.environ["DEFAULT_PREFIX"]
+                bot, guild_id, prefix=os.environ["DEFAULT_PREFIX"]
             )
         else:
             custom_prefix = guild_data[0].get("prefix")
@@ -40,7 +40,9 @@ bot = commands.Bot(
 
 @bot.event
 async def on_guild_join(guild: disnake.Guild):
-    await db_helper.update_guild_data(bot, guild.id, "prefix", os.environ["DEFAULT_PREFIX"])
+    await db_helper.update_guild_data(
+        bot, guild.id, prefix=os.environ["DEFAULT_PREFIX"]
+    )
     print(f"joined server {guild.name}")
 
 
@@ -59,6 +61,8 @@ async def on_ready():
         activity=disnake.Game(f"with lolis | {os.environ['DEFAULT_PREFIX']}help")
     )
     await db_helper.create_db_pool(bot)
+    await db_helper.create_guilds_table(bot)
+    await db_helper.create_players_table(bot)
     bot.valorant_watch_cycle.start()
 
 
@@ -86,9 +90,6 @@ if __name__ == "__main__":
         autoload("slash")
     if int(os.environ["PREFIX_ENABLED"]):
         autoload("prefix")
-    # cache data
-    bot.guild_data = json_helper.load("guildData.json")
-    bot.player_data = json_helper.load("playerData.json")
 
 # Login to Discord with the bot's token.
 bot.run(BOT_TOKEN)

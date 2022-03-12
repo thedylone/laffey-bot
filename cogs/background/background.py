@@ -6,7 +6,7 @@ import asyncio
 import math
 import random
 
-from helpers import json_helper, db_helper
+from helpers import db_helper
 
 # RIOT_TOKEN = os.environ["RIOT_TOKEN"] not used at the moment
 
@@ -17,22 +17,32 @@ class Background(commands.Cog):
         self.bot.valorant_waitlist = {}
         self.bot.valorant_watch_cycle = self.valorant_watch_cycle
 
-    @tasks.loop(seconds=30)
+    @tasks.loop()
     async def valorant_watch_cycle(self):
         await self.bot.wait_until_ready()  # wait until the bot logs in
-        init_list = [key for key in self.bot.player_data.keys()]
+        init_list = list(
+            map(
+                lambda x: x.get("player_id"),
+                await self.bot.db.fetch("select player_id from players"),
+            )
+        )
         for user_id in init_list:
-            player_user = await self.bot.getch_user(int(user_id))
-            if (
-                player_user == None or user_id not in self.bot.player_data
+            player_user = await self.bot.getch_user(user_id)
+            if player_user == None or user_id not in list(
+                map(
+                    lambda x: x.get("player_id"),
+                    await self.bot.db.fetch("select player_id from players"),
+                )
             ):  # player no longer exists
-                # del self.bot.player_data[user_id]
-                # json_helper.save(self.bot.player_data, "playerData.json")
+                # await db_helper.delete_player_data(self.bot, user_id)
                 continue
-            user_data = self.bot.player_data[user_id]
+            user_data = await db_helper.get_player_data(self.bot, user_id)
+            if len(user_data) == 0:
+                continue
+            user_data = user_data[0]
             user_puuid = user_data["puuid"]
             user_region = user_data["region"]
-            user_guild = user_data["guild"]
+            user_guild = user_data["guild_id"]
             channel = player_user
             channel_safe = False
 
@@ -50,16 +60,16 @@ class Background(commands.Cog):
                 elif watch_channel_id:
                     # sends a warning that guild exists but channel is gone
                     await db_helper.update_guild_data(
-                        self.bot, user_guild, "watch_channel", 0
+                        self.bot, user_guild, watch_channel=0
                     )
                     if guild_exists_channels:
                         await guild_exists_channels[0].send(
-                            "The channel I am set to no longer exists! Please use valorant-setchannel on another channel. I will send updates to members directly instead."
+                            "The channel I am set to no longer exists! Please use setchannel on another channel. I will send updates to members directly instead."
                         )
             elif user_guild:
                 # sends a DM to the user that bot is no longer in the guild
-                user_data["guild"] = 0
-                json_helper.save(self.bot.player_data, "playerData.json")
+                user_guild = 0
+                await db_helper.update_player_data(self.bot, user_id, guild_id=0)
                 await player_user.send(
                     "I am no longer in the server you initialised valorant-watch in. I will send updates to you directly. Alternatively, you can /valorant-unwatch to stop receiving updates, or perform /valorant-watch in another server."
                 )
@@ -78,7 +88,11 @@ class Background(commands.Cog):
                         latest_game["metadata"]["game_length"] / 1000
                     )  # given in ms
                     recent_time = start_time + duration + 100
-                    if user_data["lastTime"] >= recent_time:
+                    user_data = await db_helper.get_player_data(self.bot, user_id)
+                    if len(user_data) == 0:
+                        break
+                    user_data = user_data[0]
+                    if user_data["lasttime"] >= recent_time:
                         break  # if stored latest is more recent than latest game played, break and skip user
                     mode = latest_game["metadata"]["mode"]
                     if mode == "Deathmatch":
@@ -96,15 +110,17 @@ class Background(commands.Cog):
                         rounds_red += round["winning_team"] == "Red"
                         rounds_blue += round["winning_team"] == "Blue"
                     for player in latest_game["players"]["all_players"]:
-                        for player_id in self.bot.player_data:
+                        for player_id in init_list:
+                            player_data = await db_helper.get_player_data(
+                                self.bot, player_id
+                            )
                             if (
                                 player_id == user_id
                                 and player["puuid"] == user_puuid
                                 or user_guild > 0
-                                and player["puuid"]
-                                == self.bot.player_data[player_id]["puuid"]
-                                and self.bot.player_data[player_id]["guild"]
-                                == user_guild
+                                and len(player_data)
+                                and player["puuid"] == player_data[0]["puuid"]
+                                and player_data[0]["guild"] == user_guild
                             ):  # detects if multiple watched users who "watched" in the same guild (not 0) are in the same game
                                 player_stats = player["stats"]
                                 player_acs = player_stats["score"] / rounds_played
@@ -113,9 +129,7 @@ class Background(commands.Cog):
                                     party_red.append(player_id)
                                 elif team == "Blue":
                                     party_blue.append(player_id)
-                                elif (
-                                    team == self.bot.player_data[player_id]["puuid"]
-                                ):  # deathmatch exception
+                                else:  # deathmatch exception
                                     party_red.append(player_id)
 
                                 map_played = latest_game["metadata"]["map"]
@@ -138,58 +152,40 @@ class Background(commands.Cog):
 
                                 if mode == "Competitive" or mode == "Unrated":
                                     # save stats
-                                    self.bot.player_data[player_id][
-                                        "headshots"
-                                    ] = self.bot.player_data[player_id]["headshots"][
-                                        -4:
-                                    ] + [
-                                        player_stats["headshots"]
-                                    ]
-
-                                    self.bot.player_data[player_id][
-                                        "bodyshots"
-                                    ] = self.bot.player_data[player_id]["bodyshots"][
-                                        -4:
-                                    ] + [
-                                        player_stats["bodyshots"]
-                                    ]
-
-                                    self.bot.player_data[player_id][
-                                        "legshots"
-                                    ] = self.bot.player_data[player_id]["legshots"][
-                                        -4:
-                                    ] + [
-                                        player_stats["legshots"]
-                                    ]
-
-                                    self.bot.player_data[player_id][
-                                        "acs"
-                                    ] = self.bot.player_data[player_id]["acs"][-4:] + [
-                                        player_acs
-                                    ]
+                                    await db_helper.update_player_data(
+                                        self.bot,
+                                        player_id,
+                                        headshots=player_data[0]["headshots"][-4:]
+                                        + [player_stats["headshots"]],
+                                        bodyshots=player_data[0]["bodyshots"][-4:]
+                                        + [player_stats["bodyshots"]],
+                                        legshots=player_data[0]["legshots"][-4:]
+                                        + [player_stats["legshots"]],
+                                        acs=player_data[0]["acs"][-4:] + [player_acs],
+                                    )
 
                     async with session.get(
                         "https://api.henrikdev.xyz/valorant/v1/content"
                     ) as map_request:
                         if map_request.status == 200:
                             map_data = await map_request.json()
-                    for map in map_data["maps"]:
-                        if map["name"] == map_played:
-                            map_url = f"https://media.valorant-api.com/maps/{map['id']}/splash.png"
+                    for map_res in map_data["maps"]:
+                        if map_res["name"] == map_played:
+                            map_url = f"https://media.valorant-api.com/maps/{map_res['id']}/splash.png"
                             break
 
                     if rounds_red == rounds_blue:  # draw
                         color = 0x767676
-                        description = f"<@{'> and <@'.join(party_red+party_blue)}> just finished a {mode} game __**{rounds_red} - {rounds_blue}**__ on **{map_played}** <t:{int(recent_time)}:R>!"
+                        description = f"<@{'> and <@'.join(map(str, party_red+party_blue))}> just finished a {mode} game __**{rounds_red} - {rounds_blue}**__ on **{map_played}** <t:{int(recent_time)}:R>!"
                     elif party_red and party_blue:  # watched players on both teams
                         color = 0x767676
-                        description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ {'(surrendered) ' if is_surrendered else ' '}on **{map_played}** <t:{int(recent_time)}:R>! <@{'> and <@'.join(party_blue)}> played on the other team!"
+                        description = f"<@{'> and <@'.join(map(str,party_red))}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ {'(surrendered) ' if is_surrendered else ' '}on **{map_played}** <t:{int(recent_time)}:R>! <@{'> and <@'.join(map(str,party_blue))}> played on the other team!"
                     elif party_red:  # watched players on red only
                         color = 0x17DC33 if rounds_red > rounds_blue else 0xFC2828
-                        description = f"<@{'> and <@'.join(party_red)}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ {'(surrendered) ' if is_surrendered else ' '}on **{map_played}** <t:{int(recent_time)}:R>!"
+                        description = f"<@{'> and <@'.join(map(str,party_red))}> just {'wonnered' if rounds_red > rounds_blue else 'losted'} a {mode} game __**{rounds_red} - {rounds_blue}**__ {'(surrendered) ' if is_surrendered else ' '}on **{map_played}** <t:{int(recent_time)}:R>!"
                     elif party_blue:  # watched players on blue only
                         color = 0x17DC33 if rounds_blue > rounds_red else 0xFC2828
-                        description = f"<@{'> and <@'.join(party_blue)}> just {'wonnered' if rounds_blue > rounds_red else 'losted'} a {mode} game __**{rounds_blue} - {rounds_red}**__ {'(surrendered) ' if is_surrendered else ' '}on **{map_played}** <t:{int(recent_time)}:R>!"
+                        description = f"<@{'> and <@'.join(map(str,party_blue))}> just {'wonnered' if rounds_blue > rounds_red else 'losted'} a {mode} game __**{rounds_blue} - {rounds_red}**__ {'(surrendered) ' if is_surrendered else ' '}on **{map_played}** <t:{int(recent_time)}:R>!"
                     player_embed = disnake.Embed(
                         title="valorant watch", color=color, description=description
                     )
@@ -206,15 +202,16 @@ class Background(commands.Cog):
                         guild_data = await db_helper.get_guild_data(
                             self.bot, user_guild
                         )
-                        if len(guild_data) and guild_data[0].get("feeder_messages"):
-                            feeder_messages = guild_data[0].get("feeder_messages")
-                        if len(guild_data) and guild_data[0].get("feeder_images"):
-                            feeder_images = guild_data[0].get("feeder_images")
+                        guild_data = guild_data[0]
+                        if len(guild_data) and guild_data.get("feeder_messages"):
+                            feeder_messages = guild_data.get("feeder_messages")
+                        if len(guild_data) and guild_data.get("feeder_images"):
+                            feeder_images = guild_data.get("feeder_images")
 
                         feeder_embed = disnake.Embed(
                             title="feeder alert❗❗",
                             color=0xFF7614,
-                            description=f"<@{'> and <@'.join(feeders.keys())}> inted! {random.choice(feeder_messages)}",
+                            description=f"<@{'> and <@'.join(map(str,feeders.keys()))}> inted! {random.choice(feeder_messages)}",
                         )
                         for feeder in feeders:
                             feeder_embed.add_field(
@@ -236,27 +233,30 @@ class Background(commands.Cog):
 
                     for member_id in party_red:
                         # streak function
-                        if rounds_red != rounds_blue:
+                        member_data = await db_helper.get_player_data(
+                            self.bot, member_id
+                        )
+                        if len(member_data) and rounds_red != rounds_blue:
                             if rounds_red > rounds_blue:
-                                new_streak = max(
-                                    self.bot.player_data[member_id]["streak"] + 1, 1
-                                )
+                                new_streak = max(member_data[0]["streak"] + 1, 1)
                             elif rounds_red < rounds_blue:
-                                new_streak = min(
-                                    self.bot.player_data[member_id]["streak"] - 1, -1
-                                )
+                                new_streak = min(member_data[0]["streak"] - 1, -1)
                             if abs(new_streak) >= 3:
                                 is_streak = True
                                 streak_embed.add_field(
                                     name="streaker",
                                     value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
                                 )
-                            self.bot.player_data[member_id]["streak"] = new_streak
+                            await db_helper.update_player_data(
+                                self.bot, member_id, streak=new_streak
+                            )
 
                         # sets party members to update last updated time if more recent
-                        self.bot.player_data[member_id]["lastTime"] = max(
-                            self.bot.player_data[member_id]["lastTime"], recent_time
-                        )
+                        if recent_time > member_data[0].get("lasttime"):
+                            await db_helper.update_player_data(
+                                self.bot, member_id, lasttime=recent_time
+                            )
+
                         if member_id in self.bot.valorant_waitlist:
                             combined_waiters += self.bot.valorant_waitlist.pop(
                                 member_id
@@ -264,15 +264,14 @@ class Background(commands.Cog):
 
                     for member_id in party_blue:
                         # streak function
-                        if rounds_red != rounds_blue:
+                        member_data = await db_helper.get_player_data(
+                            self.bot, member_id
+                        )
+                        if len(member_data) and rounds_red != rounds_blue:
                             if rounds_blue > rounds_red:
-                                new_streak = max(
-                                    self.bot.player_data[member_id]["streak"] + 1, 1
-                                )
+                                new_streak = max(member_data[0]["streak"] + 1, 1)
                             elif rounds_blue < rounds_red:
-                                new_streak = min(
-                                    self.bot.player_data[member_id]["streak"] - 1, -1
-                                )
+                                new_streak = min(member_data[0]["streak"] - 1, -1)
                             if abs(new_streak) >= 3:
                                 is_streak = True
                                 streak_embed.add_field(
@@ -280,12 +279,16 @@ class Background(commands.Cog):
                                     value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
                                     inline=False,
                                 )
-                            self.bot.player_data[member_id]["streak"] = new_streak
+                            await db_helper.update_player_data(
+                                self.bot, member_id, streak=new_streak
+                            )
 
                         # sets party members to update last updated time if more recent
-                        self.bot.player_data[member_id]["lastTime"] = max(
-                            self.bot.player_data[member_id]["lastTime"], recent_time
-                        )
+                        if recent_time > member_data[0].get("lasttime"):
+                            await db_helper.update_player_data(
+                                self.bot, member_id, lasttime=recent_time
+                            )
+
                         if member_id in self.bot.valorant_waitlist:
                             combined_waiters += self.bot.valorant_waitlist.pop(
                                 member_id
@@ -297,7 +300,7 @@ class Background(commands.Cog):
                     if combined_waiters:
                         if channel_safe:
                             await channel.send(
-                                f"<@{'> <@'.join(list(set(combined_waiters)))}> removing from waitlist"
+                                f"<@{'> <@'.join(map(str,(set(combined_waiters))))}> removing from waitlist"
                             )  # pings waiters in same channel
                         else:
                             for waiter in list(set(combined_waiters)):
@@ -307,7 +310,6 @@ class Background(commands.Cog):
                                         "A player you were waiting for is done!"
                                     )
 
-                    json_helper.save(self.bot.player_data, "playerData.json")
             await asyncio.sleep(0.5)  # sleeps for number of seconds (avoid rate limit)
 
 

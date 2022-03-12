@@ -1,4 +1,3 @@
-from __future__ import annotations
 import disnake
 from disnake.ext import commands
 
@@ -7,7 +6,7 @@ from helpers import db_helper
 
 
 class Menu(disnake.ui.View):
-    def __init__(self, embeds: list[disnake.Embed]):
+    def __init__(self, embeds):
         super().__init__(timeout=None)
         self.embeds = embeds
         self.embed_count = 0
@@ -104,7 +103,7 @@ class FeederMessages(disnake.ui.Select):
         for i in sorted(self.values, reverse=True):
             del self.feeder_messages[int(i)]
         await db_helper.update_guild_data(
-            self.bot, self.message.guild.id, "feeder_messages", self.feeder_messages
+            self.bot, self.message.guild.id, feeder_messages=self.feeder_messages
         )
         await inter.edit_original_message(
             content=f"successfully deleted {len(self.values)} custom messages",
@@ -149,7 +148,7 @@ class FeederImages(disnake.ui.Select):
         for i in sorted(self.values, reverse=True):
             del self.feeder_images[int(i)]
         await db_helper.update_guild_data(
-            self.bot, self.message.guild.id, "feeder_images", self.feeder_images
+            self.bot, self.message.guild.id, feeder_images=self.feeder_images
         )
         await inter.edit_original_message(
             content=f"successfully deleted {len(self.values)} custom images",

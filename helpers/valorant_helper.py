@@ -1,4 +1,3 @@
-from turtle import update
 import disnake
 from disnake.ext import commands
 
@@ -7,7 +6,7 @@ import time
 
 from views.views import Menu, FeederMessagesView, FeederImagesView
 
-from helpers import json_helper, db_helper
+from helpers import db_helper
 
 
 async def ping(bot: commands.Bot, message):
@@ -30,11 +29,11 @@ async def info(bot: commands.Bot, message, user):
     """returns [content, embed]"""
     if user == None:
         user = message.author
-    user_id = str(user.id)
-    if user_id in bot.player_data:
-        user_data = bot.player_data[user_id]
+    player_data = await db_helper.get_player_data(bot, user.id)
+    if len(player_data):
+        user_data = player_data[0]
         embed = disnake.Embed(
-            title="valorant info", description=f"<@{user_id}> saved info"
+            title="valorant info", description=f"<@{user.id}> saved info"
         )
         embed.set_thumbnail(url=user.display_avatar.url)
         embed.add_field(
@@ -43,7 +42,7 @@ async def info(bot: commands.Bot, message, user):
             inline=True,
         )
         embed.add_field(
-            name="last updated", value=f"<t:{int(user_data['lastTime'])}>", inline=True
+            name="last updated", value=f"<t:{int(user_data['lasttime'])}>", inline=True
         )
         if len(user_data["headshots"]):
             embed.add_field(
@@ -62,7 +61,7 @@ async def info(bot: commands.Bot, message, user):
         return None, embed
     else:
         return (
-            f"<@{user_id}> not in database! do {message.prefix if isinstance(message, commands.Context) else '/'}valorant-watch first",
+            f"<@{user.id}> not in database! do {message.prefix if isinstance(message, commands.Context) else '/'}valorant-watch first",
             None,
         )
 
@@ -78,7 +77,7 @@ async def watch(bot: commands.Bot, message, name, tag):
         if len(guild_data) == 0 or not guild_data[0].get("watch_channel"):
             return f"Please set the watch channel for the guild first using {message.prefix if isinstance(message, commands.Context) else '/'}set-channel! You can also DM me and I will DM you for each update instead!"
 
-    user_id = str(message.author.id)
+    user_id = message.author.id
     async with aiohttp.ClientSession() as session:
         async with session.get(
             f"https://api.henrikdev.xyz/valorant/v1/account/{name}/{tag}"
@@ -128,33 +127,33 @@ async def watch(bot: commands.Bot, message, name, tag):
                 bodyshots.append(player_stats["bodyshots"])
                 legshots.append(player_stats["legshots"])
 
-            bot.player_data[user_id] = {
-                "guild": guild_id,
-                "name": name,
-                "tag": tag,
-                "region": user_region,
-                "puuid": user_puuid,
-                "lastTime": time.time(),
-                "streak": streak,
-                "headshots": headshots,
-                "bodyshots": bodyshots,
-                "legshots": legshots,
-                "acs": acs,
-            }
-            json_helper.save(bot.player_data, "playerData.json")
+            await db_helper.update_player_data(
+                bot,
+                user_id,
+                guild_id=guild_id,
+                name=name,
+                tag=tag,
+                region=user_region,
+                puuid=user_puuid,
+                lasttime=time.time(),
+                streak=streak,
+                headshots=headshots,
+                bodyshots=bodyshots,
+                legshots=legshots,
+                acs=acs,
+            )
             return f"<@{user_id}> database updated, user added. remove using {message.prefix if isinstance(message, commands.Context) else '/'}valorant-unwatch"
 
 
 async def unwatch(bot: commands.Bot, message):
     """removes user's valorant info from the database"""
     """returns [content]"""
-    user_id = str(message.author.id)
-    if user_id in bot.player_data:
-        del bot.player_data[user_id]
-        json_helper.save(bot.player_data, "playerData.json")
-        content = f"<@{user_id}> database updated, user removed. add again using {message.prefix if isinstance(message, commands.Context) else '/'}valorant-watch"
+    user_data = await db_helper.get_player_data(bot, message.author.id)
+    if len(user_data):
+        await db_helper.delete_player_data(bot, message.author.id)
+        content = f"<@{message.author.id}> database updated, user removed. add again using {message.prefix if isinstance(message, commands.Context) else '/'}valorant-watch"
     else:
-        content = f"<@{user_id}> error updating, user not in database"
+        content = f"<@{message.author.id}> error updating, user not in database"
     return content
 
 
@@ -241,7 +240,7 @@ async def set_channel(bot: commands.Bot, message, channel):
     if channel == None:
         channel = message.channel
     guild = message.guild
-    await db_helper.update_guild_data(bot, guild.id, "watch_channel", channel.id)
+    await db_helper.update_guild_data(bot, guild.id, watch_channel=channel.id)
     return f"successfully set `#{channel}` as watch channel for `{guild}`"
 
 
@@ -249,7 +248,7 @@ async def set_role(bot: commands.Bot, message, role):
     if role == None:
         return f"use {message.prefix if isinstance(message, commands.Context) else '/'}set-role <tag the role>"
     guild = message.guild
-    await db_helper.update_guild_data(bot, guild.id, "ping_role", role.id)
+    await db_helper.update_guild_data(bot, guild.id, ping_role=role.id)
     return f"successfully set role `{role}` as watch channel for `{guild}`"
 
 
@@ -270,7 +269,7 @@ async def feeder_message_add(bot: commands.Bot, message, new_message: str):
             else:
                 feeder_messages = [new_message]
             await db_helper.update_guild_data(
-                bot, guild.id, "feeder_messages", feeder_messages
+                bot, guild.id, feeder_messages=feeder_messages
             )
         return f"successfully added custom feeder message for `{guild}`"
     return "error! `{guild}` not in database"
@@ -336,7 +335,7 @@ async def feeder_image_add(bot: commands.Bot, message, new_image: str):
             else:
                 feeder_images = [new_image]
             await db_helper.update_guild_data(
-                bot, guild.id, "feeder_images", feeder_images
+                bot, guild.id, feeder_images=feeder_images
             )
         return f"successfully added custom feeder image for `{guild}`"
     return "error! `{guild}` not in database"
