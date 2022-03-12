@@ -1,6 +1,4 @@
 import os
-import sys
-import json
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 
@@ -8,12 +6,6 @@ import disnake
 from disnake.ext import commands
 
 from helpers import db_helper
-
-if not os.path.isfile("config.json"):
-    sys.exit("'config.json' not found!")
-else:
-    with open("config.json", encoding="utf-8") as file:
-        config = json.load(file)
 
 
 async def get_prefix(bot, message):
@@ -34,7 +26,6 @@ async def get_prefix(bot, message):
 bot = commands.Bot(
     command_prefix=get_prefix,
     intents=disnake.Intents.default(),
-    test_guilds=config["guilds"],
 )
 
 
