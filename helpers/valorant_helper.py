@@ -259,63 +259,65 @@ async def feeder_message_add(bot: commands.Bot, message, new_message: str):
     if len(new_message) > 100:
         return "message is too long!"
     guild = message.guild
-    if "feeder_messages" not in bot.guild_data[str(guild.id)]:
-        bot.guild_data[str(guild.id)]["feeder_messages"] = [new_message]
-    elif (
-        len(bot.guild_data[str(guild.id)]["feeder_messages"]) == 25
-    ):  # max number of choices for select
-        return "max number of messages reached! delete one before adding a new one!"
-    else:
-        bot.guild_data[str(guild.id)]["feeder_messages"] += [new_message]
-    json_helper.save(bot.guild_data, "guildData.json")
-    return f"successfully added custom feeder message for `{guild}`"
+    guild_data = await db_helper.get_guild_data(bot, guild.id)
+    if len(guild_data):
+        feeder_messages = guild_data[0].get("feeder_messages")
+        if feeder_messages and len(feeder_messages) >= 25:
+            return "max number of messages reached! delete one before adding a new one!"
+        else:
+            if feeder_messages:
+                feeder_messages.append(new_message)
+            else:
+                feeder_messages = [new_message]
+            await db_helper.update_guild_data(
+                bot, guild.id, "feeder_messages", feeder_messages
+            )
+        return f"successfully added custom feeder message for `{guild}`"
+    return "error! guild not in database"
 
 
 async def feeder_message_show(bot: commands.Bot, message):
     """show custom messages for feeder alert"""
     """returns [content, embed, view]"""
     guild = message.guild
-    if (
-        "feeder_messages" not in bot.guild_data[str(guild.id)]
-        or not bot.guild_data[str(guild.id)]["feeder_messages"]
-    ):
+    guild_data = await db_helper.get_guild_data(bot, guild.id)
+    if len(guild_data) and len(guild_data[0].get("feeder_messages")):
+        feeder_messages = guild_data[0].get("feeder_messages")
+        embeds = []
+        step = 5  # number of messages per embed
+        for i in range(0, len(feeder_messages), step):
+            embed = disnake.Embed(
+                title="custom feeder messages",
+                description="messsages randomly sent with the feeder alert",
+            )
+            value = ""
+            for j, message in enumerate(feeder_messages[i : i + step]):
+                value += f"`{i+j+1}` {message} \n"
+            embed.add_field(name="messages", value=value)
+            embeds.append(embed)
+        view = Menu(embeds) if len(feeder_messages) > step else None
+        return None, embeds[0], view
+    else:
         return (
             f'no custom messages for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}feeder-message add "<custom message>"!',
             None,
             None,
         )
-    feeder_messages = bot.guild_data[str(guild.id)]["feeder_messages"]
-    embeds = []
-    step = 5  # number of messages per embed
-    for i in range(0, len(feeder_messages), step):
-        embed = disnake.Embed(
-            title="custom feeder messages",
-            description="messsages randomly sent with the feeder alert",
-        )
-        value = ""
-        for j, message in enumerate(feeder_messages[i : i + step]):
-            value += f"`{i+j+1}` {message} \n"
-        embed.add_field(name="messages", value=value)
-        embeds.append(embed)
-    view = Menu(embeds) if len(feeder_messages) > step else None
-    return None, embeds[0], view
 
 
 async def feeder_message_delete(bot: commands.Bot, message):
     """delete custom message for feeder alert"""
     """returns [content, view]"""
     guild = message.guild
-    if (
-        "feeder_messages" not in bot.guild_data[str(guild.id)]
-        or not bot.guild_data[str(guild.id)]["feeder_messages"]
-    ):
+    guild_data = await db_helper.get_guild_data(bot, guild.id)
+    if len(guild_data) and len(guild_data[0].get("feeder_messages")):
+        view = FeederMessagesView(bot, message, guild_data[0].get("feeder_messages"))
+        return "choose messages to delete", view
+    else:
         return (
             f'no custom messages for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}feeder-message add "<custom message>"!',
             None,
         )
-    else:
-        view = FeederMessagesView(message)
-        return "choose messages to delete", view
 
 
 async def feeder_image_add(bot: commands.Bot, message, new_image: str):

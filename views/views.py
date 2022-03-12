@@ -3,7 +3,7 @@ import disnake
 from disnake.ext import commands
 
 
-from helpers import json_helper
+from helpers import json_helper, db_helper
 
 
 class Menu(disnake.ui.View):
@@ -76,11 +76,11 @@ class Menu(disnake.ui.View):
 
 
 class FeederMessages(disnake.ui.Select):
-    def __init__(self, message):
+    def __init__(self, bot, message, feeder_messages):
 
+        self.bot = bot
         self.message = message
-        guild_data = json_helper.load("guildData.json")
-        self.feeder_messages = guild_data[str(message.guild.id)]["feeder_messages"]
+        self.feeder_messages = feeder_messages
 
         options = [
             disnake.SelectOption(label=i, description=message)
@@ -99,11 +99,9 @@ class FeederMessages(disnake.ui.Select):
             await inter.response.send_message("only the user who sent this can use it!")
             return
         await inter.response.defer()
-        guild_data = json_helper.load("guildData.json")
         for i in sorted(self.values, reverse=True):
             del self.feeder_messages[int(i)]
-        guild_data[str(self.message.guild.id)]["feeder_messages"] = self.feeder_messages
-        json_helper.save(guild_data, "guildData.json")
+        await db_helper.update_guild_data(self.bot, self.message.guild.id, "feeder_messages", self.feeder_messages)
         await inter.edit_original_message(
             content=f"successfully deleted {len(self.values)} custom messages",
             view=None,
@@ -111,11 +109,11 @@ class FeederMessages(disnake.ui.Select):
 
 
 class FeederMessagesView(disnake.ui.View):
-    def __init__(self, message):
+    def __init__(self, bot, message, feeder_messages):
         super().__init__()
 
         # Adds the dropdown to our view object.
-        self.add_item(FeederMessages(message))
+        self.add_item(FeederMessages(bot, message, feeder_messages))
 
 
 class FeederImages(disnake.ui.Select):
