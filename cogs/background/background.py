@@ -14,7 +14,6 @@ from helpers import db_helper
 class Background(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.bot.valorant_waitlist = {}
         self.bot.valorant_watch_cycle = self.valorant_watch_cycle
 
     @tasks.loop()
@@ -257,10 +256,12 @@ class Background(commands.Cog):
                                 self.bot, member_id, lasttime=recent_time
                             )
 
-                        if member_id in self.bot.valorant_waitlist:
-                            combined_waiters += self.bot.valorant_waitlist.pop(
-                                member_id
-                            )
+                        waitlist_data = await db_helper.get_waitlist_data(
+                            self.bot, member_id
+                        )
+                        if len(waitlist_data):
+                            combined_waiters += waitlist_data[0].get("waiting_id")
+                            await db_helper.delete_waitlist_data(self.bot, member_id)
 
                     for member_id in party_blue:
                         # streak function
@@ -289,10 +290,12 @@ class Background(commands.Cog):
                                 self.bot, member_id, lasttime=recent_time
                             )
 
-                        if member_id in self.bot.valorant_waitlist:
-                            combined_waiters += self.bot.valorant_waitlist.pop(
-                                member_id
-                            )
+                        waitlist_data = await db_helper.get_waitlist_data(
+                            self.bot, member_id
+                        )
+                        if len(waitlist_data):
+                            combined_waiters += waitlist_data[0].get("waiting_id")
+                            await db_helper.delete_waitlist_data(self.bot, member_id)
 
                     if is_streak:
                         await channel.send(embed=streak_embed)

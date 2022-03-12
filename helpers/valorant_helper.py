@@ -160,7 +160,7 @@ async def unwatch(bot: commands.Bot, message):
 async def wait(bot: commands.Bot, message, *wait_users):
     """pings you when tagged user is done"""
     """returns [content]"""
-    message_user_id = str(message.author.id)
+    message_user_id = message.author.id
     if len(wait_users) == 0:
         return f"<@{message_user_id}> use {message.prefix if isinstance(message, commands.Context) else '/'}valorant-wait <tag the user you are waiting for>"
     extra_message = ""
@@ -168,33 +168,39 @@ async def wait(bot: commands.Bot, message, *wait_users):
     already_waiting = []
     not_in_database = []
     for wait_user in list(set(wait_users)):
-        wait_user_id = str(wait_user.id)
+        wait_user_id = wait_user.id
         if wait_user_id == message_user_id:
             extra_message = "interesting but ok. "
-        if wait_user_id in bot.player_data:
-            if wait_user_id in bot.valorant_waitlist:
-                if message_user_id in bot.valorant_waitlist[wait_user_id]:
+        player_data = await bot.db.fetch(
+            "select waitlist.waiting_id from players left join waitlist on waitlist.player_id = players.player_id where players.player_id = $1",
+            wait_user_id,
+        )
+        if len(player_data):
+            current_waiters = player_data[0].get("waiting_id")
+            if current_waiters:
+                if message_user_id in current_waiters:
                     already_waiting.append(wait_user_id)
-                else:
-                    bot.valorant_waitlist[wait_user_id] += [message_user_id]
-                    success_waiting.append(wait_user_id)
+                    continue
             else:
-                bot.valorant_waitlist[wait_user_id] = [message_user_id]
-                success_waiting.append(wait_user_id)
+                current_waiters = []
+            await db_helper.update_waitlist_data(
+                bot, wait_user_id, current_waiters + [message_user_id]
+            )
+            success_waiting.append(wait_user_id)
         else:
             not_in_database.append(wait_user_id)
     success_message = (
-        f"success, will notify when <@{'> <@'.join(success_waiting)}> {'is' if len(success_waiting) == 1 else 'are'} done. "
+        f"success, will notify when <@{'> <@'.join(map(str, success_waiting))}> {'is' if len(success_waiting) == 1 else 'are'} done. "
         if success_waiting
         else ""
     )
     already_message = (
-        f"you are already waiting for <@{'> <@'.join(already_waiting)}>. "
+        f"you are already waiting for <@{'> <@'.join(map(str, already_waiting))}>. "
         if already_waiting
         else ""
     )
     not_in_database_message = (
-        f"<@{'> <@'.join(not_in_database)}> not in database, unable to wait."
+        f"<@{'> <@'.join(map(str, not_in_database))}> not in database, unable to wait."
         if not_in_database
         else ""
     )
@@ -214,22 +220,26 @@ async def waitlist(bot: commands.Bot, message):
     embed.set_thumbnail(
         url="https://cdn.vox-cdn.com/uploads/chorus_image/image/66615355/VALORANT_Jett_Red_crop.0.jpg"
     )
-    for user_id in bot.valorant_waitlist:
-        if guild_id == 0 and message.author.id in bot.valorant_waitlist[user_id]:
-            embed.add_field(name="user", value=f"<@{user_id}>", inline=False)
+    waitlist_data = await bot.db.fetch(
+        "select * from waitlist inner join players on waitlist.player_id = players.player_id"
+    )
+    for waitlist_player in waitlist_data:
+        player_id = waitlist_player.get("player_id")
+        if guild_id == 0 and message.author.id in waitlist_player.get("waiting_id"):
+            embed.add_field(name="user", value=f"<@{player_id}>", inline=False)
             embed.add_field(
                 name="waiters",
                 value=f"<@{message.author.id}>",
             )
         elif (
-            user_id == str(message.author.id)
+            player_id == message.author.id
             or guild_id
-            and bot.player_data[user_id]["guild"] == guild_id
+            and waitlist_player.get("guild_id") == guild_id
         ):
-            embed.add_field(name="user", value=f"<@{user_id}>", inline=False)
+            embed.add_field(name="user", value=f"<@{player_id}>", inline=False)
             embed.add_field(
                 name="waiters",
-                value=f"<@{'> <@'.join(bot.valorant_waitlist[user_id])}>",
+                value=f"<@{'> <@'.join(map(str, waitlist_player.get('waiting_id')))}>",
             )
     return embed
 

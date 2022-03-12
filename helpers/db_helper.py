@@ -38,6 +38,15 @@ async def create_players_table(bot):
     )
 
 
+async def create_waitlist_table(bot):
+    await bot.db.execute(
+        """CREATE TABLE IF NOT EXISTS public.waitlist(
+        player_id bigint NOT NULL,
+        waiting_id bigint[]
+        )"""
+    )
+
+
 async def get_guild_data(bot, guild_id: int):
     return await bot.db.fetch("select * from guilds where guild_id = $1", guild_id)
 
@@ -92,3 +101,30 @@ async def update_player_data(bot, player_id: int, **fields):
             *fields.values(),
         )
     return "database updated"
+
+
+async def get_waitlist_data(bot, player_id: int):
+    return await bot.db.fetch("select * from waitlist where player_id = $1", player_id)
+
+
+async def delete_waitlist_data(bot, player_id: int):
+    await bot.db.execute("delete from waitlist where player_id = $1", player_id)
+
+
+async def update_waitlist_data(bot, player_id: int, waiting_id):
+    data = await bot.db.fetch(
+        "select waiting_id from waitlist where player_id = $1", player_id
+    )
+    if len(data) == 0:
+        await bot.db.execute(
+            "insert into waitlist (player_id, waiting_id) values ($1, $2)",
+            player_id,
+            waiting_id,
+        )
+    else:
+        await bot.db.execute(
+            "update waitlist set waiting_id = $2 where player_id = $1",
+            player_id,
+            waiting_id,
+        )
+    return "waitlist updated"

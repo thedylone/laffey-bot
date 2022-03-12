@@ -63,6 +63,7 @@ async def on_ready():
     await db_helper.create_db_pool(bot)
     await db_helper.create_guilds_table(bot)
     await db_helper.create_players_table(bot)
+    await db_helper.create_waitlist_table(bot)
     bot.valorant_watch_cycle.start()
 
 
