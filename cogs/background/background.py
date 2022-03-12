@@ -49,7 +49,9 @@ class Background(commands.Cog):
                     channel_safe = True
                 elif watch_channel_id:
                     # sends a warning that guild exists but channel is gone
-                    await db_helper.update_guild_data(self.bot, user_guild, "watch_channel", 0)
+                    await db_helper.update_guild_data(
+                        self.bot, user_guild, "watch_channel", 0
+                    )
                     if guild_exists_channels:
                         await guild_exists_channels[0].send(
                             "The channel I am set to no longer exists! Please use valorant-setchannel on another channel. I will send updates to members directly instead."
@@ -201,26 +203,13 @@ class Background(commands.Cog):
                         feeder_images = [
                             "https://intinc.com/wp-content/uploads/2022/02/INT-Logo-Update_2104.png"
                         ]
-                        if user_guild != 0 and str(user_guild) in self.bot.guild_data:
-                            if (
-                                "feeder_messages"
-                                in self.bot.guild_data[str(user_guild)]
-                                and self.bot.guild_data[str(user_guild)][
-                                    "feeder_messages"
-                                ]
-                            ):
-                                feeder_messages = self.bot.guild_data[str(user_guild)][
-                                    "feeder_messages"
-                                ]
-                            if (
-                                "feeder_images" in self.bot.guild_data[str(user_guild)]
-                                and self.bot.guild_data[str(user_guild)][
-                                    "feeder_images"
-                                ]
-                            ):
-                                feeder_images = self.bot.guild_data[str(user_guild)][
-                                    "feeder_images"
-                                ]
+                        guild_data = await db_helper.get_guild_data(
+                            self.bot, user_guild
+                        )
+                        if len(guild_data) and guild_data[0].get("feeder_messages"):
+                            feeder_messages = guild_data[0].get("feeder_messages")
+                        if len(guild_data) and guild_data[0].get("feeder_images"):
+                            feeder_images = guild_data[0].get("feeder_images")
 
                         feeder_embed = disnake.Embed(
                             title="feeder alert❗❗",
