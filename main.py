@@ -59,6 +59,7 @@ async def on_ready():
         activity=disnake.Game(f"with lolis | {os.environ['DEFAULT_PREFIX']}help")
     )
     await db_helper.create_db_pool(bot)
+    bot.valorant_watch_cycle.start()
 
 
 # removes default help command

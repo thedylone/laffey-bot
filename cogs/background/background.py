@@ -15,7 +15,7 @@ class Background(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.bot.valorant_waitlist = {}
-        self.valorant_watch_cycle.start()
+        self.bot.valorant_watch_cycle = self.valorant_watch_cycle
 
     @tasks.loop(seconds=30)
     async def valorant_watch_cycle(self):
