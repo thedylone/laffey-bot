@@ -97,10 +97,13 @@ async def watch(bot: commands.Bot, message, name, tag):
                 return f"<@{user_id}> error connecting, database not updated. please try again (check if you have typed correctly)"
             match_data = await match_request.json()
             headshots, bodyshots, legshots, acs = [], [], [], []
-            rounds_played = rounds_red = rounds_blue = streak = 0
+            streak = 0
             same_streak = True
             for latest_game in match_data["data"]:
                 mode = latest_game["metadata"]["mode"]
+                if mode == "Deathmatch":
+                    continue
+                rounds_played = rounds_red = rounds_blue = 0
                 for round in latest_game["rounds"]:
                     rounds_played += round["end_type"] != "Surrendered"
                     rounds_red += round["winning_team"] == "Red"
