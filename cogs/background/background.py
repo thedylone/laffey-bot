@@ -119,7 +119,7 @@ class Background(commands.Cog):
                                 or user_guild > 0
                                 and len(player_data)
                                 and player["puuid"] == player_data[0]["puuid"]
-                                and player_data[0]["guild"] == user_guild
+                                and player_data[0]["guild_id"] == user_guild
                             ):  # detects if multiple watched users who "watched" in the same guild (not 0) are in the same game
                                 player_stats = player["stats"]
                                 player_acs = player_stats["score"] / rounds_played
