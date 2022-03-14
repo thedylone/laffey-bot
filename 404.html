@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>thedylone</title>
+    <meta name="description" content="thedylone github page">
+    <link rel="shortcut icon" href="https://thedylone.github.io/static/favicon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://thedylone.github.io/static/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://thedylone.github.io/static/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://thedylone.github.io/static/favicon/favicon-16x16.png">
+    <link rel="manifest" href="https://thedylone.github.io/static/favicon/site.webmanifest">
+    <link
+        href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,300,400,600,700,800%7COpen+Sans+Condensed:300&amp;subset=latin,cyrillic"
+        rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://thedylone.github.io/static/css/screen.css">
+    <link rel="stylesheet" href="https://thedylone.github.io/static/css/error.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://thedylone.github.io/static/js/body.js"></script>
+    <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+    <script src="https://kit.fontawesome.com/3bcd4a3e8d.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="loader-wrapper">
+        <div id="loader">
+            <p>loading....</p>
+            <img src="https://thedylone.github.io/static/images/pip.gif">
+        </div>
+    </div>
+    <!-- header-->
+    <header class="main-header">
+        <div class="first-nav"><a class="skip-nav-link" href="#home">skip navigation</a>
+            <div class="container">
+                <nav class="first-nav__links">
+                    <ul>
+                        <li>
+                            <a href="https://thedylone.github.io/">homepage</a>
+                        </li>
+                        <li>
+                            <a href="https://thedylone.github.io/projects.html">projects</a>
+                        </li>
+                    </ul>
+                </nav>
+                <a class="first-nav__navcontrol icon icon_menu js-navcontrol" href="#"><i class="fas fa-bars"></i></a>
+            </div>
+        </div>
+        <div class="second-nav js-nav">
+            <div class="container"><a class="second-nav__logo"><span></span></a>
+                <nav class="menu">
+                    <ul>
+                        <li><a class="js-link js-anchor is-selected" href="#home">404</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <!-- error section-->
+    <section class="error-section" id="home">
+        <div class="container animate__animated" animation-style="fadeIn" animation-duration="0.5s"
+            animation-delay="0s">
+            <header class="error-section__header">
+                <h2>404</h2>
+                <h4>how did you get here?</h4>
+            </header>
+            <div class="error-section__image">
+                <img src="https://thedylone.github.io/static/images/smh.gif">
+            </div>
+        </div>
+    </section>
+    <!-- footer-->
+    <footer class="main-footer">
+        <div class="container">
+            <p class="main-footer__copyright"><span>made by thedylone</span></p>
+            <a class="main-footer__gotop js-link js-anchor" style="opacity: 1;" href="#home"><i
+                    class="fas fa-arrow-circle-up"></i></a>
+            <p class="main-footer__links"><a onclick="openModal($('#modal-credits'))">credits</a></p>
+        </div>
+    </footer>
+    <!-- modal stuff -->
+    <script>
+        function openModal(modal) {
+            modal.css("display", "block");;
+            const body = document.body;
+            body.style.top = -1 * window.pageYOffset + 'px';
+            body.style.position = 'fixed';
+        }
+        window.onclick = function (e) {
+            modal = document.getElementById("modal-credits")
+            if (e.target == modal) {
+                modal.style.display = "none";
+                const body = document.body;
+                const scrollY = body.style.top;
+                body.style.position = '';
+                body.style.top = '';
+                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
+        }
+    </script>
+    <!-- credits modal -->
+    <div id="modal-credits" class="modal">
+        <div class="modal-content">
+            <ul class="fa-ul">
+                <li><span class="fa-li"><i class="fas fa-check"></i><a href="https://fontawesome.com/"
+                            target="_blank"></span>font awesome</a> for the pretty nice icons</li>
+            </ul>
+
+        </div>
+    </div>
+</body>
+
+</html>
