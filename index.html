@@ -30,9 +30,19 @@
     <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
     <script src="https://thedylone.github.io/static/js/body.js"></script>
     <script src="https://kit.fontawesome.com/3bcd4a3e8d.js" crossorigin="anonymous"></script>
+    <noscript>
+        <style>
+            [class*="fa-"]:before {
+                content: "♥";
+            }
+        </style>
+    </noscript>
 </head>
 
-<body>
+<body class="no-js">
+    <script>
+        $('body').removeClass('no-js');
+    </script>
     <div id="loader-wrapper">
         <div id="loader">
             <p>loading...</p>
