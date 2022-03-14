@@ -262,7 +262,7 @@ async def set_role(bot: commands.Bot, message, role):
         return f"use {message.prefix if isinstance(message, commands.Context) else '/'}set-role <tag the role>"
     guild = message.guild
     await db_helper.update_guild_data(bot, guild.id, ping_role=role.id)
-    return f"successfully set role `{role}` as watch channel for `{guild}`"
+    return f"successfully set role `{role}` as ping role for `{guild}`"
 
 
 async def feeder_message_add(bot: commands.Bot, message, new_message: str):
