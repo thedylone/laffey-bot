@@ -258,7 +258,7 @@ async def set_role(bot: commands.Bot, message, role):
     guild = message.guild
     bot.guild_data[str(guild.id)]["ping_role"] = role.id
     json_helper.save(bot.guild_data, "guildData.json")
-    return f"successfully set role `{role}` as watch channel for `{guild}`"
+    return f"successfully set role `{role}` as ping role for `{guild}`"
 
 
 async def feeder_message_add(bot: commands.Bot, message, new_message: str):
