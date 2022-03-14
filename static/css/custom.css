@@ -509,8 +509,9 @@
 }
 
 .discord-message-image img {
-    width: 400px;
-    height: 232px;
+    width: 100%;
+    max-width: 400px;
+    height: auto;
 }
 
 code.inline {
