@@ -278,7 +278,7 @@ class Background(commands.Cog):
                             self.bot, member_id
                         )
                         if len(waitlist_data):
-                            combined_waiters += str(waitlist_data[0].get("waiting_id"))
+                            combined_waiters += waitlist_data[0].get("waiting_id")
                             await db_helper.delete_waitlist_data(self.bot, member_id)
 
                     if streak_values:
@@ -296,7 +296,7 @@ class Background(commands.Cog):
                     if combined_waiters:
                         if channel_safe:
                             content = (
-                                f"removing <@{'> <@'.join(list(set(combined_waiters)))}> from waitlist",
+                                f"removing <@{'> <@'.join(map(str,(set(combined_waiters))))}> from waitlist",
                             )
                         else:
                             for waiter in list(set(combined_waiters)):
