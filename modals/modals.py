@@ -94,3 +94,32 @@ class ValorantFeederImageModal(disnake.ui.Modal):
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         await inter.edit_original_message(content="Oops, something went wrong.")
+
+
+class ValorantStreakerMessageModal(disnake.ui.Modal):
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot = bot
+        components = [
+            disnake.ui.TextInput(
+                label="Custom Message",
+                placeholder="custom message for streaker alert",
+                custom_id="message",
+                style=disnake.TextInputStyle.short,
+                max_length=100,
+            ),
+        ]
+        super().__init__(
+            title="valorant streaker message",
+            custom_id="valorant_streaker_message",
+            components=components,
+        )
+
+    async def callback(self, inter: disnake.ModalInteraction) -> None:
+        await inter.response.defer()
+        content = await valorant_helper.streaker_message_add(
+            self.bot, inter, inter.text_values["message"]
+        )
+        await inter.edit_original_message(content=content)
+
+    async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
+        await inter.edit_original_message(content="Oops, something went wrong.")

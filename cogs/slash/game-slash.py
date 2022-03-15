@@ -6,6 +6,7 @@ from modals.modals import (
     ValorantWatchModal,
     ValorantFeederMessageModal,
     ValorantFeederImageModal,
+    ValorantStreakerMessageModal
 )
 
 
@@ -157,6 +158,41 @@ class ValorantAdmin(commands.Cog):
 
     @feeder_image.autocomplete("option")
     async def feeder_image_autocomplete(
+        self, inter: disnake.ApplicationCommandInteraction, string: str
+    ):
+        string = string.lower()
+        return [
+            option for option in ["add", "show", "delete"] if string in option.lower()
+        ]
+
+    @commands.slash_command(
+        name="streaker-message",
+        description="custom message for streaker alert functions",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def streaker_message(
+        self, inter: disnake.ApplicationCommandInteraction, option: str
+    ):
+        """custom streaker messages functions"""
+        if option == "add":
+            await inter.response.send_modal(modal=ValorantStreakerMessageModal(self.bot))
+        elif option == "show":
+            await inter.response.defer()
+            content, embed, view = await valorant_helper.streaker_message_show(
+                self.bot, inter
+            )
+            await inter.edit_original_message(content=content, embed=embed, view=view)
+        elif option == "delete" or option == "del":
+            await inter.response.defer()
+            content, view = await valorant_helper.streaker_message_delete(self.bot, inter)
+            await inter.edit_original_message(content=content, view=view)
+        else:
+            await inter.response.send_message(
+                content=f"use /streaker-message <add | show | delete>"
+            )
+
+    @streaker_message.autocomplete("option")
+    async def streaker_message_autocomplete(
         self, inter: disnake.ApplicationCommandInteraction, string: str
     ):
         string = string.lower()
