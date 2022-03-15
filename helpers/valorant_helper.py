@@ -4,7 +4,7 @@ from disnake.ext import commands
 import aiohttp
 import time
 
-from views.views import Menu, FeederMessagesView, FeederImagesView
+from views.views import Menu, FeederMessagesView, FeederImagesView, StreakerMessagesView
 
 from helpers import db_helper
 
@@ -390,5 +390,71 @@ async def feeder_image_delete(bot: commands.Bot, message):
     else:
         return (
             f'no custom images for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}feeder-image add "<custom image>"!',
+            None,
+        )
+
+async def streaker_message_add(bot: commands.Bot, message, new_message: str):
+    """add custom message for streaker alert"""
+    """returns [content]"""
+    if len(new_message) > 100:
+        return "message is too long!"
+    guild = message.guild
+    guild_data = await db_helper.get_guild_data(bot, guild.id)
+    if len(guild_data):
+        streaker_messages = guild_data[0].get("streaker_messages")
+        if streaker_messages and len(streaker_messages) >= 25:
+            return "max number of messages reached! delete one before adding a new one!"
+        else:
+            if streaker_messages:
+                streaker_messages.append(new_message)
+            else:
+                streaker_messages = [new_message]
+            await db_helper.update_guild_data(
+                bot, guild.id, streaker_messages=streaker_messages
+            )
+        return f"successfully added custom streaker message for `{guild}`"
+    return "error! `{guild}` not in database"
+
+
+async def streaker_message_show(bot: commands.Bot, message):
+    """show custom messages for streaker alert"""
+    """returns [content, embed, view]"""
+    guild = message.guild
+    guild_data = await db_helper.get_guild_data(bot, guild.id)
+    if len(guild_data) and guild_data[0].get("streaker_messages"):
+        streaker_messages = guild_data[0].get("streaker_messages")
+        embeds = []
+        step = 5  # number of messages per embed
+        for i in range(0, len(streaker_messages), step):
+            embed = disnake.Embed(
+                title="custom streaker messages",
+                description="messsages randomly sent with the streaker alert",
+            )
+            value = ""
+            for j, message in enumerate(streaker_messages[i : i + step]):
+                value += f"`{i+j+1}` {message} \n"
+            embed.add_field(name="messages", value=value)
+            embeds.append(embed)
+        view = Menu(embeds) if len(streaker_messages) > step else None
+        return None, embeds[0], view
+    else:
+        return (
+            f'no custom messages for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}streaker-message add "<custom message>"!',
+            None,
+            None,
+        )
+
+
+async def streaker_message_delete(bot: commands.Bot, message):
+    """delete custom message for streaker alert"""
+    """returns [content, view]"""
+    guild = message.guild
+    guild_data = await db_helper.get_guild_data(bot, guild.id)
+    if len(guild_data) and guild_data[0].get("streaker_messages"):
+        view = StreakerMessagesView(bot, message, guild_data[0].get("streaker_messages"))
+        return "choose messages to delete", view
+    else:
+        return (
+            f'no custom messages for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}streaker-message add "<custom message>"!',
             None,
         )

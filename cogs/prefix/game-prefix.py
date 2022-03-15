@@ -167,6 +167,39 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
                 content=f"use {ctx.prefix}feeder-image <add | show | delete>"
             )
 
+    @commands.command(
+        name="streaker-message",
+        aliases=["streakermessage", "streaker-msg", "streakermsg"],
+        description="custom streaker messages functions",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def streaker_message(
+        self, ctx: commands.Context, option: str = None, new_message: str = None
+    ):
+        """custom streaker messages functions"""
+        if option == "add":
+            if new_message:
+                out = await valorant_helper.streaker_message_add(
+                    self.bot, ctx, new_message
+                )
+                await ctx.send(out)
+            else:
+                await ctx.send(
+                    content=f'use {ctx.prefix}streaker-message add "<new message>" (include the "") '
+                )
+        elif option == "show":
+            content, embed, view = await valorant_helper.streaker_message_show(
+                self.bot, ctx
+            )
+            await ctx.send(content=content, embed=embed, view=view)
+        elif option == "delete" or option == "del":
+            content, view = await valorant_helper.streaker_message_delete(self.bot, ctx)
+            await ctx.send(content=content, view=view)
+        else:
+            await ctx.send(
+                content=f"use {ctx.prefix}streaker-message <add | show | delete>"
+            )
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Valorant(bot))
