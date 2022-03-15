@@ -157,7 +157,72 @@
 }
 
 .commands-section__header, .notifs-section__header {
-    padding-left: 10px;
+    padding: 10px;
+    position: relative;
+    background-color: #36393f;
+    box-shadow: 0 2px 2px 0 #202225;
+}
+
+.search-wrapper {
+    text-align: center;
+    position: absolute;
+    right: 10px;
+    bottom: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.search-wrapper form {
+    width: 100%;
+    height: 50%;
+}
+
+.search-wrapper .autocomplete {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
+
+.search-wrapper input {
+    background-color: #202225;
+    float: right;
+    color: #dcddde;
+    padding: 10px;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.25s;
+}
+
+.search-wrapper input:focus {
+    outline: none;
+    width: 200%;
+}
+
+.search-wrapper svg {
+    position: absolute;
+    height: 50%;
+    right: 0;
+}
+
+@media screen and (max-width:800px) {
+    .search-wrapper input:focus {
+        width: 150%;
+    }
+}
+
+@media screen and (max-width:600px) {
+    .search-wrapper input:focus {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width:400px) {
+    .search-wrapper {
+        position: static;
+    }
 }
 
 .discord-messages {
@@ -212,7 +277,7 @@
     background-color: #32353b;
 }
 
-.discord-message:hover .discord-hidden-timestamp{
+.discord-message:hover .discord-hidden-timestamp {
     opacity: 1;
 }
 
@@ -536,4 +601,4 @@ code {
     scrollbar-color: #202225 #2f3136;
     background: #2f3136;
     border: 1px solid #202225;
-  }
+}
