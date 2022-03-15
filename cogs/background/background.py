@@ -192,9 +192,6 @@ class Background(commands.Cog):
                         title="valorant watch", color=color, description=description
                     )
                     player_embed.set_thumbnail(url=map_url)
-                    await channel.send(
-                        embed=player_embed
-                    )  # sends the notification embed
 
                     if feeders:
                         feeder_messages = ["lmao", "git gud"]
@@ -222,28 +219,21 @@ class Background(commands.Cog):
                                     "feeder_images"
                                 ]
 
-                        feeder_embed = disnake.Embed(
-                            title="feeder alert❗❗",
-                            color=0xFF7614,
-                            description=f"<@{'> and <@'.join(feeders.keys())}> inted! {random.choice(feeder_messages)}",
-                        )
+                        feeder_values = []
                         for feeder in feeders:
-                            feeder_embed.add_field(
-                                name="dirty inter",
-                                value=f"<@{feeder}> finished {feeders[feeder]['kills']}/{feeders[feeder]['deaths']}/{feeders[feeder]['assists']} with an ACS of {feeders[feeder]['acs']}.",
-                                inline=False,
-                            )
-                        feeder_embed.set_image(url=random.choice(feeder_images))
-                        await channel.send(embed=feeder_embed)  # sends the feeder embed
+                            feeder_values += [
+                                f"<@{feeder}> finished {feeders[feeder]['kills']}/{feeders[feeder]['deaths']}/{feeders[feeder]['assists']} with an ACS of {feeders[feeder]['acs']}."
+                            ]
+                        player_embed.add_field(
+                            name=f"feeder alert❗❗ {random.choice(feeder_messages)}",
+                            value="\n".join(feeder_values),
+                            inline=False,
+                        )
+                        player_embed.set_image(url=random.choice(feeder_images))
 
                     combined_waiters = []  # init list of users to ping for waitlist
 
-                    is_streak = False
-                    streak_embed = disnake.Embed(
-                        title="streaker alert 👀👀",
-                        color=0xCC36D1,
-                        description="someone is on a streak!",
-                    )
+                    streak_values = []
 
                     for member_id in party_red:
                         # streak function
@@ -257,12 +247,9 @@ class Background(commands.Cog):
                                     self.bot.player_data[member_id]["streak"] - 1, -1
                                 )
                             if abs(new_streak) >= 3:
-                                is_streak = True
-                                streak_embed.add_field(
-                                    name="streaker",
-                                    value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
-                                    inline=False,
-                                )
+                                streak_values += [
+                                    f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!"
+                                ]
                             self.bot.player_data[member_id]["streak"] = new_streak
 
                         # sets party members to update last updated time if more recent
@@ -286,12 +273,9 @@ class Background(commands.Cog):
                                     self.bot.player_data[member_id]["streak"] - 1, -1
                                 )
                             if abs(new_streak) >= 3:
-                                is_streak = True
-                                streak_embed.add_field(
-                                    name="streaker",
-                                    value=f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!",
-                                    inline=False,
-                                )
+                                streak_values += [
+                                    f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!"
+                                ]
                             self.bot.player_data[member_id]["streak"] = new_streak
 
                         # sets party members to update last updated time if more recent
@@ -303,24 +287,43 @@ class Background(commands.Cog):
                                 member_id
                             )
 
-                    if is_streak:
-                        await channel.send(embed=streak_embed)
+                    if streak_values:
+                        streak_messages = ["butt ass naked", "cock"]
+                        if user_guild != 0 and str(user_guild) in self.bot.guild_data:
+                            if (
+                                "streak_messages"
+                                in self.bot.guild_data[str(user_guild)]
+                                and self.bot.guild_data[str(user_guild)][
+                                    "streak_messages"
+                                ]
+                            ):
+                                feeder_messages = self.bot.guild_data[str(user_guild)][
+                                    "streak_messages"
+                                ]
+                        player_embed.add_field(
+                            name=f"streaker alert 👀👀 {random.choice(streak_messages)}",
+                            value="\n".join(streak_values),
+                            inline=False,
+                        )
+
+                    content = ""
 
                     if combined_waiters:
                         if channel_safe:
-                            await channel.send(
-                                f"<@{'> <@'.join(list(set(combined_waiters)))}> removing from waitlist"
-                            )  # pings waiters in same channel
+                            content=f"<@{'> <@'.join(list(set(combined_waiters)))}> removing from waitlist",
                         else:
                             for waiter in list(set(combined_waiters)):
                                 waiter_user = await self.bot.getch_user(waiter)
                                 if waiter_user:
-                                    await waiter_user.send(
-                                        "A player you were waiting for is done!"
-                                    )
+                                    content="A player you were waiting for is done!",
                         json_helper.save(self.bot.valorant_waitlist, "waitlist.json")
+
+                    await channel.send(
+                        content=content,
+                        embed=player_embed,
+                    )
                     json_helper.save(self.bot.player_data, "playerData.json")
-                    
+
             await asyncio.sleep(0.5)  # sleeps for number of seconds (avoid rate limit)
 
 
