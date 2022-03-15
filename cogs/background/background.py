@@ -278,7 +278,7 @@ class Background(commands.Cog):
                             self.bot, member_id
                         )
                         if len(waitlist_data):
-                            combined_waiters += waitlist_data[0].get("waiting_id")
+                            combined_waiters += str(waitlist_data[0].get("waiting_id"))
                             await db_helper.delete_waitlist_data(self.bot, member_id)
 
                     if streak_values:
@@ -305,6 +305,7 @@ class Background(commands.Cog):
                                     content = (
                                         "A player you were waiting for is done!",
                                     )
+                                    break
 
                     await channel.send(
                         content=content,
