@@ -1,0 +1,7 @@
+__pycache__/
+.env
+config.json
+playerData.json
+guildData.json
+waitlist.json
+.replit
