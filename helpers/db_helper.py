@@ -14,7 +14,8 @@ async def create_guilds_table(bot):
         watch_channel bigint,
         ping_role bigint,
         feeder_messages text[] COLLATE pg_catalog."default",
-        feeder_images text[] COLLATE pg_catalog."default"
+        feeder_images text[] COLLATE pg_catalog."default",
+        streaker_messages text[] COLLATE pg_catalog."default"
         )"""
     )
 
