@@ -295,18 +295,19 @@ class Background(commands.Cog):
 
                     if combined_waiters:
                         if channel_safe:
-                            content = f"removing <@{'> <@'.join(map(str,(set(combined_waiters))))}> from waitlist",
+                            await channel.send(
+                                content=f"removing <@{'> <@'.join(map(str,(set(combined_waiters))))}> from waitlist",
+                                embed=player_embed,
+                            )
                         else:
                             for waiter in list(set(combined_waiters)):
                                 waiter_user = await self.bot.getch_user(waiter)
                                 if waiter_user:
-                                    content = "A player you were waiting for is done!",
+                                    await channel.send(
+                                        content="A player you were waiting for is done!",
+                                        embed=player_embed,
+                                    )
                                     break
-
-                    await channel.send(
-                        content=content,
-                        embed=player_embed,
-                    )
 
             await asyncio.sleep(0.5)  # sleeps for number of seconds (avoid rate limit)
 
