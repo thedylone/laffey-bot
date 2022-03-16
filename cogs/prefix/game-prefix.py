@@ -111,7 +111,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     async def feeder_message(self, ctx: commands.Context):
         await ctx.send(
-            content="custom message for the feeder alert. options: add, show, delete"
+            content="custom messages for the feeder alert. options: add, show, delete"
         )
 
     @feeder_message.command(
@@ -144,36 +144,46 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         content, view = await valorant_helper.feeder_message_delete(self.bot, ctx)
         await ctx.send(content=content, view=view)
 
-    @commands.command(
+    @commands.group(
         name="feeder-image",
         aliases=["feederimage", "feeder-img", "feederimg"],
         description="custom feeder images functions",
+        invoke_without_command=True,
+    )
+    async def feeder_image(self, ctx: commands.Context):
+        await ctx.send(
+            content="custom images for the feeder alert. options: add, show, delete"
+        )
+
+    @feeder_image.command(
+        name="add", description="add custom images for the feeder alert"
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def feeder_image(
-        self, ctx: commands.Context, option: str = None, new_image: str = None
-    ):
-        """custom feeder images functions"""
-        if option == "add":
-            if new_image:
-                out = await valorant_helper.feeder_image_add(self.bot, ctx, new_image)
-                await ctx.send(out)
-            else:
-                await ctx.send(
-                    content=f'use {ctx.prefix}feeder-image add "<new image url>" (include the "") '
-                )
-        elif option == "show":
-            content, embed, view = await valorant_helper.feeder_image_show(
-                self.bot, ctx
-            )
-            await ctx.send(content=content, embed=embed, view=view)
-        elif option == "delete" or option == "del":
-            content, view = await valorant_helper.feeder_image_delete(self.bot, ctx)
-            await ctx.send(content=content, view=view)
+    async def feeder_image_add(self, ctx: commands.Context, new_image: str = None):
+        if new_image:
+            out = await valorant_helper.feeder_image_add(self.bot, ctx, new_image)
+            await ctx.send(out)
         else:
             await ctx.send(
-                content=f"use {ctx.prefix}feeder-image <add | show | delete>"
+                content=f'use {ctx.prefix}feeder-image add "<new image url>" (include the "") '
             )
+
+    @feeder_image.command(
+        name="show", description="show custom images for the feeder alert"
+    )
+    async def feeder_image_show(self, ctx: commands.Context):
+        content, embed, view = await valorant_helper.feeder_image_show(self.bot, ctx)
+        await ctx.send(content=content, embed=embed, view=view)
+
+    @feeder_image.command(
+        name="delete",
+        aliases=["del", "remove"],
+        description="delete custom images for the feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def feeder_image_delete(self, ctx: commands.Context):
+        content, view = await valorant_helper.feeder_image_delete(self.bot, ctx)
+        await ctx.send(content=content, view=view)
 
     @commands.command(
         name="streaker-message",
