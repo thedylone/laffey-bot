@@ -310,16 +310,12 @@ class Background(commands.Cog):
 
                     if combined_waiters:
                         if channel_safe:
-                            content = (
-                                f"removing <@{'> <@'.join(list(set(combined_waiters)))}> from waitlist",
-                            )
+                            content = f"removing <@{'> <@'.join(list(set(combined_waiters)))}> from waitlist"
                         else:
                             for waiter in list(set(combined_waiters)):
                                 waiter_user = await self.bot.getch_user(waiter)
                                 if waiter_user:
-                                    content = (
-                                        "A player you were waiting for is done!",
-                                    )
+                                    content = "A player you were waiting for is done!"
                         json_helper.save(self.bot.valorant_waitlist, "waitlist.json")
 
                     await channel.send(
