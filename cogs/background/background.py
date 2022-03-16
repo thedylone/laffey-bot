@@ -308,6 +308,10 @@ class Background(commands.Cog):
                                         embed=player_embed,
                                     )
                                     break
+                    else:
+                        await channel.send(
+                            embed=player_embed,
+                        )
 
             await asyncio.sleep(0.5)  # sleeps for number of seconds (avoid rate limit)
 

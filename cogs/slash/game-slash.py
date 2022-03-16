@@ -6,7 +6,7 @@ from modals.modals import (
     ValorantWatchModal,
     ValorantFeederMessageModal,
     ValorantFeederImageModal,
-    ValorantStreakerMessageModal
+    ValorantStreakerMessageModal,
 )
 
 
@@ -95,13 +95,15 @@ class ValorantAdmin(commands.Cog):
         content = await valorant_helper.set_role(self.bot, inter, role)
         await inter.edit_original_message(content=content)
 
+    customise_options = commands.option_enum(["add", "show", "delete"])
+
     @commands.slash_command(
         name="feeder-message",
         description="custom message for feeder alert functions",
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def feeder_message(
-        self, inter: disnake.ApplicationCommandInteraction, option: str
+        self, inter: disnake.ApplicationCommandInteraction, option: customise_options
     ):
         """custom feeder messages functions"""
         if option == "add":
@@ -121,22 +123,13 @@ class ValorantAdmin(commands.Cog):
                 content=f"use /feeder-message <add | show | delete>"
             )
 
-    @feeder_message.autocomplete("option")
-    async def feeder_message_autocomplete(
-        self, inter: disnake.ApplicationCommandInteraction, string: str
-    ):
-        string = string.lower()
-        return [
-            option for option in ["add", "show", "delete"] if string in option.lower()
-        ]
-
     @commands.slash_command(
         name="feeder-image",
         description="custom image for feeder alert functions",
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def feeder_image(
-        self, inter: disnake.ApplicationCommandInteraction, option: str
+        self, inter: disnake.ApplicationCommandInteraction, option: customise_options
     ):
         """custom feeder images functions"""
         if option == "add":
@@ -156,26 +149,19 @@ class ValorantAdmin(commands.Cog):
                 content=f"use /feeder-image <add | show | delete>"
             )
 
-    @feeder_image.autocomplete("option")
-    async def feeder_image_autocomplete(
-        self, inter: disnake.ApplicationCommandInteraction, string: str
-    ):
-        string = string.lower()
-        return [
-            option for option in ["add", "show", "delete"] if string in option.lower()
-        ]
-
     @commands.slash_command(
         name="streaker-message",
         description="custom message for streaker alert functions",
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def streaker_message(
-        self, inter: disnake.ApplicationCommandInteraction, option: str
+        self, inter: disnake.ApplicationCommandInteraction, option: customise_options
     ):
         """custom streaker messages functions"""
         if option == "add":
-            await inter.response.send_modal(modal=ValorantStreakerMessageModal(self.bot))
+            await inter.response.send_modal(
+                modal=ValorantStreakerMessageModal(self.bot)
+            )
         elif option == "show":
             await inter.response.defer()
             content, embed, view = await valorant_helper.streaker_message_show(
@@ -184,21 +170,14 @@ class ValorantAdmin(commands.Cog):
             await inter.edit_original_message(content=content, embed=embed, view=view)
         elif option == "delete" or option == "del":
             await inter.response.defer()
-            content, view = await valorant_helper.streaker_message_delete(self.bot, inter)
+            content, view = await valorant_helper.streaker_message_delete(
+                self.bot, inter
+            )
             await inter.edit_original_message(content=content, view=view)
         else:
             await inter.response.send_message(
                 content=f"use /streaker-message <add | show | delete>"
             )
-
-    @streaker_message.autocomplete("option")
-    async def streaker_message_autocomplete(
-        self, inter: disnake.ApplicationCommandInteraction, string: str
-    ):
-        string = string.lower()
-        return [
-            option for option in ["add", "show", "delete"] if string in option.lower()
-        ]
 
 
 def setup(bot: commands.Bot):
