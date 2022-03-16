@@ -103,38 +103,46 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         content = await valorant_helper.set_role(self.bot, ctx, role)
         await ctx.send(content=content)
 
-    @commands.command(
+    @commands.group(
         name="feeder-message",
         aliases=["feedermessage", "feeder-msg", "feedermsg"],
         description="custom feeder messages functions",
+        invoke_without_command=True,
+    )
+    async def feeder_message(self, ctx: commands.Context):
+        await ctx.send(
+            content="custom message for the feeder alert. options: add, show, delete"
+        )
+
+    @feeder_message.command(
+        name="add", description="add custom messages for the feeder alert"
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def feeder_message(
-        self, ctx: commands.Context, option: str = None, new_message: str = None
-    ):
-        """custom feeder messages functions"""
-        if option == "add":
-            if new_message:
-                out = await valorant_helper.feeder_message_add(
-                    self.bot, ctx, new_message
-                )
-                await ctx.send(out)
-            else:
-                await ctx.send(
-                    content=f'use {ctx.prefix}feeder-message add "<new message>" (include the "") '
-                )
-        elif option == "show":
-            content, embed, view = await valorant_helper.feeder_message_show(
-                self.bot, ctx
-            )
-            await ctx.send(content=content, embed=embed, view=view)
-        elif option == "delete" or option == "del":
-            content, view = await valorant_helper.feeder_message_delete(self.bot, ctx)
-            await ctx.send(content=content, view=view)
+    async def feeder_message_add(self, ctx: commands.Context, new_message: str = None):
+        if new_message:
+            out = await valorant_helper.feeder_message_add(self.bot, ctx, new_message)
+            await ctx.send(out)
         else:
             await ctx.send(
-                content=f"use {ctx.prefix}feeder-message <add | show | delete>"
+                content=f'use {ctx.prefix}feeder-message add "<new message>" (include the "") '
             )
+
+    @feeder_message.command(
+        name="show", description="show custom messages for the feeder alert"
+    )
+    async def feeder_message_show(self, ctx: commands.Context):
+        content, embed, view = await valorant_helper.feeder_message_show(self.bot, ctx)
+        await ctx.send(content=content, embed=embed, view=view)
+
+    @feeder_message.command(
+        name="delete",
+        aliases=["del", "remove"],
+        description="delete custom messages for the feeder alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def feeder_message_delete(self, ctx: commands.Context):
+        content, view = await valorant_helper.feeder_message_delete(self.bot, ctx)
+        await ctx.send(content=content, view=view)
 
     @commands.command(
         name="feeder-image",
