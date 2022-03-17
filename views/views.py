@@ -160,6 +160,7 @@ class FeederImagesView(disnake.ui.View):
         # Adds the dropdown to our view object.
         self.add_item(FeederImages(message))
 
+
 class StreakerMessages(disnake.ui.Select):
     def __init__(self, message):
 
@@ -187,7 +188,9 @@ class StreakerMessages(disnake.ui.Select):
         guild_data = json_helper.load("guildData.json")
         for i in sorted(self.values, reverse=True):
             del self.streaker_messages[int(i)]
-        guild_data[str(self.message.guild.id)]["streaker_messages"] = self.streaker_messages
+        guild_data[str(self.message.guild.id)][
+            "streaker_messages"
+        ] = self.streaker_messages
         json_helper.save(guild_data, "guildData.json")
         await inter.edit_original_message(
             content=f"successfully deleted {len(self.values)} custom messages",
@@ -201,3 +204,33 @@ class StreakerMessagesView(disnake.ui.View):
 
         # Adds the dropdown to our view object.
         self.add_item(StreakerMessages(message))
+
+
+class HelpDropdown(disnake.ui.Select):
+    def __init__(self, embeds, cogs) -> None:
+        
+        self.embeds = embeds
+        self.cogs = cogs
+        self.embed_count = 0
+
+        options = [
+            disnake.SelectOption(label=i, description=message)
+            for i, message in enumerate(cogs)
+        ]
+
+        super().__init__(
+            placeholder="choose category to show...",
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+        
+    async def callback(self, inter: disnake.MessageInteraction):
+        embed = self.embeds[int(self.values[0])]
+        await inter.response.edit_message(embed=embed, view=HelpView(self.embeds, self.cogs))
+
+class HelpView(disnake.ui.View):
+    def __init__(self, embeds, cogs):
+        super().__init__()
+
+        self.add_item(HelpDropdown(embeds, cogs))

@@ -6,7 +6,7 @@ import random
 from helpers import general_helper
 
 
-class General(commands.Cog, name="general"):
+class General(commands.Cog, name="general-prefix"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 

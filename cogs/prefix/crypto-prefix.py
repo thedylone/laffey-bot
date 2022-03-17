@@ -4,7 +4,7 @@ from disnake.ext import commands
 from helpers import crypto_helper
 
 
-class Crypto(commands.Cog, name="crypto"):
+class Crypto(commands.Cog, name="crypto-prefix"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 

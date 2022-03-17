@@ -8,6 +8,7 @@ import disnake
 from disnake.ext import commands
 
 from helpers import json_helper
+from cogs.help import help
 
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found!")
@@ -32,6 +33,7 @@ bot = commands.Bot(
     command_prefix=get_prefix,
     intents=disnake.Intents.default(),
     test_guilds=config["guilds"],
+    help_command=help.Help()
 )
 
 

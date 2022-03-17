@@ -4,7 +4,7 @@ from disnake.ext import commands
 from helpers import valorant_helper
 
 
-class Valorant(commands.Cog, name="valorant"):
+class Valorant(commands.Cog, name="valorant-prefix"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
