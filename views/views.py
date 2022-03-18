@@ -206,16 +206,19 @@ class StreakerMessagesView(disnake.ui.View):
         self.add_item(StreakerMessages(message))
 
 
-class HelpDropdown(disnake.ui.Select):
-    def __init__(self, embeds, cogs) -> None:
-        
-        self.embeds = embeds
-        self.cogs = cogs
-        self.embed_count = 0
+class PageSelect(disnake.ui.Select):
+    def __init__(self, embeds_dict) -> None:
+        """{name: {description: [str], emoji: [emoji], embed: [embed]}}"""
+
+        self.embeds_dict = embeds_dict
 
         options = [
-            disnake.SelectOption(label=i, description=message)
-            for i, message in enumerate(cogs)
+            disnake.SelectOption(
+                label=name,
+                description=embeds_dict[name]["description"],
+                emoji=embeds_dict[name]["emoji"],
+            )
+            for name in embeds_dict
         ]
 
         super().__init__(
@@ -224,13 +227,60 @@ class HelpDropdown(disnake.ui.Select):
             max_values=1,
             options=options,
         )
-        
-    async def callback(self, inter: disnake.MessageInteraction):
-        embed = self.embeds[int(self.values[0])]
-        await inter.response.edit_message(embed=embed, view=HelpView(self.embeds, self.cogs))
 
-class HelpView(disnake.ui.View):
-    def __init__(self, embeds, cogs):
+    async def callback(self, inter: disnake.MessageInteraction):
+        embed = self.embeds_dict[self.values[0]]["embed"]
+        await inter.response.edit_message(embed=embed, view=PageView(self.embeds_dict))
+
+
+class PageView(disnake.ui.View):
+    """{name: {description: [str], emoji: [emoji], embed: [embed]}}"""
+
+    def __init__(self, embeds_dict):
         super().__init__()
 
-        self.add_item(HelpDropdown(embeds, cogs))
+        self.add_item(PageSelect(embeds_dict))
+
+
+class HelpSelect(disnake.ui.Select):
+    def __init__(self, help_command, embeds_dict) -> None:
+        """{name: {description: [str], emoji: [emoji]}}"""
+
+        self.embeds_dict = embeds_dict
+        self.help_command = help_command
+        self.current_embed = ""
+
+        options = [
+            disnake.SelectOption(
+                label=name,
+                description=embeds_dict[name]["description"],
+                emoji=embeds_dict[name]["emoji"],
+            )
+            for name in embeds_dict
+        ]
+
+        super().__init__(
+            placeholder="choose category to show...",
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+
+    async def callback(self, inter: disnake.MessageInteraction):
+        if self.current_embed != self.values[0]:
+            self.current_embed = self.values[0]
+            embed = await self.help_command.cog_help_embed(
+                self.help_command.context.bot.get_cog(self.values[0])
+            )
+            await inter.response.edit_message(
+                embed=embed, view=HelpView(self.help_command, self.embeds_dict)
+            )
+
+
+class HelpView(disnake.ui.View):
+    """{name: {description: [str], emoji: [emoji]}}"""
+
+    def __init__(self, help_command, embeds_dict):
+        super().__init__()
+
+        self.add_item(HelpSelect(help_command, embeds_dict))

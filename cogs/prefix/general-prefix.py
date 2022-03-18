@@ -6,7 +6,10 @@ import random
 from helpers import general_helper
 
 
-class General(commands.Cog, name="general-prefix"):
+class General(commands.Cog, name="general"):
+    """miscellaneous bot commands"""
+    COG_EMOJI = "🤖"
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -35,6 +38,9 @@ class General(commands.Cog, name="general-prefix"):
 
 
 class GeneralAdmin(commands.Cog, name="general admin"):
+    """bot admin commands"""
+    COG_EMOJI = "📃"
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 

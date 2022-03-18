@@ -4,7 +4,10 @@ from disnake.ext import commands
 from helpers import valorant_helper
 
 
-class Valorant(commands.Cog, name="valorant-prefix"):
+class Valorant(commands.Cog, name="valorant"):
+    """valorant related commands"""
+    COG_EMOJI = "🕹️"
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -76,6 +79,9 @@ class Valorant(commands.Cog, name="valorant-prefix"):
 
 
 class ValorantAdmin(commands.Cog, name="valorant admin"):
+    """valorant admin commands"""
+    COG_EMOJI = "🎮"
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -120,6 +126,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def feeder_message_add(self, ctx: commands.Context, new_message: str = None):
+        """add custom messages for the feeder alert"""
         if new_message:
             out = await valorant_helper.feeder_message_add(self.bot, ctx, new_message)
             await ctx.send(out)
@@ -132,6 +139,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         name="show", description="show custom messages for the feeder alert"
     )
     async def feeder_message_show(self, ctx: commands.Context):
+        """show custom messages for the feeder aler"""
         content, embed, view = await valorant_helper.feeder_message_show(self.bot, ctx)
         await ctx.send(content=content, embed=embed, view=view)
 
@@ -142,6 +150,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def feeder_message_delete(self, ctx: commands.Context):
+        """delete custom messages for the feeder alert"""
         content, view = await valorant_helper.feeder_message_delete(self.bot, ctx)
         await ctx.send(content=content, view=view)
 
@@ -162,6 +171,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def feeder_image_add(self, ctx: commands.Context, new_image: str = None):
+        """add custom images for the feeder alert"""
         if new_image:
             out = await valorant_helper.feeder_image_add(self.bot, ctx, new_image)
             await ctx.send(out)
@@ -174,6 +184,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         name="show", description="show custom images for the feeder alert"
     )
     async def feeder_image_show(self, ctx: commands.Context):
+        """show custom images for the feeder alert"""
         content, embed, view = await valorant_helper.feeder_image_show(self.bot, ctx)
         await ctx.send(content=content, embed=embed, view=view)
 
@@ -184,6 +195,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def feeder_image_delete(self, ctx: commands.Context):
+        """delete custom images for the feeder alert"""
         content, view = await valorant_helper.feeder_image_delete(self.bot, ctx)
         await ctx.send(content=content, view=view)
 
@@ -204,6 +216,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def streaker_message_add(self, ctx: commands.Context, new_message: str = None):
+        """add custom messages for the streaker alert"""
         if new_message:
             out = await valorant_helper.streaker_message_add(self.bot, ctx, new_message)
             await ctx.send(out)
@@ -216,6 +229,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         name="show", description="show custom messages for the streaker alert"
     )
     async def streaker_message_show(self, ctx: commands.Context):
+        """show custom messages for the streaker alert"""
         content, embed, view = await valorant_helper.streaker_message_show(self.bot, ctx)
         await ctx.send(content=content, embed=embed, view=view)
 
@@ -226,6 +240,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def streaker_message_delete(self, ctx: commands.Context):
+        """delete custom messages for the streaker alert"""
         content, view = await valorant_helper.streaker_message_delete(self.bot, ctx)
         await ctx.send(content=content, view=view)
 

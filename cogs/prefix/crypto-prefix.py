@@ -4,7 +4,10 @@ from disnake.ext import commands
 from helpers import crypto_helper
 
 
-class Crypto(commands.Cog, name="crypto-prefix"):
+class Crypto(commands.Cog, name="crypto"):
+    """crypto related commands"""
+    COG_EMOJI = "🪙"
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
