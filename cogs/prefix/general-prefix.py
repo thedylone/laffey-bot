@@ -30,6 +30,12 @@ class General(commands.Cog, name="general"):
         content, embed, view = await general_helper.peko(ctx)
         await ctx.send(content=content, embed=embed, view=view)
 
+    @commands.command(name="fubu", description="fubu")
+    async def fubu(self, ctx: commands.Context):
+        """fubu"""
+        content, embed, view = await general_helper.fubu(ctx)
+        await ctx.send(content=content, embed=embed, view=view)
+
     @commands.command(name="holo", description="all live hololive streams")
     async def holo(self, ctx: commands.Context):
         """all live hololive streams"""
