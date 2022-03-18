@@ -6,6 +6,7 @@ import disnake
 from disnake.ext import commands
 
 from helpers import db_helper
+from cogs.help import help
 
 
 async def get_prefix(bot, message):
@@ -26,6 +27,7 @@ async def get_prefix(bot, message):
 bot = commands.Bot(
     command_prefix=get_prefix,
     intents=disnake.Intents.default(),
+    help_command=help.Help()
 )
 
 
