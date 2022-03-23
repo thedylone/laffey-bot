@@ -92,6 +92,7 @@ async def fubudex(message, url, params, headers):
                     ).set_thumbnail(
                         url="https://hololive.hololivepro.com/wp-content/themes/hololive/images/head_l.png"
                     )
+                    has_mention = False
                     mention_embed = disnake.Embed(
                         title="mentioned streams",
                         description="not on their channels",
@@ -123,6 +124,7 @@ async def fubudex(message, url, params, headers):
                                 inline=False,
                             )
                         else:
+                            has_mention = True
                             mention_embed.add_field(
                                 name=video["channel"]["name"],
                                 value=f"{video['status']}: [{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
@@ -146,11 +148,12 @@ async def fubudex(message, url, params, headers):
                             inline=False,
                         )
 
-                    embeds_dict["mention"] = {
-                        "description": "videos not on the channels but they are mentioned",
-                        "emoji": "💬",
-                        "embed": mention_embed,
-                    }
+                    if has_mention:
+                        embeds_dict["mention"] = {
+                            "description": "videos not on the channels but they are mentioned",
+                            "emoji": "💬",
+                            "embed": mention_embed,
+                        }
                     return None, home_embed, PageView(embeds_dict)
                 else:
                     embed = disnake.Embed(
