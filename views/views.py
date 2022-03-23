@@ -212,15 +212,15 @@ class StreakerMessagesView(disnake.ui.View):
 
 class PageSelect(disnake.ui.Select):
     def __init__(self, embeds_dict) -> None:
-        """{name: {description: [str], emoji: [emoji], embed: [embed]}}"""
+        """{name: {description: [str], emoji: [emoji], embed: [embed], color: hex}}"""
 
         self.embeds_dict = embeds_dict
 
         options = [
             disnake.SelectOption(
                 label=name,
-                description=embeds_dict[name]["description"],
-                emoji=embeds_dict[name]["emoji"],
+                description=embeds_dict[name].get("description", "..."),
+                emoji=embeds_dict[name].get("emoji", None),
             )
             for name in embeds_dict
         ]
@@ -257,8 +257,8 @@ class HelpSelect(disnake.ui.Select):
         options = [
             disnake.SelectOption(
                 label=name,
-                description=embeds_dict[name]["description"],
-                emoji=embeds_dict[name]["emoji"],
+                description=embeds_dict[name].get("description", "..."),
+                emoji=embeds_dict[name].get("emoji"),
             )
             for name in embeds_dict
         ]
