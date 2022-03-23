@@ -64,10 +64,10 @@ async def fubudex(message, url, params, headers):
     """returns [content, embed, view]"""
 
     id_name_convert = {
-        "UC1DCedRgGHBdm81E1llLhOQ": {"name": "Pekora Ch. 兎田ぺこら", "emoji": "👯"},
-        "UCdn5BQ06XqgXoAxIhbqw5Rg": {"name": "フブキCh。白上フブキ", "emoji": "🌽"},
-        "UC5CwaMl1eIgY8h02uZw7u8A": {"name": "Suisei Channel", "emoji": "☄️"},
-        "UChAnqc_AY5_I3Px5dig3X1Q": {"name": "Korone Ch. 戌神ころね", "emoji": "🥐"},
+        "UC1DCedRgGHBdm81E1llLhOQ": {"name": "Pekora Ch. 兎田ぺこら", "emoji": "👯", "color": 0x64ffff},
+        "UCdn5BQ06XqgXoAxIhbqw5Rg": {"name": "フブキCh。白上フブキ", "emoji": "🌽", "color": 0x64ffff},
+        "UC5CwaMl1eIgY8h02uZw7u8A": {"name": "Suisei Channel", "emoji": "☄️", "color": 0x0064ff},
+        "UChAnqc_AY5_I3Px5dig3X1Q": {"name": "Korone Ch. 戌神ころね", "emoji": "🥐", "color": 0xffff00},
     }
 
     async with aiohttp.ClientSession() as session:
@@ -133,6 +133,7 @@ async def fubudex(message, url, params, headers):
 
                     for channel in channel_data:
                         if channel_data[channel]["name"]:
+                            channel_data[channel]["embed"].color = id_name_convert[channel]["color"]
                             embeds_dict[channel_data[channel]["name"]] = {
                                 "description": "hololive",
                                 "emoji": id_name_convert[channel]["emoji"],
