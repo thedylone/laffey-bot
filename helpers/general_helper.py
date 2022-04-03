@@ -4,6 +4,7 @@ from disnake.ext import commands
 import os
 import aiohttp
 import re
+import dateutil.parser as dp
 
 from views.views import Menu, PageView
 
@@ -34,7 +35,7 @@ async def holodex(message, url, params, headers):
                             pattern = "\[|\]"
                             embed.add_field(
                                 name=video["channel"]["name"],
-                                value=f"{video['status']}: [{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
+                                value=f"{video['status']} <t:{int(dp.parse(video['start_scheduled']).timestamp())}:R>: [{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
                                 inline=False,
                             )
                         embeds.append(embed)
@@ -64,10 +65,26 @@ async def fubudex(message, url, params, headers):
     """returns [content, embed, view]"""
 
     id_name_convert = {
-        "UC1DCedRgGHBdm81E1llLhOQ": {"name": "Pekora Ch. 兎田ぺこら", "emoji": "👯", "color": 0x64ffff},
-        "UCdn5BQ06XqgXoAxIhbqw5Rg": {"name": "フブキCh。白上フブキ", "emoji": "🌽", "color": 0x64ffff},
-        "UC5CwaMl1eIgY8h02uZw7u8A": {"name": "Suisei Channel", "emoji": "☄️", "color": 0x0064ff},
-        "UChAnqc_AY5_I3Px5dig3X1Q": {"name": "Korone Ch. 戌神ころね", "emoji": "🥐", "color": 0xffff00},
+        "UC1DCedRgGHBdm81E1llLhOQ": {
+            "name": "Pekora Ch. 兎田ぺこら",
+            "emoji": "👯",
+            "color": 0x64FFFF,
+        },
+        "UCdn5BQ06XqgXoAxIhbqw5Rg": {
+            "name": "フブキCh。白上フブキ",
+            "emoji": "🌽",
+            "color": 0x64FFFF,
+        },
+        "UC5CwaMl1eIgY8h02uZw7u8A": {
+            "name": "Suisei Channel",
+            "emoji": "☄️",
+            "color": 0x0064FF,
+        },
+        "UChAnqc_AY5_I3Px5dig3X1Q": {
+            "name": "Korone Ch. 戌神ころね",
+            "emoji": "🥐",
+            "color": 0xFFFF00,
+        },
     }
 
     async with aiohttp.ClientSession() as session:
@@ -120,20 +137,22 @@ async def fubudex(message, url, params, headers):
                             )
                             channel_data[video_channel]["embed"].add_field(
                                 name=video["status"],
-                                value=f"[{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
+                                value=f"<t:{int(dp.parse(video['start_scheduled']).timestamp())}:R>: [{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
                                 inline=False,
                             )
                         else:
                             has_mention = True
                             mention_embed.add_field(
                                 name=video["channel"]["name"],
-                                value=f"{video['status']}: [{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
+                                value=f"{video['status']} <t:{int(dp.parse(video['start_scheduled']).timestamp())}:R>: [{re.sub(pattern,'',video['title'])}](https://www.youtube.com/watch?v={video['id']})",
                                 inline=True,
                             )
 
                     for channel in channel_data:
                         if channel_data[channel]["name"]:
-                            channel_data[channel]["embed"].color = id_name_convert[channel]["color"]
+                            channel_data[channel]["embed"].color = id_name_convert[
+                                channel
+                            ]["color"]
                             embeds_dict[channel_data[channel]["name"]] = {
                                 "description": "hololive",
                                 "emoji": id_name_convert[channel]["emoji"],
