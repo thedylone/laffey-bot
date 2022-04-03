@@ -1,4 +1,4 @@
 aiohttp
 disnake
 asyncpg
-dateutil
+python-dateutil
