@@ -11,16 +11,63 @@ from helpers import json_helper
 
 async def ping(bot: commands.Bot, message):
     """pings role and sends optional image"""
-    """returns [content, file]"""
+    """returns [content, embed, file]"""
     guild_id = message.guild.id
     if "ping_role" not in bot.guild_data[str(guild_id)]:
         return (
             f"please set the role to ping first using {message.prefix if isinstance(message, commands.Context) else '/'}set-role!",
             None,
+            None,
         )
     else:
         ping_role = bot.guild_data[str(guild_id)]["ping_role"]
-        return f"<@&{ping_role}>", disnake.File("jewelsignal.jpg")
+        if (
+            "ping_image" in bot.guild_data[str(guild_id)]
+            and bot.guild_data[str(guild_id)]["ping_image"]
+        ):
+            url = bot.guild_data[str(guild_id)]["ping_image"]
+            embed = disnake.Embed().set_image(url=url)
+            return f"<@&{ping_role}>", embed, None
+        return f"<@&{ping_role}>", None, disnake.File("jewelsignal.jpg")
+
+
+async def ping_image_add(bot: commands.Bot, message, new_image: str):
+    """add custom image for ping"""
+    if len(new_image) > 100:
+        return "url is too long!"
+    guild = message.guild
+    bot.guild_data[str(guild.id)]["ping_image"] = new_image
+    json_helper.save(bot.guild_data, "guildData.json")
+    return f"successfully added custom ping image for `{guild}`"
+
+
+async def ping_image_show(bot: commands.Bot, message):
+    """show custom image for ping"""
+    """returns content, embed"""
+    guild = message.guild
+    if (
+        "ping_image" not in bot.guild_data[str(guild.id)]
+        or not bot.guild_data[str(guild.id)]["ping_image"]
+    ):
+        return (
+            f'no custom images for `{guild}`! add using {message.prefix if isinstance(message, commands.Context) else "/"}ping-image add "<custom image>"!',
+            None,
+        )
+    ping_image = bot.guild_data[str(guild.id)]["ping_image"]
+    embed = disnake.Embed(
+        title="custom ping image",
+        description="image sent with the ping",
+    )
+    embed.set_image(url=ping_image)
+    return None, embed
+
+
+async def ping_image_delete(bot: commands.Bot, message):
+    """delete custom image for ping"""
+    """returns content"""
+    guild = message.guild
+    bot.guild_data[str(guild.id)].pop("ping_image", None)
+    return "ping image succesfully deleted"
 
 
 async def info(bot: commands.Bot, message, user):
@@ -384,6 +431,7 @@ async def feeder_image_delete(bot: commands.Bot, message):
     else:
         view = FeederImagesView(message)
         return "choose images to delete", view
+
 
 async def streaker_message_add(bot: commands.Bot, message, new_message: str):
     """add custom message for streaker alert"""
