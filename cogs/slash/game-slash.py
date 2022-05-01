@@ -4,6 +4,7 @@ from disnake.ext import commands
 from helpers import valorant_helper
 from modals.modals import (
     ValorantWatchModal,
+    ValorantPingImageModal,
     ValorantFeederMessageModal,
     ValorantFeederImageModal,
     ValorantStreakerMessageModal,
@@ -96,6 +97,30 @@ class ValorantAdmin(commands.Cog):
         await inter.edit_original_message(content=content)
 
     customise_options = commands.option_enum(["add", "show", "delete"])
+
+    @commands.slash_command(
+        name="ping-image",
+        description="custom image for ping alert functions",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def ping_image(
+        self, inter: disnake.ApplicationCommandInteraction, option: customise_options
+    ):
+        """custom ping images functions"""
+        if option == "add":
+            await inter.response.send_modal(modal=ValorantPingImageModal(self.bot))
+        elif option == "show":
+            await inter.response.defer()
+            content, embed = await valorant_helper.ping_image_show(self.bot, inter)
+            await inter.edit_original_message(content=content, embed=embed)
+        elif option == "delete" or option == "del":
+            await inter.response.defer()
+            content = await valorant_helper.ping_image_delete(self.bot, inter)
+            await inter.edit_original_message(content=content)
+        else:
+            await inter.response.send_message(
+                content=f"use /ping-image <add | show | delete>"
+            )
 
     @commands.slash_command(
         name="feeder-message",
