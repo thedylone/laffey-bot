@@ -6,6 +6,7 @@ from helpers import valorant_helper
 
 class Valorant(commands.Cog, name="valorant"):
     """valorant related commands"""
+
     COG_EMOJI = "🕹️"
 
     def __init__(self, bot: commands.Bot):
@@ -19,8 +20,8 @@ class Valorant(commands.Cog, name="valorant"):
     @commands.guild_only()
     async def valorant_ping(self, ctx: commands.Context):
         """pings role and sends optional image"""
-        content, file = await valorant_helper.ping(self.bot, ctx)
-        await ctx.send(content=content, file=file)
+        content, embed, file = await valorant_helper.ping(self.bot, ctx)
+        await ctx.send(content=content, embed=embed, file=file)
 
     @commands.command(
         name="valorant-info",
@@ -80,6 +81,7 @@ class Valorant(commands.Cog, name="valorant"):
 
 class ValorantAdmin(commands.Cog, name="valorant admin"):
     """valorant admin commands"""
+
     COG_EMOJI = "🎮"
 
     def __init__(self, bot: commands.Bot):
@@ -107,6 +109,47 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     async def set_role(self, ctx: commands.Context, role: disnake.Role = None):
         "set the role the bot will ping"
         content = await valorant_helper.set_role(self.bot, ctx, role)
+        await ctx.send(content=content)
+
+    @commands.group(
+        name="ping-image",
+        aliases=["pingimage", "ping-img", "pingimg"],
+        description="custom ping image functions",
+        invoke_without_command=True,
+    )
+    async def ping_image(self, ctx: commands.Context):
+        """custom image for the ping alert"""
+        await ctx.send(
+            content="custom image for the ping alert. options: add, show, delete"
+        )
+
+    @ping_image.command(name="add", description="add custom image for the ping alert")
+    @commands.has_guild_permissions(manage_messages=True)
+    async def ping_image_add(self, ctx: commands.Context, new_image: str = None):
+        """add custom image for the ping alert"""
+        if new_image:
+            content = await valorant_helper.ping_image_add(self.bot, ctx, new_image)
+            await ctx.send(content=content)
+        else:
+            await ctx.send(
+                content=f'use {ctx.prefix}ping-image add "<new image url>" (include the "") '
+            )
+
+    @ping_image.command(name="show", description="show custom image for the ping alert")
+    async def ping_image_show(self, ctx: commands.Context):
+        """show custom image for the ping alert"""
+        content, embed = await valorant_helper.ping_image_show(self.bot, ctx)
+        await ctx.send(content=content, embed=embed)
+
+    @ping_image.command(
+        name="delete",
+        aliases=["del", "remove"],
+        description="delete custom image for the ping alert",
+    )
+    @commands.has_guild_permissions(manage_messages=True)
+    async def ping_image_delete(self, ctx: commands.Context):
+        """delete custom image for the ping alert"""
+        content = await valorant_helper.ping_image_delete(self.bot, ctx)
         await ctx.send(content=content)
 
     @commands.group(
@@ -215,7 +258,9 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         name="add", description="add custom messages for the streaker alert"
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def streaker_message_add(self, ctx: commands.Context, new_message: str = None):
+    async def streaker_message_add(
+        self, ctx: commands.Context, new_message: str = None
+    ):
         """add custom messages for the streaker alert"""
         if new_message:
             out = await valorant_helper.streaker_message_add(self.bot, ctx, new_message)
@@ -230,7 +275,9 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     async def streaker_message_show(self, ctx: commands.Context):
         """show custom messages for the streaker alert"""
-        content, embed, view = await valorant_helper.streaker_message_show(self.bot, ctx)
+        content, embed, view = await valorant_helper.streaker_message_show(
+            self.bot, ctx
+        )
         await ctx.send(content=content, embed=embed, view=view)
 
     @streaker_message.command(

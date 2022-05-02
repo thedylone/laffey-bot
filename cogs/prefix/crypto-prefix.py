@@ -6,6 +6,7 @@ from helpers import crypto_helper
 
 class Crypto(commands.Cog, name="crypto"):
     """crypto related commands"""
+
     COG_EMOJI = "🪙"
 
     def __init__(self, bot: commands.Bot):

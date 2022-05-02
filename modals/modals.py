@@ -38,6 +38,35 @@ class ValorantWatchModal(disnake.ui.Modal):
         await inter.edit_original_message(content="Oops, something went wrong.")
 
 
+class ValorantPingImageModal(disnake.ui.Modal):
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot = bot
+        components = [
+            disnake.ui.TextInput(
+                label="Custom Image URL",
+                placeholder="url of custom image for ping alert",
+                custom_id="url",
+                style=disnake.TextInputStyle.short,
+                max_length=100,
+            ),
+        ]
+        super().__init__(
+            title="valorant ping image",
+            custom_id="valorant_ping_image",
+            components=components,
+        )
+
+    async def callback(self, inter: disnake.ModalInteraction) -> None:
+        await inter.response.defer()
+        content = await valorant_helper.ping_image_add(
+            self.bot, inter, inter.text_values["url"]
+        )
+        await inter.edit_original_message(content=content)
+
+    async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
+        await inter.edit_original_message(content="Oops, something went wrong.")
+
+
 class ValorantFeederMessageModal(disnake.ui.Modal):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
