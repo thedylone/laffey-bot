@@ -29,17 +29,19 @@ class Background(commands.Cog):
                 # del self.bot.player_data[user_id]
                 # json_helper.save(self.bot.player_data, "playerData.json")
                 continue
-            user_data = self.bot.player_data[user_id]
-            user_puuid = user_data["puuid"]
-            user_region = user_data["region"]
-            user_guild = user_data["guild"]
+            user_data = self.bot.player_data.get(user_id)
+            user_puuid = user_data.get("puuid")
+            user_region = user_data.get("region")
+            user_guild = user_data.get("guild")
             channel = player_user
             channel_safe = False
 
             guild_exists = self.bot.get_guild(user_guild)
             if guild_exists in self.bot.guilds:
                 # check if bot is still in the guild
-                watch_channel_id = self.bot.guild_data[str(user_guild)]["watch_channel"]
+                watch_channel_id = self.bot.guild_data[str(user_guild)].get(
+                    "watch_channel"
+                )
                 channel_exists = self.bot.get_channel(watch_channel_id)
                 guild_exists_channels = guild_exists.text_channels
                 if channel_exists in guild_exists_channels:
@@ -70,15 +72,16 @@ class Background(commands.Cog):
                     if match_request.status != 200:
                         continue
                     match_data = await match_request.json()
-                for latest_game in match_data["data"]:
-                    start_time = latest_game["metadata"]["game_start"]  # given in s
-                    duration = (
-                        latest_game["metadata"]["game_length"] / 1000
-                    )  # given in ms
+                for latest_game in match_data.get("data"):
+                    metadata = latest_game.get("metadata")
+                    if not metadata:
+                        continue
+                    start_time = metadata.get("game_start")  # given in s
+                    duration = metadata.get("game_length") / 1000  # given in ms
                     recent_time = start_time + duration + 100
-                    if user_data["lastTime"] >= recent_time:
+                    if user_data.get("lastTime") >= recent_time:
                         break  # if stored latest is more recent than latest game played, break and skip user
-                    mode = latest_game["metadata"]["mode"]
+                    mode = metadata.get("mode")
                     if mode == "Deathmatch":
                         continue
                     party_red = []
@@ -86,51 +89,51 @@ class Background(commands.Cog):
                     feeders = {}
                     rounds_played = rounds_red = rounds_blue = 0
                     is_surrendered = False
-                    for round in latest_game["rounds"]:
-                        if round["end_type"] == "Surrendered":
+                    for round in latest_game.get("rounds"):
+                        if round.get("end_type") == "Surrendered":
                             is_surrendered = True
                         else:
                             rounds_played += 1
-                        rounds_red += round["winning_team"] == "Red"
-                        rounds_blue += round["winning_team"] == "Blue"
-                    for player in latest_game["players"]["all_players"]:
+                        rounds_red += round.get("winning_team") == "Red"
+                        rounds_blue += round.get("winning_team") == "Blue"
+                    for player in latest_game.get("players").get("all_players"):
                         for player_id in self.bot.player_data:
                             if (
                                 player_id == user_id
-                                and player["puuid"] == user_puuid
+                                and player.get("puuid") == user_puuid
                                 or user_guild > 0
-                                and player["puuid"]
-                                == self.bot.player_data[player_id]["puuid"]
-                                and self.bot.player_data[player_id]["guild"]
+                                and player.get("puuid")
+                                == self.bot.player_data[player_id].get("puuid")
+                                and self.bot.player_data[player_id].get("guild")
                                 == user_guild
                             ):  # detects if multiple watched users who "watched" in the same guild (not 0) are in the same game
-                                player_stats = player["stats"]
-                                player_acs = player_stats["score"] / rounds_played
-                                team = player["team"]
+                                player_stats = player.get("stats")
+                                player_acs = player_stats.get("score") / rounds_played
+                                team = player.get("team")
                                 if team == "Red":
                                     party_red.append(player_id)
                                 elif team == "Blue":
                                     party_blue.append(player_id)
-                                elif (
-                                    team == self.bot.player_data[player_id]["puuid"]
+                                elif team == self.bot.player_data[player_id].get(
+                                    "puuid"
                                 ):  # deathmatch exception
                                     party_red.append(player_id)
 
-                                map_played = latest_game["metadata"]["map"]
+                                map_played = metadata.get("map")
 
-                                if player_stats["deaths"] >= (
-                                    player_stats["kills"]
-                                    + (1.1 * math.e) ** (player_stats["kills"] / 5)
+                                if player_stats.get("deaths") >= (
+                                    player_stats.get("kills")
+                                    + (1.1 * math.e) ** (player_stats.get("kills") / 5)
                                     + 2.9
                                 ):  # formula for calculating feeding threshold
                                     feeders[player_id] = {
-                                        "kills": player_stats["kills"],
-                                        "deaths": player_stats["deaths"],
-                                        "assists": player_stats["assists"],
+                                        "kills": player_stats.get("kills"),
+                                        "deaths": player_stats.get("deaths"),
+                                        "assists": player_stats.get("assists"),
                                         "acs": int(player_acs),
                                         "kd": "{:.2f}".format(
-                                            player_stats["kills"]
-                                            / player_stats["deaths"]
+                                            player_stats.get("kills")
+                                            / player_stats.get("deaths")
                                         ),
                                     }
 
@@ -138,31 +141,37 @@ class Background(commands.Cog):
                                     # save stats
                                     self.bot.player_data[player_id][
                                         "headshots"
-                                    ] = self.bot.player_data[player_id]["headshots"][
+                                    ] = self.bot.player_data[player_id].get(
+                                        "headshots"
+                                    )[
                                         -4:
                                     ] + [
-                                        player_stats["headshots"]
+                                        player_stats.get("headshots")
                                     ]
 
                                     self.bot.player_data[player_id][
                                         "bodyshots"
-                                    ] = self.bot.player_data[player_id]["bodyshots"][
+                                    ] = self.bot.player_data[player_id].get(
+                                        "bodyshots"
+                                    )[
                                         -4:
                                     ] + [
-                                        player_stats["bodyshots"]
+                                        player_stats.get("bodyshots")
                                     ]
 
                                     self.bot.player_data[player_id][
                                         "legshots"
-                                    ] = self.bot.player_data[player_id]["legshots"][
+                                    ] = self.bot.player_data[player_id].get("legshots")[
                                         -4:
                                     ] + [
-                                        player_stats["legshots"]
+                                        player_stats.get("legshots")
                                     ]
 
                                     self.bot.player_data[player_id][
                                         "acs"
-                                    ] = self.bot.player_data[player_id]["acs"][-4:] + [
+                                    ] = self.bot.player_data[player_id].get("acs")[
+                                        -4:
+                                    ] + [
                                         player_acs
                                     ]
 
@@ -171,9 +180,9 @@ class Background(commands.Cog):
                     ) as map_request:
                         if map_request.status == 200:
                             map_data = await map_request.json()
-                    for map in map_data["maps"]:
-                        if map["name"] == map_played:
-                            map_url = f"https://media.valorant-api.com/maps/{map['id']}/splash.png"
+                    for map in map_data.get("maps"):
+                        if map.get("name") == map_played:
+                            map_url = f"https://media.valorant-api.com/maps/{map.get('id')}/splash.png"
                             break
 
                     if rounds_red == rounds_blue:  # draw
@@ -199,30 +208,27 @@ class Background(commands.Cog):
                             "https://intinc.com/wp-content/uploads/2022/02/INT-Logo-Update_2104.png"
                         ]
                         if user_guild != 0 and str(user_guild) in self.bot.guild_data:
-                            if (
+                            if "feeder_messages" in self.bot.guild_data[
+                                str(user_guild)
+                            ] and self.bot.guild_data[str(user_guild)].get(
                                 "feeder_messages"
-                                in self.bot.guild_data[str(user_guild)]
-                                and self.bot.guild_data[str(user_guild)][
-                                    "feeder_messages"
-                                ]
                             ):
-                                feeder_messages = self.bot.guild_data[str(user_guild)][
-                                    "feeder_messages"
-                                ]
-                            if (
-                                "feeder_images" in self.bot.guild_data[str(user_guild)]
-                                and self.bot.guild_data[str(user_guild)][
-                                    "feeder_images"
-                                ]
+                                feeder_messages = self.bot.guild_data[
+                                    str(user_guild)
+                                ].get("feeder_messages")
+                            if "feeder_images" in self.bot.guild_data[
+                                str(user_guild)
+                            ] and self.bot.guild_data[str(user_guild)].get(
+                                "feeder_images"
                             ):
-                                feeder_images = self.bot.guild_data[str(user_guild)][
-                                    "feeder_images"
-                                ]
+                                feeder_images = self.bot.guild_data[
+                                    str(user_guild)
+                                ].get("feeder_images")
 
                         feeder_values = []
                         for feeder in feeders:
                             feeder_values += [
-                                f"<@{feeder}> finished {feeders[feeder]['kills']}/{feeders[feeder]['deaths']}/{feeders[feeder]['assists']} with an ACS of {feeders[feeder]['acs']}."
+                                f"<@{feeder}> finished {feeders[feeder].get('kills')}/{feeders[feeder].get('deaths')}/{feeders[feeder].get('assists')} with an ACS of {feeders[feeder].get('acs')}."
                             ]
                         player_embed.add_field(
                             name=f"feeder alert❗❗ {random.choice(feeder_messages)}",
@@ -240,11 +246,12 @@ class Background(commands.Cog):
                         if rounds_red != rounds_blue:
                             if rounds_red > rounds_blue:
                                 new_streak = max(
-                                    self.bot.player_data[member_id]["streak"] + 1, 1
+                                    self.bot.player_data[member_id].get("streak") + 1, 1
                                 )
                             elif rounds_red < rounds_blue:
                                 new_streak = min(
-                                    self.bot.player_data[member_id]["streak"] - 1, -1
+                                    self.bot.player_data[member_id].get("streak") - 1,
+                                    -1,
                                 )
                             if abs(new_streak) >= 3:
                                 streak_values += [
@@ -254,7 +261,7 @@ class Background(commands.Cog):
 
                         # sets party members to update last updated time if more recent
                         self.bot.player_data[member_id]["lastTime"] = max(
-                            self.bot.player_data[member_id]["lastTime"], recent_time
+                            self.bot.player_data[member_id].get("lastTime"), recent_time
                         )
                         if member_id in self.bot.valorant_waitlist:
                             combined_waiters += self.bot.valorant_waitlist.pop(
@@ -266,11 +273,12 @@ class Background(commands.Cog):
                         if rounds_red != rounds_blue:
                             if rounds_blue > rounds_red:
                                 new_streak = max(
-                                    self.bot.player_data[member_id]["streak"] + 1, 1
+                                    self.bot.player_data[member_id].get("streak") + 1, 1
                                 )
                             elif rounds_blue < rounds_red:
                                 new_streak = min(
-                                    self.bot.player_data[member_id]["streak"] - 1, -1
+                                    self.bot.player_data[member_id].get("streak") - 1,
+                                    -1,
                                 )
                             if abs(new_streak) >= 3:
                                 streak_values += [
@@ -280,7 +288,7 @@ class Background(commands.Cog):
 
                         # sets party members to update last updated time if more recent
                         self.bot.player_data[member_id]["lastTime"] = max(
-                            self.bot.player_data[member_id]["lastTime"], recent_time
+                            self.bot.player_data[member_id].get("lastTime"), recent_time
                         )
                         if member_id in self.bot.valorant_waitlist:
                             combined_waiters += self.bot.valorant_waitlist.pop(
@@ -290,16 +298,14 @@ class Background(commands.Cog):
                     if streak_values:
                         streak_messages = ["butt ass naked", "cock"]
                         if user_guild != 0 and str(user_guild) in self.bot.guild_data:
-                            if (
+                            if "streak_messages" in self.bot.guild_data[
+                                str(user_guild)
+                            ] and self.bot.guild_data[str(user_guild)].get(
                                 "streak_messages"
-                                in self.bot.guild_data[str(user_guild)]
-                                and self.bot.guild_data[str(user_guild)][
-                                    "streak_messages"
-                                ]
                             ):
-                                feeder_messages = self.bot.guild_data[str(user_guild)][
-                                    "streak_messages"
-                                ]
+                                feeder_messages = self.bot.guild_data[
+                                    str(user_guild)
+                                ].get("streak_messages")
                         player_embed.add_field(
                             name=f"streaker alert 👀👀 {random.choice(streak_messages)}",
                             value="\n".join(streak_values),
