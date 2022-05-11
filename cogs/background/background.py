@@ -39,9 +39,9 @@ class Background(commands.Cog):
             if len(user_data) == 0:
                 continue
             user_data = user_data[0]
-            user_puuid = user_data["puuid"]
-            user_region = user_data["region"]
-            user_guild = user_data["guild_id"]
+            user_puuid = user_data.get("puuid")
+            user_region = user_data.get("region")
+            user_guild = user_data.get("guild")
             channel = player_user
             channel_safe = False
 
@@ -81,19 +81,20 @@ class Background(commands.Cog):
                     if match_request.status != 200:
                         continue
                     match_data = await match_request.json()
-                for latest_game in match_data["data"]:
-                    start_time = latest_game["metadata"]["game_start"]  # given in s
-                    duration = (
-                        latest_game["metadata"]["game_length"] / 1000
-                    )  # given in ms
+                for latest_game in match_data.get("data"):
+                    metadata = latest_game.get("metadata")
+                    if not metadata:
+                        continue
+                    start_time = metadata.get("game_start")  # given in s
+                    duration = metadata.get("game_length") / 1000  # given in ms
                     recent_time = start_time + duration + 100
                     user_data = await db_helper.get_player_data(self.bot, user_id)
                     if len(user_data) == 0:
                         break
                     user_data = user_data[0]
-                    if user_data["lasttime"] >= recent_time:
+                    if user_data.get("lasttime") >= recent_time:
                         break  # if stored latest is more recent than latest game played, break and skip user
-                    mode = latest_game["metadata"]["mode"]
+                    mode = metadata.get("mode")
                     if mode == "Deathmatch":
                         continue
                     party_red = []
@@ -101,29 +102,29 @@ class Background(commands.Cog):
                     feeders = {}
                     rounds_played = rounds_red = rounds_blue = 0
                     is_surrendered = False
-                    for round in latest_game["rounds"]:
-                        if round["end_type"] == "Surrendered":
+                    for round in latest_game.get("rounds"):
+                        if round.get("end_type") == "Surrendered":
                             is_surrendered = True
                         else:
                             rounds_played += 1
-                        rounds_red += round["winning_team"] == "Red"
-                        rounds_blue += round["winning_team"] == "Blue"
-                    for player in latest_game["players"]["all_players"]:
+                        rounds_red += round.get("winning_team") == "Red"
+                        rounds_blue += round.get("winning_team") == "Blue"
+                    for player in latest_game["players"].get("all_players"):
                         for player_id in init_list:
                             player_data = await db_helper.get_player_data(
                                 self.bot, player_id
                             )
                             if (
                                 player_id == user_id
-                                and player["puuid"] == user_puuid
+                                and player.get("puuid") == user_puuid
                                 or user_guild > 0
                                 and len(player_data)
-                                and player["puuid"] == player_data[0]["puuid"]
-                                and player_data[0]["guild_id"] == user_guild
+                                and player["puuid"] == player_data[0].get("puuid")
+                                and player_data[0].get("guild_id") == user_guild
                             ):  # detects if multiple watched users who "watched" in the same guild (not 0) are in the same game
-                                player_stats = player["stats"]
-                                player_acs = player_stats["score"] / rounds_played
-                                team = player["team"]
+                                player_stats = player.get("stats")
+                                player_acs = player_stats.get("score") / rounds_played
+                                team = player.get("team")
                                 if team == "Red":
                                     party_red.append(player_id)
                                 elif team == "Blue":
@@ -131,21 +132,21 @@ class Background(commands.Cog):
                                 else:  # deathmatch exception
                                     party_red.append(player_id)
 
-                                map_played = latest_game["metadata"]["map"]
+                                map_played = metadata.get("map")
 
-                                if player_stats["deaths"] >= (
-                                    player_stats["kills"]
-                                    + (1.1 * math.e) ** (player_stats["kills"] / 5)
+                                if player_stats.get("deaths") >= (
+                                    player_stats.get("kills")
+                                    + (1.1 * math.e) ** (player_stats.get("kills") / 5)
                                     + 2.9
                                 ):  # formula for calculating feeding threshold
                                     feeders[player_id] = {
-                                        "kills": player_stats["kills"],
-                                        "deaths": player_stats["deaths"],
-                                        "assists": player_stats["assists"],
+                                        "kills": player_stats.get("kills"),
+                                        "deaths": player_stats.get("deaths"),
+                                        "assists": player_stats.get("assists"),
                                         "acs": int(player_acs),
                                         "kd": "{:.2f}".format(
-                                            player_stats["kills"]
-                                            / player_stats["deaths"]
+                                            player_stats.get("kills")
+                                            / player_stats.get("deaths")
                                         ),
                                     }
 
@@ -154,13 +155,13 @@ class Background(commands.Cog):
                                     await db_helper.update_player_data(
                                         self.bot,
                                         player_id,
-                                        headshots=player_data[0]["headshots"][-4:]
-                                        + [player_stats["headshots"]],
-                                        bodyshots=player_data[0]["bodyshots"][-4:]
-                                        + [player_stats["bodyshots"]],
-                                        legshots=player_data[0]["legshots"][-4:]
-                                        + [player_stats["legshots"]],
-                                        acs=player_data[0]["acs"][-4:] + [player_acs],
+                                        headshots=player_data[0].get("headshots")[-4:]
+                                        + [player_stats.get("headshots")],
+                                        bodyshots=player_data[0].get("bodyshots")[-4:]
+                                        + [player_stats.get("bodyshots")],
+                                        legshots=player_data[0].get("legshots")[-4:]
+                                        + [player_stats.get("legshots")],
+                                        acs=player_data[0].get("acs")[-4:] + [player_acs],
                                     )
 
                     async with session.get(
@@ -168,9 +169,9 @@ class Background(commands.Cog):
                     ) as map_request:
                         if map_request.status == 200:
                             map_data = await map_request.json()
-                    for map_res in map_data["maps"]:
-                        if map_res["name"] == map_played:
-                            map_url = f"https://media.valorant-api.com/maps/{map_res['id']}/splash.png"
+                    for map_res in map_data.get("maps"):
+                        if map_res.get("name") == map_played:
+                            map_url = f"https://media.valorant-api.com/maps/{map_res.get('id')}/splash.png"
                             break
 
                     if rounds_red == rounds_blue:  # draw
@@ -206,7 +207,7 @@ class Background(commands.Cog):
                         feeder_values = []
                         for feeder in feeders:
                             feeder_values += [
-                                f"<@{feeder}> finished {feeders[feeder]['kills']}/{feeders[feeder]['deaths']}/{feeders[feeder]['assists']} with an ACS of {feeders[feeder]['acs']}."
+                                f"<@{feeder}> finished {feeders[feeder].get('kills')}/{feeders[feeder].get('deaths')}/{feeders[feeder].get('assists')} with an ACS of {feeders[feeder].get('acs')}."
                             ]
                         player_embed.add_field(
                             name=f"feeder alert❗❗ {random.choice(feeder_messages)}",
@@ -226,9 +227,9 @@ class Background(commands.Cog):
                         )
                         if len(member_data) and rounds_red != rounds_blue:
                             if rounds_red > rounds_blue:
-                                new_streak = max(member_data[0]["streak"] + 1, 1)
+                                new_streak = max(member_data[0].get("streak") + 1, 1)
                             elif rounds_red < rounds_blue:
-                                new_streak = min(member_data[0]["streak"] - 1, -1)
+                                new_streak = min(member_data[0].get("streak") - 1, -1)
                             if abs(new_streak) >= 3:
                                 streak_values += [
                                     f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!"
@@ -257,9 +258,9 @@ class Background(commands.Cog):
                         )
                         if len(member_data) and rounds_red != rounds_blue:
                             if rounds_blue > rounds_red:
-                                new_streak = max(member_data[0]["streak"] + 1, 1)
+                                new_streak = max(member_data[0].get("streak") + 1, 1)
                             elif rounds_blue < rounds_red:
-                                new_streak = min(member_data[0]["streak"] - 1, -1)
+                                new_streak = min(member_data[0].get("streak") - 1, -1)
                             if abs(new_streak) >= 3:
                                 streak_values += [
                                     f"<@{member_id}> is on a {abs(new_streak)}-game {'winning' if new_streak > 0 else 'losing'} streak!"
