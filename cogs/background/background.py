@@ -41,7 +41,7 @@ class Background(commands.Cog):
             user_data = user_data[0]
             user_puuid = user_data.get("puuid")
             user_region = user_data.get("region")
-            user_guild = user_data.get("guild")
+            user_guild = user_data.get("guild_id")
             channel = player_user
             channel_safe = False
 
