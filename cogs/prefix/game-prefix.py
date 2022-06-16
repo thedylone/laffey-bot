@@ -42,11 +42,16 @@ class Valorant(commands.Cog, name="valorant"):
         self, ctx: commands.Context, name: str = None, tag: str = None
     ):
         """add user's valorant info to the database"""
-        if name == None or tag == None:
-            content = f"use {ctx.prefix}valorant-watch <name> <tag without #>"
-        else:
-            content = await valorant_helper.watch(self.bot, ctx, name, tag)
-        await ctx.send(content=content)
+        if tag == None:
+            if not name or "#" not in name:
+                content = f"use {ctx.prefix}valorant-watch <name> <tag>"
+                await ctx.send(content=content)
+                return
+            else:
+                name, tag = name.split('#')[:2]
+        message = await ctx.send(content="retrieving data...")
+        content = await valorant_helper.watch(self.bot, ctx, name, tag)
+        await message.edit(content=content)
 
     @commands.command(
         name="valorant-unwatch",
