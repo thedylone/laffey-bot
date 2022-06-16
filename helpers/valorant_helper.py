@@ -120,6 +120,7 @@ async def watch(bot: commands.Bot, message, name, tag):
         if len(guild_data) == 0 or not guild_data[0].get("watch_channel"):
             return f"Please set the watch channel for the guild first using {message.prefix if isinstance(message, commands.Context) else '/'}set-channel! You can also DM me and I will DM you for each update instead!"
 
+    tag = tag.replace("#", "")
     user_id = message.author.id
     async with aiohttp.ClientSession() as session:
         async with session.get(

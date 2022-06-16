@@ -16,7 +16,7 @@ class ValorantWatchModal(disnake.ui.Modal):
                 max_length=50,
             ),
             disnake.ui.TextInput(
-                label="Tag (without #)",
+                label="Tag",
                 placeholder="12345",
                 custom_id="tag",
                 style=disnake.TextInputStyle.short,
