@@ -164,11 +164,14 @@ class Background(commands.Cog):
                                         acs=player_data[0].get("acs")[-4:] + [player_acs],
                                     )
 
+                    map_data = None
                     async with session.get(
                         "https://api.henrikdev.xyz/valorant/v1/content"
                     ) as map_request:
                         if map_request.status == 200:
                             map_data = await map_request.json()
+                    
+                    map_url = None
                     for map_res in map_data.get("maps"):
                         if map_res.get("name") == map_played:
                             map_url = f"https://media.valorant-api.com/maps/{map_res.get('id')}/splash.png"
