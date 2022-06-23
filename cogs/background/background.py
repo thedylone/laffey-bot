@@ -203,7 +203,7 @@ class Background(commands.Cog):
                     player_embed = disnake.Embed(
                         title="valorant watch", color=color, description=description
                     )
-                    player_embed.set_thumbnail(url=map_url)
+                    if map_url: player_embed.set_thumbnail(url=map_url)
 
                     if feeders:
                         feeder_messages = ["lmao", "git gud"]
