@@ -41,7 +41,8 @@ class Valorant(commands.Cog, name="valorant"):
     async def valorant_watch(
         self, ctx: commands.Context, name: str = None, tag: str = None
     ):
-        """add user's valorant info to the database"""
+        """add user's valorant info to the database.
+        e.g. ?vwatch GuessJewels#peko"""
         if tag == None:
             if not name or "#" not in name:
                 content = f"use {ctx.prefix}valorant-watch <name> <tag>"
