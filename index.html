@@ -123,6 +123,11 @@
                         to server</a>
                     <a class="js-anchor" href="#commands">view commands</a>
                 </div>
+                <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+                <script type='text/javascript'>
+                    kofiwidget2.init('Support Me on Ko-fi', '#29abe0', 'thedylone');
+                    kofiwidget2.draw();
+                </script>
             </div>
             <figure class="about-section__figure animate__animated" animation-style="fadeInRight"
                 animation-duration="1s" animation-delay="0.5s">
@@ -190,9 +195,11 @@
                                     your
                                     information and store in the database. you will be able to receive updates from the
                                     bot,
-                                    <a  class="search-anchor js-anchor" href="#valorant-info">view your info</a>, and <a
-                                         class="search-anchor js-anchor" href="#valorant-wait">allow others to wait for you</a>. note
-                                    that <a  class="search-anchor js-anchor" href="#set-channel">the watch channel for the server must
+                                    <a class="search-anchor js-anchor" href="#valorant-info">view your info</a>, and <a
+                                        class="search-anchor js-anchor" href="#valorant-wait">allow others to wait for
+                                        you</a>. note
+                                    that <a class="search-anchor js-anchor" href="#set-channel">the watch channel for
+                                        the server must
                                         be set first</a> if used in a server. if used
                                     in private messages, the bot will send updates to you directly instead.
                                 </div>
@@ -620,7 +627,7 @@
                                     <span
                                         class="discord-interaction-command-name discord-interactive">?valorant-ping</span>.
                                     the bot will ping the set role for the server. note that the role has to be set
-                                    first with <a  class="search-anchor js-anchor" href="#set-role">set-role</a>.
+                                    first with <a class="search-anchor js-anchor" href="#set-role">set-role</a>.
                                 </div>
                             </div>
                         </div>
@@ -686,7 +693,8 @@
                                         &lt;channel&gt;</span>.
                                     set the channel the bot will send updates to in the server. only members with
                                     permissions to manage messages can use this. this command has to be run first before
-                                    <a  class="search-anchor js-anchor" href="#valorant-watch">valorant-watch</a> can be used in the
+                                    <a class="search-anchor js-anchor" href="#valorant-watch">valorant-watch</a> can be
+                                    used in the
                                     server.
                                 </div>
                             </div>
@@ -760,7 +768,8 @@
                                         &lt;role&gt;</span>.
                                     set the role the bot will ping. only members with
                                     permissions to manage messages can use this. this command has to be run first before
-                                    <a  class="search-anchor js-anchor" href="#valorant-ping">valorant-ping</a> can be used in the
+                                    <a class="search-anchor js-anchor" href="#valorant-ping">valorant-ping</a> can be
+                                    used in the
                                     server.
                                 </div>
                             </div>
@@ -1079,7 +1088,8 @@
                                                 <div class="discord-embed-fields">
                                                     <div class="discord-embed-field">
                                                         <div class="discord-embed-field-title">streaker alert 👀👀 <a
-                                                                 class="search-anchor js-anchor" href="#streaker-message">set your own
+                                                                class="search-anchor js-anchor"
+                                                                href="#streaker-message">set your own
                                                                 custom message</a>
                                                         </div>
                                                     </div>
@@ -1140,7 +1150,8 @@
                                                 <div class="discord-embed-fields">
                                                     <div class="discord-embed-field">
                                                         <div class="discord-embed-field-title">feeder alert❗❗ <a
-                                                                 class="search-anchor js-anchor" href="#feeder-message">set your own
+                                                                class="search-anchor js-anchor"
+                                                                href="#feeder-message">set your own
                                                                 custom message</a></div>
                                                         <span
                                                             class="discord-mention-wrapper discord-interactive">@thedylone</span>
@@ -1155,7 +1166,8 @@
                                                 src="https://media.valorant-api.com/maps/E2AD5C54-4114-A870-9641-8EA21279579A/splash.png"
                                                 alt="">
                                         </div>
-                                        <div class="discord-embed-footer"><a  class="search-anchor js-anchor" href="#feeder-image">set
+                                        <div class="discord-embed-footer"><a class="search-anchor js-anchor"
+                                                href="#feeder-image">set
                                                 your own custom image</a></div>
                                     </div>
                                 </div>
@@ -1169,12 +1181,12 @@
     <!-- discord messages js -->
     <script>
         var time = new Date();
-        var currentTime = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+        var currentTime = time.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
         document.querySelectorAll(".discord-message-timestamp, .discord-inline-timestamp").forEach(timestamp => {
-            timestamp.innerHTML = "Today at " + currentTime
-        })
+            timestamp.innerHTML = "Today at " + currentTime;
+        });
         document.querySelectorAll(".discord-hidden-timestamp").forEach(timestamp => {
-            timestamp.innerHTML = currentTime
+            timestamp.innerHTML = currentTime;
         })
     </script>
     <!-- social section-->
@@ -1188,7 +1200,7 @@
                         <a href="https://twitter.com/thedylone" target="_blank"><i class="fab fa-twitter"></i></a>
                         <a href="https://github.com/thedylone" target="_blank"><i class="fab fa-github"></i></a>
                         <a href="https://www.linkedin.com/in/thedylone" target="_blank"><i
-                            class="fab fa-linkedin"></i></a>
+                                class="fab fa-linkedin"></i></a>
                         <a href="https://www.instagram.com/lan_dy_lan/" target="_blank"><i
                                 class="fab fa-instagram"></i></a>
                         <a href="https://www.youtube.com/playlist?list=PLNoXhhzDZRr-eVYWu7YmfvaUN9AgfAedn"
@@ -1218,7 +1230,7 @@
             body.style.position = 'fixed';
         }
         window.onclick = function (e) {
-            modal = document.getElementById("modal-credits")
+            modal = document.getElementById("modal-credits");
             if (e.target == modal) {
                 modal.style.display = "none";
                 const body = document.body;

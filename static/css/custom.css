@@ -61,6 +61,7 @@ html {
     text-align: center;
     color: rgba(255, 255, 255, .9);
     transition: 1s ease;
+    padding: 20px;
 }
 
 .about-section__card-header {
@@ -72,7 +73,7 @@ html {
 }
 
 .about-section__card-buttons {
-    padding: 20px;
+    padding: 10px;
 }
 
 .about-section__card-buttons a {
