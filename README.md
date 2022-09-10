@@ -1,5 +1,7 @@
 # laffey-bot
-discord bot with valorant commands
+discord bot with valorant commands, and more!
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z0EY6XA)
 
 ## valorant commands
 valorant-setchannel
