@@ -23,10 +23,13 @@ async def get_prefix(bot, message):
     return commands.when_mentioned_or(custom_prefix)(bot, message)
 
 
+intents = disnake.Intents.default()
+intents.message_content = True
+
 # creating a commands.Bot() instance, and assigning it to "bot"
 bot = commands.Bot(
     command_prefix=get_prefix,
-    intents=disnake.Intents.default(),
+    intents=intents,
     help_command=help.Help()
 )
 
