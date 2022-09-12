@@ -50,7 +50,9 @@ async def create_waitlist_table(bot):
 
 
 async def get_guild_data(bot, guild_id: int):
-    return await bot.db.fetch("select * from guilds where guild_id = $1", guild_id)
+    return await bot.db.fetch(
+        "select * from guilds where guild_id = $1", guild_id
+    )
 
 
 async def delete_guild_data(bot, guild_id: int):
@@ -58,19 +60,24 @@ async def delete_guild_data(bot, guild_id: int):
 
 
 async def update_guild_data(bot, guild_id: int, **fields):
+    cols = ("player_id", *fields.keys())
     data = await bot.db.fetch(
-        f"select {('player_id', *fields.keys())} from guilds where guild_id = $1",
+        f"select {cols} from guilds where guild_id = $1",
         guild_id,
     )
     if len(data) == 0:
+        cols = ", ".join(fields.keys())
+        vals = ", ".join([f"${i+2}" for i in range(len(fields))])
         await bot.db.execute(
-            f"insert into guilds (guild_id, {', '.join(fields.keys())}) values ($1, {', '.join(['$'+str(i+2) for i in range(len(fields))])})",
+            f"insert into guilds (guild_id, {cols}) values ($1, {vals})",
             guild_id,
             *fields.values(),
         )
     else:
+        list_of_vals = [f"{v} = ${i+2}" for i, v in enumerate(fields.keys())]
+        vals = ", ".join(list_of_vals)
         await bot.db.execute(
-            f"update guilds set {', '.join([v + ' = $'+str(i+2) for i, v in enumerate(fields.keys())])} where guild_id = $1",
+            f"update guilds set {vals} where guild_id = $1",
             guild_id,
             *fields.values(),
         )
@@ -78,7 +85,9 @@ async def update_guild_data(bot, guild_id: int, **fields):
 
 
 async def get_player_data(bot, player_id: int):
-    return await bot.db.fetch("select * from players where player_id = $1", player_id)
+    return await bot.db.fetch(
+        "select * from players where player_id = $1", player_id
+    )
 
 
 async def delete_player_data(bot, player_id: int):
@@ -86,19 +95,24 @@ async def delete_player_data(bot, player_id: int):
 
 
 async def update_player_data(bot, player_id: int, **fields):
+    cols = ("player_id", *fields.keys())
     data = await bot.db.fetch(
-        f"select {('player_id', *fields.keys())} from players where player_id = $1",
+        f"select {cols} from players where player_id = $1",
         player_id,
     )
     if len(data) == 0:
+        cols = ", ".join(fields.keys())
+        vals = ", ".join([f"${i+2}" for i in range(len(fields))])
         await bot.db.execute(
-            f"insert into players (player_id, {', '.join(fields.keys())}) values ($1, {', '.join(['$'+str(i+2) for i in range(len(fields))])})",
+            f"insert into players (player_id, {cols}) values ($1, {vals})",
             player_id,
             *fields.values(),
         )
     else:
+        list_of_vals = [f"{v} = ${i+2}" for i, v in enumerate(fields.keys())]
+        vals = ", ".join(list_of_vals)
         await bot.db.execute(
-            f"update players set {', '.join([v + ' = $'+str(i+2) for i, v in enumerate(fields.keys())])} where player_id = $1",
+            f"update players set {vals} where player_id = $1",
             player_id,
             *fields.values(),
         )
@@ -106,11 +120,15 @@ async def update_player_data(bot, player_id: int, **fields):
 
 
 async def get_waitlist_data(bot, player_id: int):
-    return await bot.db.fetch("select * from waitlist where player_id = $1", player_id)
+    return await bot.db.fetch(
+        "select * from waitlist where player_id = $1", player_id
+    )
 
 
 async def delete_waitlist_data(bot, player_id: int):
-    await bot.db.execute("delete from waitlist where player_id = $1", player_id)
+    await bot.db.execute(
+        "delete from waitlist where player_id = $1", player_id
+    )
 
 
 async def update_waitlist_data(bot, player_id: int, waiting_id):
