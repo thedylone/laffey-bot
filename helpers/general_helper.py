@@ -13,11 +13,15 @@ from helpers import db_helper
 
 HOLODEX_TOKEN = os.environ.get("HOLODEX_TOKEN")
 holo_desc = "[live and upcoming videos](https://holodex.net/)"
-holo_url = "https://hololive.hololivepro.com/wp-content/themes/hololive/images/head_l.png"
+holo_url = "https://i.redd.it/lmrrc51ywma61.jpg"
 
 
 async def holodex(message, url, params, headers):
-    """returns [content, embed, view]"""
+    """
+    get all live hololive videos.
+    sends a request to the Holodex API.
+    returns content, embed, view
+    """
     async with aiohttp.ClientSession() as session:
         request = await session.get(url, headers=headers, params=params)
     if not request or request.status != 200:
@@ -63,7 +67,11 @@ async def holodex(message, url, params, headers):
 
 
 async def fubudex(message, url, params, headers):
-    """returns [content, embed, view]"""
+    """
+    get upcoming videos with a set dictionary of channels.
+    sends a request to the Holodex API.
+    returns content, embed, view
+    """
     # store info for set channels
     id_name_convert = {
         "UC1DCedRgGHBdm81E1llLhOQ": {
@@ -209,8 +217,11 @@ async def fubudex(message, url, params, headers):
 
 
 async def peko(message):
-    """peko"""
-    """returns [content, embed, view]"""
+    """
+    get upcoming videos for a set list of channels.
+    calls the holodex() function.
+    returns content, embed, view
+    """
     if not HOLODEX_TOKEN:
         return (
             "no Holodex Token! contact the person running the bot",
@@ -230,8 +241,11 @@ async def peko(message):
 
 
 async def holo(message):
-    """all live hololive streams"""
-    """returns [content, embed, view]"""
+    """
+    get all live hololive videos.
+    calls the holodex() function.
+    returns content, embed, view
+    """
     if not HOLODEX_TOKEN:
         return (
             "no Holodex Token! contact the person running the bot",
@@ -245,8 +259,11 @@ async def holo(message):
 
 
 async def fubu(message):
-    """fubu"""
-    """returns [content, embed, view]"""
+    """
+    get upcoming videos for a set list of channels.
+    calls the fubudex() function.
+    returns content, embed, view
+    """
     if not HOLODEX_TOKEN:
         return (
             "no Holodex Token! contact the person running the bot",
@@ -266,8 +283,11 @@ async def fubu(message):
 
 
 async def prefix(bot: commands.Bot, message, prefix):
-    """set prefix for the server"""
-    """returns [content]"""
+    """
+    set prefix for the server.
+    if prefix is not provided, shows the current prefix.
+    returns content
+    """
     if prefix:
         prefix = re.sub("[^ !#-&(-~]", "", prefix)
     guild_id = message.guild.id
