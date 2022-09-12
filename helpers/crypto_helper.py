@@ -2,8 +2,10 @@ import aiohttp
 
 
 async def price(symbol):
-    """get price of coin in USD"""
-    """return [content]"""
+    """
+    get price of requested coin in USD.
+    returns content
+    """
     async with aiohttp.ClientSession() as session:
         async with session.get(
             f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
