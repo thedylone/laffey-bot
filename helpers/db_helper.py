@@ -148,3 +148,21 @@ async def update_waitlist_data(bot, player_id: int, waiting_id):
             waiting_id,
         )
     return "waitlist updated"
+
+
+async def get_players_join_waitlist(bot, player_id: int):
+    select = "select waitlist.waiting_id"
+    left_join = "players left join waitlist"
+    on = "on waitlist.player_id = players.player_id"
+    where = "where players.player_id = $1"
+    return await bot.db.fetch(
+        f"{select} from {left_join} {on} {where}",
+        player_id,
+    )
+
+
+async def get_waitlist_join_players(bot):
+    select = "select * "
+    inner_join = "waitlist inner join players"
+    on = "on waitlist.player_id = players.player_id"
+    return await bot.db.fetch(f"{select} from {inner_join} {on}")
