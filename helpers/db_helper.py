@@ -3,10 +3,12 @@ import asyncpg
 
 
 async def create_db_pool(bot):
-    bot.db = await asyncpg.create_pool(os.environ["DATABASE_URL"])
+    """creates db pool and attach to the bot"""
+    bot.db = await asyncpg.create_pool(os.environ.get("DATABASE_URL"))
 
 
 async def create_guilds_table(bot):
+    """attempts to create guilds table"""
     await bot.db.execute(
         """CREATE TABLE IF NOT EXISTS public.guilds(
         guild_id bigint NOT NULL,
@@ -22,6 +24,7 @@ async def create_guilds_table(bot):
 
 
 async def create_players_table(bot):
+    """attempts to create players table"""
     await bot.db.execute(
         """CREATE TABLE IF NOT EXISTS public.players(
         player_id bigint NOT NULL,
@@ -41,6 +44,7 @@ async def create_players_table(bot):
 
 
 async def create_waitlist_table(bot):
+    """attempts to create waitlist table"""
     await bot.db.execute(
         """CREATE TABLE IF NOT EXISTS public.waitlist(
         player_id bigint NOT NULL,
@@ -50,16 +54,23 @@ async def create_waitlist_table(bot):
 
 
 async def get_guild_data(bot, guild_id: int):
+    """returns data for specified guild"""
     return await bot.db.fetch(
         "select * from guilds where guild_id = $1", guild_id
     )
 
 
 async def delete_guild_data(bot, guild_id: int):
+    """deletes data for specified guild"""
     await bot.db.execute("delete from guilds where guild_id = $1", guild_id)
 
 
 async def update_guild_data(bot, guild_id: int, **fields):
+    """
+    updates data for specified guild.
+    specify field by using kwargs.
+    e.g. key=value
+    """
     cols = ("player_id", *fields.keys())
     data = await bot.db.fetch(
         f"select {cols} from guilds where guild_id = $1",
@@ -85,16 +96,23 @@ async def update_guild_data(bot, guild_id: int, **fields):
 
 
 async def get_player_data(bot, player_id: int):
+    """returns data for specified player"""
     return await bot.db.fetch(
         "select * from players where player_id = $1", player_id
     )
 
 
 async def delete_player_data(bot, player_id: int):
+    """deletes data for specified player"""
     await bot.db.execute("delete from players where player_id = $1", player_id)
 
 
 async def update_player_data(bot, player_id: int, **fields):
+    """
+    updates data for specified player.
+    specify field by using kwargs.
+    e.g. key=value
+    """
     cols = ("player_id", *fields.keys())
     data = await bot.db.fetch(
         f"select {cols} from players where player_id = $1",
@@ -120,18 +138,24 @@ async def update_player_data(bot, player_id: int, **fields):
 
 
 async def get_waitlist_data(bot, player_id: int):
+    """returns data for specified waitlisted player"""
     return await bot.db.fetch(
         "select * from waitlist where player_id = $1", player_id
     )
 
 
 async def delete_waitlist_data(bot, player_id: int):
+    """deletes data for specified waitlisted player"""
     await bot.db.execute(
         "delete from waitlist where player_id = $1", player_id
     )
 
 
 async def update_waitlist_data(bot, player_id: int, waiting_id):
+    """
+    updates data for specified waitlisted player.
+    inserts waiting_id into player_id's row.
+    """
     data = await bot.db.fetch(
         "select waiting_id from waitlist where player_id = $1", player_id
     )
@@ -151,6 +175,10 @@ async def update_waitlist_data(bot, player_id: int, waiting_id):
 
 
 async def get_players_join_waitlist(bot, player_id: int):
+    """
+    returns data for specified player.
+    left join with waitlist.
+    """
     select = "select waitlist.waiting_id"
     left_join = "players left join waitlist"
     on = "on waitlist.player_id = players.player_id"
@@ -162,6 +190,10 @@ async def get_players_join_waitlist(bot, player_id: int):
 
 
 async def get_waitlist_join_players(bot):
+    """
+    returns data for waitlisted players.
+    inner join with players.
+    """
     select = "select * "
     inner_join = "waitlist inner join players"
     on = "on waitlist.player_id = players.player_id"
