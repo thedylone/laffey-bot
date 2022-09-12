@@ -10,7 +10,9 @@ async def price(symbol):
         ) as request:
             if request.status == 200:
                 data = await request.json()
-                content = "1 {} is {:.2f} USD".format(symbol, float(data["price"]))
+                content = "1 {} is {:.2f} USD".format(
+                    symbol, float(data.get("price"))
+                )
             else:
                 content = "error getting price"
             return content
