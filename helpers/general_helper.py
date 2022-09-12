@@ -211,6 +211,12 @@ async def fubudex(message, url, params, headers):
 async def peko(message):
     """peko"""
     """returns [content, embed, view]"""
+    if not HOLODEX_TOKEN:
+        return (
+            "no Holodex Token! contact the person running the bot",
+            None,
+            None,
+        )
     url = "https://holodex.net/api/v2/users/live"
     channel_list = [
         "UC1DCedRgGHBdm81E1llLhOQ",
@@ -226,6 +232,12 @@ async def peko(message):
 async def holo(message):
     """all live hololive streams"""
     """returns [content, embed, view]"""
+    if not HOLODEX_TOKEN:
+        return (
+            "no Holodex Token! contact the person running the bot",
+            None,
+            None,
+        )
     url = "https://holodex.net/api/v2/live"
     params = {"status": "live", "org": "Hololive", "limit": "50"}
     headers = {"Content-Type": "application/json", "X-APIKEY": HOLODEX_TOKEN}
@@ -235,6 +247,12 @@ async def holo(message):
 async def fubu(message):
     """fubu"""
     """returns [content, embed, view]"""
+    if not HOLODEX_TOKEN:
+        return (
+            "no Holodex Token! contact the person running the bot",
+            None,
+            None,
+        )
     url = "https://holodex.net/api/v2/users/live"
     channel_list = [
         "UC1DCedRgGHBdm81E1llLhOQ",
