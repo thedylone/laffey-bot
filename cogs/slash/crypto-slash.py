@@ -5,27 +5,31 @@ from helpers import crypto_helper
 
 
 class Crypto(commands.Cog):
+    """crypto related commands"""
+
+    COG_EMOJI = "🪙"
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.slash_command(name="sol", description="sol price")
     async def sol(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.response.defer()
         """get the current price of SOL in USD."""
+        await inter.response.defer()
         content = await crypto_helper.price("SOLUSDT")
         await inter.edit_original_message(content=content)
 
     @commands.slash_command(name="btc", description="btc price")
     async def btc(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.response.defer()
         """get the current price of BTC in USD."""
+        await inter.response.defer()
         content = await crypto_helper.price("BTCUSDT")
         await inter.edit_original_message(content=content)
 
     @commands.slash_command(name="eth", description="eth price")
     async def eth(self, inter: disnake.ApplicationCommandInteraction):
-        await inter.response.defer()
         """get the current price of ETH in USD."""
+        await inter.response.defer()
         content = await crypto_helper.price("ETHUSDT")
         await inter.edit_original_message(content=content)
 
