@@ -35,7 +35,9 @@ intents.message_content = True
 
 # creating a commands.Bot() instance, and assigning it to "bot"
 bot = commands.Bot(
-    command_prefix=get_prefix, intents=intents, help_command=help.Help()
+    command_prefix=get_prefix,
+    intents=intents,
+    help_command=help.Help(),
 )
 
 

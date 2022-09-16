@@ -1,14 +1,21 @@
 import disnake
-from disnake.ext import commands
 
 from views.views import HelpView
 
 
-class Help(commands.HelpCommand):
+class Help(disnake.ext.commands.HelpCommand):
     """show help commands"""
 
+    desc_list = [
+        "A discord bot by thedylone#3801",
+        "More info on [the website](https://thedylone.github.io/laffey-bot/).",
+        "[Support the bot on Ko-fi](https://ko-fi.com/thedylone)!",
+        "Use `help [command]` for more info on a command.",
+        "You can also use `help [category]` for more info on a category.",
+    ]
+
     def __init__(self) -> None:
-        self.description = "check out more info at [the website](https://thedylone.github.io/laffey-bot/).\nUse `help [command]` for more info on a command.\nYou can also use `help [category]` for more info on a category."
+        self.description = "\n".join(self.desc_list)
         super().__init__()
 
     def get_command_signature(self, command):
@@ -16,11 +23,15 @@ class Help(commands.HelpCommand):
 
     async def bot_help_embed(self, mapping):
         home_embed = disnake.Embed(
-            title="🏠 help home", description=self.description, color=0x9444B3
+            title="🏠 help home",
+            description=self.description,
+            color=0x9444B3,
         )
         for cog, commands in mapping.items():
             filtered = await self.filter_commands(commands, sort=True)
-            command_signatures = [self.get_command_signature(c) for c in filtered]
+            command_signatures = [
+                self.get_command_signature(c) for c in filtered
+            ]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", None)
                 if not cog_name:
@@ -29,7 +40,9 @@ class Help(commands.HelpCommand):
                 description = getattr(cog, "description", None)
                 combined_name = emoji + " " + cog_name if emoji else cog_name
                 home_embed.add_field(
-                    name=combined_name, value=description, inline=False
+                    name=combined_name,
+                    value=description,
+                    inline=False,
                 )
         return home_embed
 
@@ -38,14 +51,19 @@ class Help(commands.HelpCommand):
         embeds_dict = {}
         for cog, commands in mapping.items():
             filtered = await self.filter_commands(commands, sort=True)
-            command_signatures = [self.get_command_signature(c) for c in filtered]
+            command_signatures = [
+                self.get_command_signature(c) for c in filtered
+            ]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", None)
                 if not cog_name:
                     continue
                 emoji = getattr(cog, "COG_EMOJI", None)
                 description = getattr(cog, "description", None)
-                embeds_dict[cog_name] = {"description": description, "emoji": emoji}
+                embeds_dict[cog_name] = {
+                    "description": description,
+                    "emoji": emoji,
+                }
 
         view = HelpView(self, embeds_dict)
         await self.get_destination().send(embed=home_embed, view=view)
@@ -61,7 +79,9 @@ class Help(commands.HelpCommand):
             description = getattr(cog, "description", None)
             combined_name = emoji + " " + cog_name if emoji else cog_name
             embed.title = combined_name
-            embed.description = description if description else self.description
+            embed.description = (
+                description if description else self.description
+            )
             for command in filtered:
                 embed.add_field(
                     name=self.get_command_signature(command),
@@ -83,7 +103,11 @@ class Help(commands.HelpCommand):
         embed.add_field(name="help", value=group.help)
         alias = group.aliases
         if alias:
-            embed.add_field(name="aliases", value=", ".join(alias), inline=False)
+            embed.add_field(
+                name="aliases",
+                value=", ".join(alias),
+                inline=False,
+            )
 
         filtered = await self.filter_commands(group.commands, sort=True)
         for command in filtered:
@@ -104,7 +128,11 @@ class Help(commands.HelpCommand):
         embed.add_field(name="help", value=command.help)
         alias = command.aliases
         if alias:
-            embed.add_field(name="aliases", value=", ".join(alias), inline=False)
+            embed.add_field(
+                name="aliases",
+                value=", ".join(alias),
+                inline=False,
+            )
 
         await self.get_destination().send(embed=embed)
 
