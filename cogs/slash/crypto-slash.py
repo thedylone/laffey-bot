@@ -1,4 +1,4 @@
-import disnake
+from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
 from helpers import crypto_helper
@@ -13,21 +13,21 @@ class Crypto(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name="sol", description="sol price")
-    async def sol(self, inter: disnake.ApplicationCommandInteraction):
+    async def sol(self, inter: ApplicationCommandInteraction):
         """get the current price of SOL in USD."""
         await inter.response.defer()
         content = await crypto_helper.price("SOLUSDT")
         await inter.edit_original_message(content=content)
 
     @commands.slash_command(name="btc", description="btc price")
-    async def btc(self, inter: disnake.ApplicationCommandInteraction):
+    async def btc(self, inter: ApplicationCommandInteraction):
         """get the current price of BTC in USD."""
         await inter.response.defer()
         content = await crypto_helper.price("BTCUSDT")
         await inter.edit_original_message(content=content)
 
     @commands.slash_command(name="eth", description="eth price")
-    async def eth(self, inter: disnake.ApplicationCommandInteraction):
+    async def eth(self, inter: ApplicationCommandInteraction):
         """get the current price of ETH in USD."""
         await inter.response.defer()
         content = await crypto_helper.price("ETHUSDT")
