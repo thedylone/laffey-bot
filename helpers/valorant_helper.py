@@ -3,6 +3,7 @@ from disnake.ext import commands
 
 import aiohttp
 import time
+import validators
 
 from views.views import (
     Menu,
@@ -54,6 +55,8 @@ async def ping_image_add(bot: commands.Bot, message, new_image: str):
     """
     if len(new_image) > 100:
         return "url is too long!"
+    if not validators.url(new_image):
+        return "invalid url!"
     guild = message.guild
     await db_helper.update_guild_data(bot, guild.id, ping_image=new_image)
     return f"successfully added custom ping image for `{guild}`"
@@ -457,6 +460,8 @@ async def feeder_image_add(bot: commands.Bot, message, new_image: str):
     """
     if len(new_image) > 100:
         return "url is too long!"
+    if not validators.url(new_image):
+        return "invalid url!"
     guild = message.guild
     guild_data = await db_helper.get_guild_data(bot, guild.id)
     if len(guild_data):
