@@ -6,7 +6,7 @@ import aiohttp
 import re
 import dateutil.parser as dp
 
-from views.views import Menu, PageView
+from views.views import Menu, PageView, SelectEmbed
 
 from helpers import db_helper
 
@@ -139,14 +139,12 @@ async def fubudex(message, url, params, headers):
         description="not on their channels",
         color=0x5EDEEB,
     ).set_thumbnail(url=holo_url)
-    # create dictionary of embeds
-    embeds_dict = {
-        "home": {
-            "description": "main page",
-            "emoji": "🏠",
-            "embed": home_embed,
-        }
-    }
+    # create list of SelectEmbeds
+    embeds = [
+        SelectEmbed(
+            name="home", description="main page", emoji="🏠", embed=home_embed
+        )
+    ]
     for video in data:
         id = video["channel"]["id"]
         name = video["channel"]["name"]
@@ -185,12 +183,14 @@ async def fubudex(message, url, params, headers):
             channel_data[channel]["embed"].color = id_name_convert[channel][
                 "color"
             ]
-            # add channel info and embed to embeds_dict
-            embeds_dict[channel_name] = {
-                "description": "hololive",
-                "emoji": id_name_convert[channel]["emoji"],
-                "embed": channel_data[channel]["embed"],
-            }
+            embeds.append(
+                SelectEmbed(
+                    name=channel_name,
+                    description="hololive",
+                    emoji=id_name_convert[channel]["emoji"],
+                    embed=channel_data[channel]["embed"],
+                )
+            )
         else:
             # channel has no video in data
             channel_name = id_name_convert[channel]["name"]
@@ -207,13 +207,15 @@ async def fubudex(message, url, params, headers):
         )
 
     if has_mention:
-        # add mention embed to embeds_dict
-        embeds_dict["mention"] = {
-            "description": "videos not on the channels but they are mentioned",
-            "emoji": "💬",
-            "embed": mention_embed,
-        }
-    return None, home_embed, PageView(embeds_dict)
+        embeds.append(
+            SelectEmbed(
+                name="mention",
+                description="videos not on the channels but are mentioned",
+                emoji="💬",
+                embed=mention_embed,
+            )
+        )
+    return None, home_embed, PageView(embeds)
 
 
 async def peko(message):

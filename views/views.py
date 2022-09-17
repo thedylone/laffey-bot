@@ -3,6 +3,17 @@ import disnake
 from helpers import db_helper
 
 
+class SelectEmbed:
+    def __init__(
+        self, name="", color=None, description="", emoji="", embed=None
+    ):
+        self.name = name
+        self.color = color
+        self.description = description
+        self.emoji = emoji
+        self.embed = embed
+
+
 class Menu(disnake.ui.View):
     def __init__(self, embeds):
         super().__init__(timeout=None)
@@ -225,28 +236,21 @@ class StreakerMessagesView(disnake.ui.View):
 
 
 class PageSelect(disnake.ui.Select):
-    def __init__(self, embeds_dict) -> None:
-        """
-        embeds_dict = {
-            name: {
-                description: [str],
-                emoji: [emoji],
-                embed: [embed],
-                color: hex
-            }
-        }
-        """
+    def __init__(self, embeds) -> None:
 
-        self.embeds_dict = embeds_dict
+        self.embeds = embeds
+        self.embeds_dict = {}
 
-        options = [
-            disnake.SelectOption(
-                label=name,
-                description=embeds_dict[name].get("description", "..."),
-                emoji=embeds_dict[name].get("emoji", None),
+        options = []
+        for embed in embeds:
+            options.append(
+                disnake.SelectOption(
+                    label=embed.name,
+                    description=embed.description,
+                    emoji=embed.emoji,
+                )
             )
-            for name in embeds_dict
-        ]
+            self.embeds_dict[embed.name] = embed
 
         super().__init__(
             placeholder="choose category to show...",
@@ -256,37 +260,35 @@ class PageSelect(disnake.ui.Select):
         )
 
     async def callback(self, inter: disnake.MessageInteraction):
-        embed = self.embeds_dict[self.values[0]]["embed"]
+        embed = self.embeds_dict[self.values[0]].embed
         await inter.response.edit_message(
-            embed=embed, view=PageView(self.embeds_dict)
+            embed=embed, view=PageView(self.embeds)
         )
 
 
 class PageView(disnake.ui.View):
-    """{name: {description: [str], emoji: [emoji], embed: [embed]}}"""
-
-    def __init__(self, embeds_dict):
+    def __init__(self, embeds):
         super().__init__()
 
-        self.add_item(PageSelect(embeds_dict))
+        self.add_item(PageSelect(embeds))
 
 
 class HelpSelect(disnake.ui.Select):
-    def __init__(self, help_command, embeds_dict) -> None:
-        """{name: {description: [str], emoji: [emoji]}}"""
+    def __init__(self, help_command, embeds) -> None:
 
-        self.embeds_dict = embeds_dict
+        self.embeds = embeds
         self.help_command = help_command
         self.current_embed = ""
 
-        options = [
-            disnake.SelectOption(
-                label=name,
-                description=embeds_dict[name].get("description", "..."),
-                emoji=embeds_dict[name].get("emoji"),
+        options = []
+        for embed in embeds:
+            options.append(
+                disnake.SelectOption(
+                    label=embed.name,
+                    description=embed.description,
+                    emoji=embed.emoji,
+                )
             )
-            for name in embeds_dict
-        ]
 
         super().__init__(
             placeholder="choose category to show...",
@@ -302,14 +304,12 @@ class HelpSelect(disnake.ui.Select):
                 self.help_command.context.bot.get_cog(self.values[0])
             )
             await inter.response.edit_message(
-                embed=embed, view=HelpView(self.help_command, self.embeds_dict)
+                embed=embed, view=HelpView(self.help_command, self.embeds)
             )
 
 
 class HelpView(disnake.ui.View):
-    """{name: {description: [str], emoji: [emoji]}}"""
-
-    def __init__(self, help_command, embeds_dict):
+    def __init__(self, help_command, embeds):
         super().__init__()
 
-        self.add_item(HelpSelect(help_command, embeds_dict))
+        self.add_item(HelpSelect(help_command, embeds))

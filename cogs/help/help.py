@@ -1,6 +1,6 @@
 import disnake
 
-from views.views import HelpView
+from views.views import HelpView, SelectEmbed
 
 
 class Help(disnake.ext.commands.HelpCommand):
@@ -48,7 +48,7 @@ class Help(disnake.ext.commands.HelpCommand):
 
     async def send_bot_help(self, mapping):
         home_embed = await self.bot_help_embed(mapping)
-        embeds_dict = {}
+        embeds = []
         for cog, commands in mapping.items():
             filtered = await self.filter_commands(commands, sort=True)
             command_signatures = [
@@ -60,12 +60,13 @@ class Help(disnake.ext.commands.HelpCommand):
                     continue
                 emoji = getattr(cog, "COG_EMOJI", None)
                 description = getattr(cog, "description", None)
-                embeds_dict[cog_name] = {
-                    "description": description,
-                    "emoji": emoji,
-                }
+                embeds.append(
+                    SelectEmbed(
+                        name=cog_name, description=description, emoji=emoji
+                    )
+                )
 
-        view = HelpView(self, embeds_dict)
+        view = HelpView(self, embeds)
         await self.get_destination().send(embed=home_embed, view=view)
 
     async def cog_help_embed(self, cog):
