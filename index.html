@@ -136,9 +136,9 @@
         </div>
     </section>
     <!-- commands section -->
-    <section class="commands-section" id="commands">
+    <section class="commands-section discord-section" id="commands">
         <div class="container">
-            <header class="commands-section__header animate__animated" animation-style="fadeIn"
+            <header class="commands-section__header discord-section__header animate__animated" animation-style="fadeIn"
                 animation-duration="0.5s" animation-delay="0s">
                 <h2>commands</h2>
                 <div class="search-wrapper">
@@ -585,8 +585,7 @@
                                                 </div>
                                             </div>
                                             <img class="discord-embed-thumbnail"
-                                                src="https://i.redd.it/pxwk9pc6q9n91.jpg"
-                                                alt="">
+                                                src="https://i.redd.it/pxwk9pc6q9n91.jpg" alt="">
                                         </div>
                                     </div>
                                 </div>
@@ -1038,10 +1037,10 @@
         </div>
     </section>
     <!-- notifs section -->
-    <section class="notifs-section" id="notifs">
+    <section class="notifs-section discord-section" id="notifs">
         <div class="container">
-            <header class="notifs-section__header animate__animated" animation-style="fadeIn" animation-duration="0.5s"
-                animation-delay="0s">
+            <header class="notifs-section__header discord-section__header animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
                 <h2>notifs</h2>
             </header>
             <div class="discord-messages">
@@ -1180,14 +1179,7 @@
     </section>
     <!-- discord messages js -->
     <script>
-        var time = new Date();
-        var currentTime = time.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
-        document.querySelectorAll(".discord-message-timestamp, .discord-inline-timestamp").forEach(timestamp => {
-            timestamp.innerHTML = "Today at " + currentTime;
-        });
-        document.querySelectorAll(".discord-hidden-timestamp").forEach(timestamp => {
-            timestamp.innerHTML = currentTime;
-        })
+        discordTime()
     </script>
     <!-- social section-->
     <div class="contacts-section" id="socials">
@@ -1221,26 +1213,6 @@
             <p class="main-footer__links"><a onclick="openModal($('#modal-credits'))">credits</a></p>
         </div>
     </footer>
-    <!-- modal stuff -->
-    <script>
-        function openModal(modal) {
-            modal.css("display", "block");;
-            const body = document.body;
-            body.style.top = -1 * window.pageYOffset + 'px';
-            body.style.position = 'fixed';
-        }
-        window.onclick = function (e) {
-            modal = document.getElementById("modal-credits");
-            if (e.target == modal) {
-                modal.style.display = "none";
-                const body = document.body;
-                const scrollY = body.style.top;
-                body.style.position = '';
-                body.style.top = '';
-                window.scrollTo(0, parseInt(scrollY || '0') * -1);
-            }
-        }
-    </script>
     <!-- credits modal -->
     <div id="modal-credits" class="modal">
         <div class="modal-content">
@@ -1251,11 +1223,29 @@
 
         </div>
     </div>
+    <!-- image modal -->
+    <div id="modal-image" class="modal">
+        <img class="modal-content__image">
+    </div>
     <!-- search bar js -->
     <script>
         const COMMANDS = Array.from(document.querySelectorAll(".discord-command-group")).map(x => x.id);
         autocomplete($("#search-bar"), COMMANDS);
         searchAnchor();
+    </script>
+    <!-- modal stuff -->
+    <script>
+        window.onclick = function (e) {
+            if ($(e.target).attr("class") == "modal") {
+                e.target.style.display = "none";
+                const body = document.body;
+                const scrollY = body.style.top;
+                body.style.position = '';
+                body.style.top = '';
+                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
+        };
+        imagesOpenModal()
     </script>
 </body>
 
