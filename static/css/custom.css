@@ -653,14 +653,3 @@ code {
     background: #2f3136;
     border: 1px solid #202225;
 }
-
-.modal {
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content__image {
-    max-height: 75vh;
-    max-width: 75vw;
-    margin: auto;
-}
