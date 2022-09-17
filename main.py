@@ -1,5 +1,6 @@
 import os
 import sys
+import argparse
 import disnake
 from disnake.ext import commands
 
@@ -14,6 +15,7 @@ if not BOT_TOKEN:
 DEFAULT_PREFIX = os.environ.get("DEFAULT_PREFIX", "?")
 SLASH_ENABLED = os.environ.get("SLASH_ENABLED", 1)
 PREFIX_ENABLED = os.environ.get("PREFIX_ENABLED", 1)
+DEBUG_MODE = False
 
 
 async def get_prefix(bot, message):
@@ -85,7 +87,17 @@ def autoload(command_type: str) -> None:
 
 
 if __name__ == "__main__":
-    autoload("error")  # loads error handler
+    parser = argparse.ArgumentParser(description="run discord bot")
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="run in debug mode",
+    )
+    args = parser.parse_args()
+    DEBUG_MODE = args.debug
+    if not DEBUG_MODE:
+        autoload("error")  # loads error handler
     autoload("background")  # loads background tasks
     autoload("contextmenu")  # lodas context menu commands
     if int(SLASH_ENABLED):
