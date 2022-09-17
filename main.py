@@ -1,4 +1,6 @@
 import os
+from os.path import join, dirname
+from dotenv import load_dotenv
 import sys
 import argparse
 import disnake
@@ -7,6 +9,8 @@ from disnake.ext import commands
 from helpers import db_helper
 from cogs.help import help
 
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 if not BOT_TOKEN:
     print("BOT_TOKEN missing")
