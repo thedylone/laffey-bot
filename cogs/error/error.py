@@ -9,17 +9,21 @@ class ErrorHandler(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(
-        self, ctx: commands.Context, error: commands.CommandError
+        self,
+        ctx: commands.Context,
+        error: commands.CommandError,
     ):
         """A global error handler cog."""
         if isinstance(error, commands.CommandNotFound):
-            return  # Return because we don't want to show an error for every command not found
+            # Return because we don't want to show for every command not found
+            return
         elif isinstance(error, commands.CommandOnCooldown):
-            message = f"This command is on cooldown. Please try again after {round(error.retry_after, 1)} seconds."
+            cooldown = f"Try again after {round(error.retry_after, 1)} seconds"
+            message = f"This command is on cooldown. {cooldown}."
         elif isinstance(error, commands.MissingPermissions):
-            message = "You are missing the required permissions to run this command!"
+            message = "You don't have the permissions to run this command!"
         elif isinstance(error, commands.UserInputError):
-            message = "Something about your input was wrong, please check your input and try again!"
+            message = "Your input was wrong, please check and try again!"
         elif isinstance(error, commands.NoPrivateMessage):
             message = "This command cannot be run in a Private Message!"
         else:

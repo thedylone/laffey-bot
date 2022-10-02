@@ -2,3 +2,5 @@ aiohttp
 disnake
 asyncpg
 python-dateutil
+validators
+python-dotenv

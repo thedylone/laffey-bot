@@ -24,18 +24,29 @@ class ValorantWatchModal(disnake.ui.Modal):
             ),
         ]
         super().__init__(
-            title="valorant watch", custom_id="valorant_watch", components=components
+            title="valorant watch",
+            custom_id="valorant_watch",
+            components=components,
         )
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
         content = await valorant_helper.watch(
-            self.bot, inter, inter.text_values["name"], inter.text_values["tag"]
+            self.bot,
+            inter,
+            inter.text_values["name"],
+            inter.text_values["tag"],
         )
         await inter.edit_original_message(content=content)
 
-    async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
-        await inter.edit_original_message(content="Oops, something went wrong.")
+    async def on_error(
+        self,
+        error: Exception,
+        inter: disnake.ModalInteraction,
+    ) -> None:
+        await inter.edit_original_message(
+            content="Oops, something went wrong."
+        )
 
 
 class ValorantPingImageModal(disnake.ui.Modal):
@@ -59,12 +70,20 @@ class ValorantPingImageModal(disnake.ui.Modal):
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
         content = await valorant_helper.ping_image_add(
-            self.bot, inter, inter.text_values["url"]
+            self.bot,
+            inter,
+            inter.text_values["url"],
         )
         await inter.edit_original_message(content=content)
 
-    async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
-        await inter.edit_original_message(content="Oops, something went wrong.")
+    async def on_error(
+        self,
+        error: Exception,
+        inter: disnake.ModalInteraction,
+    ) -> None:
+        await inter.edit_original_message(
+            content="Oops, something went wrong."
+        )
 
 
 class ValorantFeederMessageModal(disnake.ui.Modal):
@@ -88,12 +107,20 @@ class ValorantFeederMessageModal(disnake.ui.Modal):
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
         content = await valorant_helper.feeder_message_add(
-            self.bot, inter, inter.text_values["message"]
+            self.bot,
+            inter,
+            inter.text_values["message"],
         )
         await inter.edit_original_message(content=content)
 
-    async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
-        await inter.edit_original_message(content="Oops, something went wrong.")
+    async def on_error(
+        self,
+        error: Exception,
+        inter: disnake.ModalInteraction,
+    ) -> None:
+        await inter.edit_original_message(
+            content="Oops, something went wrong."
+        )
 
 
 class ValorantFeederImageModal(disnake.ui.Modal):
@@ -117,12 +144,20 @@ class ValorantFeederImageModal(disnake.ui.Modal):
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
         content = await valorant_helper.feeder_image_add(
-            self.bot, inter, inter.text_values["url"]
+            self.bot,
+            inter,
+            inter.text_values["url"],
         )
         await inter.edit_original_message(content=content)
 
-    async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
-        await inter.edit_original_message(content="Oops, something went wrong.")
+    async def on_error(
+        self,
+        error: Exception,
+        inter: disnake.ModalInteraction,
+    ) -> None:
+        await inter.edit_original_message(
+            content="Oops, something went wrong."
+        )
 
 
 class ValorantStreakerMessageModal(disnake.ui.Modal):
@@ -146,9 +181,17 @@ class ValorantStreakerMessageModal(disnake.ui.Modal):
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         await inter.response.defer()
         content = await valorant_helper.streaker_message_add(
-            self.bot, inter, inter.text_values["message"]
+            self.bot,
+            inter,
+            inter.text_values["message"],
         )
         await inter.edit_original_message(content=content)
 
-    async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
-        await inter.edit_original_message(content="Oops, something went wrong.")
+    async def on_error(
+        self,
+        error: Exception,
+        inter: disnake.ModalInteraction,
+    ) -> None:
+        await inter.edit_original_message(
+            content="Oops, something went wrong."
+        )

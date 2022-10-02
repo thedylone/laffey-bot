@@ -10,18 +10,32 @@ class ContextMenu(commands.Cog):
 
     @commands.user_command(name="avatar")
     async def avatar(
-        self, inter: disnake.ApplicationCommandInteraction, user: disnake.User
+        self,
+        inter: disnake.ApplicationCommandInteraction,
+        user: disnake.User,
     ):
+        """displays the user's avatar in an embed"""
         embed = disnake.Embed(title=f"{user}'s avatar")
         embed.set_image(url=user.display_avatar.url)
         await inter.response.send_message(embed=embed)
 
+    @commands.user_command(name="valorant-info")
+    async def valorant_info(
+        self, inter: disnake.ApplicationCommandInteraction, user: disnake.User
+    ):
+        """returns user's valorant info from the database"""
+        await inter.response.defer()
+        content, embed = await valorant_helper.info(self.bot, inter, user)
+        await inter.edit_original_message(content=content, embed=embed)
+
     @commands.user_command(name="valorant-wait")
     async def valorant_wait(
-        self, inter: disnake.ApplicationCommandInteraction, wait_user: disnake.User
+        self,
+        inter: disnake.ApplicationCommandInteraction,
+        wait_user: disnake.User,
     ):
-        await inter.response.defer()
         """pings you when tagged user is done"""
+        await inter.response.defer()
         content = await valorant_helper.wait(self.bot, inter, wait_user)
         await inter.edit_original_message(content=content)
 

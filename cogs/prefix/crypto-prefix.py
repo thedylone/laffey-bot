@@ -1,4 +1,3 @@
-import disnake
 from disnake.ext import commands
 
 from helpers import crypto_helper
@@ -12,7 +11,7 @@ class Crypto(commands.Cog, name="crypto"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="sol", description="solprice")
+    @commands.command(name="sol", description="sol price")
     async def sol(self, ctx: commands.Context):
         """get the current price of SOL in USD."""
         content = await crypto_helper.price("SOLUSDT")

@@ -1,22 +1,35 @@
 import os
-
-BOT_TOKEN = os.environ["BOT_TOKEN"]
-
+from os.path import join, dirname
+from dotenv import load_dotenv
+import sys
+import argparse
 import disnake
 from disnake.ext import commands
 
 from helpers import db_helper
 from cogs.help import help
 
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+if not BOT_TOKEN:
+    print("BOT_TOKEN missing")
+    sys.exit(1)
+
+DEFAULT_PREFIX = os.environ.get("DEFAULT_PREFIX", "?")
+SLASH_ENABLED = os.environ.get("SLASH_ENABLED", 1)
+PREFIX_ENABLED = os.environ.get("PREFIX_ENABLED", 1)
+DEBUG_MODE = False
+
 
 async def get_prefix(bot, message):
-    custom_prefix = os.environ["DEFAULT_PREFIX"]
+    custom_prefix = DEFAULT_PREFIX
     if not isinstance(message.channel, disnake.channel.DMChannel):
         guild_id = message.guild.id
         guild_data = await db_helper.get_guild_data(bot, guild_id)
         if len(guild_data) == 0:
             await db_helper.update_guild_data(
-                bot, guild_id, prefix=os.environ["DEFAULT_PREFIX"]
+                bot, guild_id, prefix=DEFAULT_PREFIX
             )
         else:
             custom_prefix = guild_data[0].get("prefix")
@@ -30,15 +43,13 @@ intents.message_content = True
 bot = commands.Bot(
     command_prefix=get_prefix,
     intents=intents,
-    help_command=help.Help()
+    help_command=help.Help(),
 )
 
 
 @bot.event
 async def on_guild_join(guild: disnake.Guild):
-    await db_helper.update_guild_data(
-        bot, guild.id, prefix=os.environ["DEFAULT_PREFIX"]
-    )
+    await db_helper.update_guild_data(bot, guild.id, prefix=DEFAULT_PREFIX)
     print(f"joined server {guild.name}")
 
 
@@ -54,7 +65,7 @@ async def on_ready():
     print(f"logged in {bot.user.name}")
     # set activity of the bot
     await bot.change_presence(
-        activity=disnake.Game(f"with lolis | {os.environ['DEFAULT_PREFIX']}help")
+        activity=disnake.Game(f"with lolis | {DEFAULT_PREFIX}help")
     )
     await db_helper.create_db_pool(bot)
     await db_helper.create_guilds_table(bot)
@@ -80,12 +91,22 @@ def autoload(command_type: str) -> None:
 
 
 if __name__ == "__main__":
-    autoload("error")  # loads error handler
+    parser = argparse.ArgumentParser(description="run discord bot")
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="run in debug mode",
+    )
+    args = parser.parse_args()
+    DEBUG_MODE = args.debug
+    if not DEBUG_MODE:
+        autoload("error")  # loads error handler
     autoload("background")  # loads background tasks
     autoload("contextmenu")  # lodas context menu commands
-    if int(os.environ["SLASH_ENABLED"]):
+    if int(SLASH_ENABLED):
         autoload("slash")
-    if int(os.environ["PREFIX_ENABLED"]):
+    if int(PREFIX_ENABLED):
         autoload("prefix")
 
 # Login to Discord with the bot's token.
