@@ -1,31 +1,34 @@
+"""main file initializing the bot and loading cogs"""
 import os
-from os.path import join, dirname
-from dotenv import load_dotenv
 import sys
 import argparse
+from os.path import join, dirname
+from dotenv import load_dotenv
 import disnake
 from disnake.ext import commands
 
 from helpers import db_helper
-from cogs.help import help
+from cogs.help import help as custom_help
 
-dotenv_path = join(dirname(__file__), ".env")
+dotenv_path: str = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
+BOT_TOKEN: str | None = os.environ.get("BOT_TOKEN")
 if not BOT_TOKEN:
     print("BOT_TOKEN missing")
     sys.exit(1)
 
-DEFAULT_PREFIX = os.environ.get("DEFAULT_PREFIX", "?")
-SLASH_ENABLED = os.environ.get("SLASH_ENABLED", 1)
-PREFIX_ENABLED = os.environ.get("PREFIX_ENABLED", 1)
+DEFAULT_PREFIX: str = os.environ.get("DEFAULT_PREFIX", "?")
+SLASH_ENABLED: str = os.environ.get("SLASH_ENABLED", "1")
+PREFIX_ENABLED: str = os.environ.get("PREFIX_ENABLED", "1")
 DEBUG_MODE = False
+LOG_WEBHOOK: str | None = os.environ.get("LOG_WEBHOOK")
 
 
 async def get_prefix(bot, message):
-    custom_prefix = DEFAULT_PREFIX
+    """returns prefix for the guild"""
+    custom_prefix: str = DEFAULT_PREFIX
     if not isinstance(message.channel, disnake.channel.DMChannel):
-        guild_id = message.guild.id
+        guild_id: int = message.guild.id
         guild_data = await db_helper.get_guild_data(bot, guild_id)
         if len(guild_data) == 0:
             await db_helper.update_guild_data(
@@ -39,29 +42,36 @@ async def get_prefix(bot, message):
 intents = disnake.Intents.default()
 intents.message_content = True
 
-# creating a commands.Bot() instance, and assigning it to "bot"
 bot = commands.Bot(
     command_prefix=get_prefix,
     intents=intents,
-    help_command=help.Help(),
+    help_command=custom_help.Help(),
 )
 
 
 @bot.event
-async def on_guild_join(guild: disnake.Guild):
+async def on_guild_join(guild: disnake.Guild) -> None:
+    """adds guild to database when bot joins a server"""
     await db_helper.update_guild_data(bot, guild.id, prefix=DEFAULT_PREFIX)
-    print(f"joined server {guild.name}")
+    msg: str = f"joined server {guild.name}"
+    print(msg)
+    if bot.owner:
+        await bot.owner.send(msg)
 
 
 @bot.event
-async def on_guild_remove(guild: disnake.Guild):
+async def on_guild_remove(guild: disnake.Guild) -> None:
+    """removes guild from database when bot leaves a server"""
     await db_helper.delete_guild_data(bot, guild.id)
-    print(f"left server {guild.name}")
+    msg: str = f"left server {guild.name}"
+    print(msg)
+    if bot.owner:
+        await bot.owner.send(msg)
 
 
-# When the bot is ready, run this code.
 @bot.event
 async def on_ready():
+    """runs when bot is ready"""
     print(f"logged in {bot.user.name}")
     # set activity of the bot
     await bot.change_presence(

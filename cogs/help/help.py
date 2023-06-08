@@ -1,3 +1,4 @@
+"""custom help command"""
 import disnake
 
 from views.views import HelpView, SelectEmbed

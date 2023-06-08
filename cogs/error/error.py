@@ -17,7 +17,7 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, commands.CommandNotFound):
             # Return because we don't want to show for every command not found
             return
-        elif isinstance(error, commands.CommandOnCooldown):
+        if isinstance(error, commands.CommandOnCooldown):
             cooldown = f"Try again after {round(error.retry_after, 1)} seconds"
             message = f"This command is on cooldown. {cooldown}."
         elif isinstance(error, commands.MissingPermissions):

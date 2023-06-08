@@ -1,10 +1,12 @@
-import disnake
-from disnake.ext import tasks, commands
-
-import aiohttp
+"""background tasks"""
 import asyncio
 import math
 import random
+import aiohttp
+
+import disnake
+from disnake.ext import tasks, commands
+
 
 from helpers import db_helper
 
@@ -92,9 +94,10 @@ class ValorantMatchBackground:
         """returns True is feeder is triggered"""
         return deaths >= (kills + (1.1 * math.e) ** (kills / 5) + 2.9)
 
-    def mention_list(self, list):
+    @staticmethod
+    def mention_list(mention_list):
         """joins a list into discord mentions"""
-        return f"<@{'> and <@'.join(map(str, list))}>"
+        return f"<@{'> and <@'.join(map(str, mention_list))}>"
 
     def rounds_to_player_embed(self):
         """convert rounds into a player embed"""
@@ -210,7 +213,7 @@ class ValorantMatchBackground:
         """updates database waitlist and adds to list of waiters"""
         waitlist_data = await db_helper.get_waitlist_data(self.bot, id)
         if len(waitlist_data):
-            self.combined_waiters.append(waitlist_data[0].get("waiting_id"))
+            self.combined_waiters += waitlist_data[0].get("waiting_id")
             await db_helper.delete_waitlist_data(self.bot, id)
 
     def streakers_to_player_embed(self):
@@ -273,10 +276,10 @@ class ValorantMatchBackground:
                     "deaths": deaths,
                     "assists": player_stats.get("assists"),
                     "acs": int(player_acs),
-                    "kd": "{:.2f}".format(kills / deaths),
+                    "kd": f"{kills / deaths:.2f}",
                 }
 
-            if self.mode == "Competitive" or self.mode == "Unrated":
+            if self.mode in ("Competitive", "Unrated"):
                 # save stats
                 await db_helper.update_player_data(
                     self.bot,
