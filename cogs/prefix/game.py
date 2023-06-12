@@ -1,3 +1,5 @@
+"""prefix commands for game related commands"""
+
 import disnake
 from disnake.ext import commands
 
@@ -9,8 +11,8 @@ class Valorant(commands.Cog, name="valorant"):
 
     COG_EMOJI = "🕹️"
 
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot: commands.Bot = bot
 
     @commands.command(
         name="valorant-ping",
@@ -18,10 +20,9 @@ class Valorant(commands.Cog, name="valorant"):
         description="pings role",
     )
     @commands.guild_only()
-    async def valorant_ping(self, ctx: commands.Context):
+    async def valorant_ping(self, ctx: commands.Context) -> None:
         """pings role and sends optional image"""
-        content, embed, file = await valorant_helper.ping(self.bot, ctx)
-        await ctx.send(content=content, embed=embed, file=file)
+        await ctx.send(**await valorant_helper.ping(self.bot, ctx))
 
     @commands.command(
         name="valorant-info",
@@ -31,11 +32,10 @@ class Valorant(commands.Cog, name="valorant"):
     async def valorant_info(
         self,
         ctx: commands.Context,
-        user: disnake.User = None,
-    ):
+        user: disnake.User | None = None,
+    ) -> None:
         """returns user's valorant info from the database"""
-        content, embed = await valorant_helper.info(self.bot, ctx, user)
-        await ctx.send(content=content, embed=embed)
+        await ctx.send(**await valorant_helper.info(self.bot, ctx, user))
 
     @commands.command(
         name="valorant-watch",
@@ -43,30 +43,36 @@ class Valorant(commands.Cog, name="valorant"):
         description="adds user into database",
     )
     async def valorant_watch(
-        self, ctx: commands.Context, name: str = None, tag: str = None
-    ):
+        self,
+        ctx: commands.Context,
+        name: str | None = None,
+        tag: str | None = None,
+    ) -> None:
         """add user's valorant info to the database.
         e.g. ?vwatch GuessJewels#peko"""
+        if name is None:
+            content: str = f"use {ctx.prefix}valorant-watch <name> <tag>"
+            await ctx.send(content=content)
+            return
         if tag is None:
-            if not name or "#" not in name:
-                content = f"use {ctx.prefix}valorant-watch <name> <tag>"
+            if "#" not in name:
+                content: str = f"use {ctx.prefix}valorant-watch <name> <tag>"
                 await ctx.send(content=content)
                 return
-            else:
-                name, tag = name.split("#")[:2]
-        message = await ctx.send(content="retrieving data...")
-        content = await valorant_helper.watch(self.bot, ctx, name, tag)
-        await message.edit(content=content)
+            name, tag = name.split("#")[:2]
+        message: disnake.Message = await ctx.send(content="retrieving data...")
+        await message.edit(
+            **await valorant_helper.watch(self.bot, ctx, name, tag)
+        )
 
     @commands.command(
         name="valorant-unwatch",
         aliases=["valorantunwatch", "valunwatch", "vunwatch"],
         description="removes user's valorant info from the database",
     )
-    async def valorant_unwatch(self, ctx: commands.Context):
+    async def valorant_unwatch(self, ctx: commands.Context) -> None:
         """removes user's valorant info from the database"""
-        content = await valorant_helper.unwatch(self.bot, ctx)
-        await ctx.send(content=content)
+        await ctx.send(**await valorant_helper.unwatch(self.bot, ctx))
 
     @commands.command(
         name="valorant-wait",
@@ -77,20 +83,20 @@ class Valorant(commands.Cog, name="valorant"):
         self,
         ctx: commands.Context,
         *wait_users: disnake.User,
-    ):
+    ) -> None:
         """pings you when tagged user is done"""
-        content = await valorant_helper.wait(self.bot, ctx, *wait_users)
-        await ctx.send(content=content)
+        await ctx.send(
+            **await valorant_helper.wait(self.bot, ctx, *wait_users)
+        )
 
     @commands.command(
         name="valorant-waitlist",
         aliases=["valorantwaitlist", "valwaitlist", "vwaitlist"],
         description="prints valorant waitlist",
     )
-    async def valorant_waitlist(self, ctx: commands.Context):
+    async def valorant_waitlist(self, ctx: commands.Context) -> None:
         """prints valorant waitlist"""
-        embed = await valorant_helper.waitlist(self.bot, ctx)
-        await ctx.send(embed=embed)
+        await ctx.send(**await valorant_helper.waitlist(self.bot, ctx))
 
 
 class ValorantAdmin(commands.Cog, name="valorant admin"):
@@ -98,8 +104,8 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
 
     COG_EMOJI = "🎮"
 
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot: commands.Bot = bot
 
     @commands.command(
         name="set-channel",
@@ -110,11 +116,15 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     async def set_channel(
         self,
         ctx: commands.Context,
-        channel: disnake.TextChannel = None,
-    ):
+        channel: disnake.TextChannel
+        | disnake.VoiceChannel
+        | disnake.Thread
+        | None = None,
+    ) -> None:
         """set the channel the bot will send updates to"""
-        content = await valorant_helper.set_channel(self.bot, ctx, channel)
-        await ctx.send(content=content)
+        await ctx.send(
+            **await valorant_helper.set_channel(self.bot, ctx, channel)
+        )
 
     @commands.command(
         name="set-role",
@@ -125,13 +135,12 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     async def set_role(
         self,
         ctx: commands.Context,
-        role: disnake.Role = None,
-    ):
+        role: disnake.Role | None = None,
+    ) -> None:
         "set the role the bot will ping"
-        content = await valorant_helper.set_role(self.bot, ctx, role)
-        await ctx.send(content=content)
+        await ctx.send(**await valorant_helper.set_role(self.bot, ctx, role))
 
-    options = "options: add, show, delete"
+    options: str = "options: add, show, delete"
 
     @commands.group(
         name="ping-image",
@@ -139,7 +148,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         description="custom ping image functions",
         invoke_without_command=True,
     )
-    async def ping_image(self, ctx: commands.Context):
+    async def ping_image(self, ctx: commands.Context) -> None:
         """custom image for the ping alert"""
         await ctx.send(
             content=f"custom image for the ping alert. {self.options}"
@@ -150,24 +159,22 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def ping_image_add(
-        self, ctx: commands.Context, new_image: str = None
-    ):
+        self, ctx: commands.Context, new_image: str | None = None
+    ) -> None:
         """add custom image for the ping alert"""
-        if new_image:
-            content = await valorant_helper.ping_image_add(
-                self.bot, ctx, new_image
-            )
-            await ctx.send(content=content)
-        else:
+        if new_image is None:
             await ctx.send(content=f'use {ctx.prefix}ping-image add "<url>"')
+            return
+        await ctx.send(
+            **await valorant_helper.ping_image_add(self.bot, ctx, new_image)
+        )
 
     @ping_image.command(
         name="show", description="show custom image for the ping alert"
     )
-    async def ping_image_show(self, ctx: commands.Context):
+    async def ping_image_show(self, ctx: commands.Context) -> None:
         """show custom image for the ping alert"""
-        content, embed = await valorant_helper.ping_image_show(self.bot, ctx)
-        await ctx.send(content=content, embed=embed)
+        await ctx.send(**await valorant_helper.ping_image_show(self.bot, ctx))
 
     @ping_image.command(
         name="delete",
@@ -175,10 +182,11 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         description="delete custom image for the ping alert",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def ping_image_delete(self, ctx: commands.Context):
+    async def ping_image_delete(self, ctx: commands.Context) -> None:
         """delete custom image for the ping alert"""
-        content = await valorant_helper.ping_image_delete(self.bot, ctx)
-        await ctx.send(content=content)
+        await ctx.send(
+            **await valorant_helper.ping_image_delete(self.bot, ctx)
+        )
 
     @commands.group(
         name="feeder-message",
@@ -186,7 +194,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         description="custom feeder messages functions",
         invoke_without_command=True,
     )
-    async def feeder_message(self, ctx: commands.Context):
+    async def feeder_message(self, ctx: commands.Context) -> None:
         """custom messages for the feeder alert"""
         await ctx.send(
             content=f"custom messages for the feeder alert. {self.options}"
@@ -197,28 +205,28 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def feeder_message_add(
-        self, ctx: commands.Context, new_message: str = None
-    ):
+        self, ctx: commands.Context, new_message: str | None = None
+    ) -> None:
         """add custom messages for the feeder alert"""
-        if new_message:
-            out = await valorant_helper.feeder_message_add(
-                self.bot, ctx, new_message
-            )
-            await ctx.send(out)
-        else:
+        if new_message is None:
             await ctx.send(
                 content=f'use {ctx.prefix}feeder-message add "<message>"'
             )
+            return
+        await ctx.send(
+            **await valorant_helper.feeder_message_add(
+                self.bot, ctx, new_message
+            )
+        )
 
     @feeder_message.command(
         name="show", description="show custom messages for the feeder alert"
     )
-    async def feeder_message_show(self, ctx: commands.Context):
+    async def feeder_message_show(self, ctx: commands.Context) -> None:
         """show custom messages for the feeder aler"""
-        content, embed, view = await valorant_helper.feeder_message_show(
-            self.bot, ctx
+        await ctx.send(
+            **await valorant_helper.feeder_message_show(self.bot, ctx)
         )
-        await ctx.send(content=content, embed=embed, view=view)
 
     @feeder_message.command(
         name="delete",
@@ -226,12 +234,11 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         description="delete custom messages for the feeder alert",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def feeder_message_delete(self, ctx: commands.Context):
+    async def feeder_message_delete(self, ctx: commands.Context) -> None:
         """delete custom messages for the feeder alert"""
-        content, view = await valorant_helper.feeder_message_delete(
-            self.bot, ctx
+        await ctx.send(
+            **await valorant_helper.feeder_message_delete(self.bot, ctx)
         )
-        await ctx.send(content=content, view=view)
 
     @commands.group(
         name="feeder-image",
@@ -239,7 +246,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         description="custom feeder images functions",
         invoke_without_command=True,
     )
-    async def feeder_image(self, ctx: commands.Context):
+    async def feeder_image(self, ctx: commands.Context) -> None:
         """custom images for the feeder alert"""
         await ctx.send(
             content=f"custom images for the feeder alert. {self.options}"
@@ -250,26 +257,24 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def feeder_image_add(
-        self, ctx: commands.Context, new_image: str = None
-    ):
+        self, ctx: commands.Context, new_image: str | None = None
+    ) -> None:
         """add custom images for the feeder alert"""
-        if new_image:
-            out = await valorant_helper.feeder_image_add(
-                self.bot, ctx, new_image
-            )
-            await ctx.send(out)
-        else:
+        if new_image is None:
             await ctx.send(content=f'use {ctx.prefix}feeder-image add "<url>"')
+            return
+        await ctx.send(
+            **await valorant_helper.feeder_image_add(self.bot, ctx, new_image)
+        )
 
     @feeder_image.command(
         name="show", description="show custom images for the feeder alert"
     )
-    async def feeder_image_show(self, ctx: commands.Context):
+    async def feeder_image_show(self, ctx: commands.Context) -> None:
         """show custom images for the feeder alert"""
-        content, embed, view = await valorant_helper.feeder_image_show(
-            self.bot, ctx
+        await ctx.send(
+            **await valorant_helper.feeder_image_show(self.bot, ctx)
         )
-        await ctx.send(content=content, embed=embed, view=view)
 
     @feeder_image.command(
         name="delete",
@@ -277,12 +282,11 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         description="delete custom images for the feeder alert",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def feeder_image_delete(self, ctx: commands.Context):
+    async def feeder_image_delete(self, ctx: commands.Context) -> None:
         """delete custom images for the feeder alert"""
-        content, view = await valorant_helper.feeder_image_delete(
-            self.bot, ctx
+        await ctx.send(
+            **await valorant_helper.feeder_image_delete(self.bot, ctx)
         )
-        await ctx.send(content=content, view=view)
 
     @commands.group(
         name="streaker-message",
@@ -290,7 +294,7 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         description="custom streaker messages functions",
         invoke_without_command=True,
     )
-    async def streaker_message(self, ctx: commands.Context):
+    async def streaker_message(self, ctx: commands.Context) -> None:
         """custom messages for the streaker alert"""
         await ctx.send(
             content=f"custom messages for the streaker alert. {self.options}"
@@ -301,28 +305,28 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def streaker_message_add(
-        self, ctx: commands.Context, new_message: str = None
-    ):
+        self, ctx: commands.Context, new_message: str | None = None
+    ) -> None:
         """add custom messages for the streaker alert"""
-        if new_message:
-            out = await valorant_helper.streaker_message_add(
-                self.bot, ctx, new_message
-            )
-            await ctx.send(out)
-        else:
+        if new_message is None:
             await ctx.send(
                 content=f'use {ctx.prefix}streaker-message add "<message>"'
             )
+            return
+        await ctx.send(
+            **await valorant_helper.streaker_message_add(
+                self.bot, ctx, new_message
+            )
+        )
 
     @streaker_message.command(
         name="show", description="show custom messages for the streaker alert"
     )
-    async def streaker_message_show(self, ctx: commands.Context):
+    async def streaker_message_show(self, ctx: commands.Context) -> None:
         """show custom messages for the streaker alert"""
-        content, embed, view = await valorant_helper.streaker_message_show(
-            self.bot, ctx
+        await ctx.send(
+            **await valorant_helper.streaker_message_show(self.bot, ctx)
         )
-        await ctx.send(content=content, embed=embed, view=view)
 
     @streaker_message.command(
         name="delete",
@@ -330,14 +334,14 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
         description="delete custom messages for the streaker alert",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def streaker_message_delete(self, ctx: commands.Context):
+    async def streaker_message_delete(self, ctx: commands.Context) -> None:
         """delete custom messages for the streaker alert"""
-        content, view = await valorant_helper.streaker_message_delete(
-            self.bot, ctx
+        await ctx.send(
+            **await valorant_helper.streaker_message_delete(self.bot, ctx)
         )
-        await ctx.send(content=content, view=view)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: commands.Bot) -> None:
+    """loads cog into bot"""
     bot.add_cog(Valorant(bot))
     bot.add_cog(ValorantAdmin(bot))
