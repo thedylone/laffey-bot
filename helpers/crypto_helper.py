@@ -1,20 +1,25 @@
+"""helper functions for crypto cog"""
+
+import os
 import aiohttp
 
+COINAPI_TOKEN: str | None = os.getenv("CRYPTO_TOKEN")
 
-async def price(symbol):
+
+async def price(sym: str) -> dict[str, str]:
     """
     get price of requested coin in USD.
     returns content
     """
     async with aiohttp.ClientSession() as session:
-        async with session.get(
-            f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
-        ) as request:
+        url: str = f"https://rest.coinapi.io/v1/exchangerate/{sym}/USD"
+        headers: dict[str, str | None] = {"X-CoinAPI-Key": COINAPI_TOKEN}
+        async with session.get(url, headers=headers) as request:
             if request.status == 200:
-                data = await request.json()
-                content = "1 {} is {:.2f} USD".format(
-                    symbol, float(data.get("price"))
-                )
+                data: dict = await request.json()
+                content: str = f"1 {sym} = {data.get('rate'):.2f} USD"
             else:
                 content = "error getting price"
-            return content
+            return {
+                "content": content,
+            }

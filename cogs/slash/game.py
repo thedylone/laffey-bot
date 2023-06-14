@@ -17,7 +17,7 @@ from modals.modals import (
 class Valorant(commands.Cog):
     """valorant related commands"""
 
-    COG_EMOJI = "🕹️"
+    COG_EMOJI: str = "🕹️"
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot: commands.Bot = bot
@@ -92,7 +92,7 @@ class Valorant(commands.Cog):
 class ValorantAdmin(commands.Cog):
     """valorant admin commands"""
 
-    COG_EMOJI = "🎮"
+    COG_EMOJI: str = "🎮"
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot: commands.Bot = bot
@@ -262,6 +262,6 @@ class ValorantAdmin(commands.Cog):
 
 
 def setup(bot: commands.Bot) -> None:
-    """loads the cog into the bot"""
+    """loads game cog into bot"""
     bot.add_cog(Valorant(bot))
     bot.add_cog(ValorantAdmin(bot))

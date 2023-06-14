@@ -9,7 +9,7 @@ from helpers import valorant_helper
 class Valorant(commands.Cog, name="valorant"):
     """valorant related commands"""
 
-    COG_EMOJI = "🕹️"
+    COG_EMOJI: str = "🕹️"
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot: commands.Bot = bot
@@ -102,7 +102,7 @@ class Valorant(commands.Cog, name="valorant"):
 class ValorantAdmin(commands.Cog, name="valorant admin"):
     """valorant admin commands"""
 
-    COG_EMOJI = "🎮"
+    COG_EMOJI: str = "🎮"
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot: commands.Bot = bot
@@ -342,6 +342,6 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
 
 
 def setup(bot: commands.Bot) -> None:
-    """loads cog into bot"""
+    """loads game cog into bot"""
     bot.add_cog(Valorant(bot))
     bot.add_cog(ValorantAdmin(bot))
