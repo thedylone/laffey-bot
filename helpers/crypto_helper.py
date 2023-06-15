@@ -3,10 +3,12 @@
 import os
 import aiohttp
 
+from helpers.helpers import DiscordReturn
+
 COINAPI_TOKEN: str | None = os.getenv("CRYPTO_TOKEN")
 
 
-async def price(sym: str) -> dict[str, str]:
+async def price(sym: str) -> DiscordReturn:
     """
     get price of requested coin in USD.
     returns content

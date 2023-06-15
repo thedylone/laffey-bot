@@ -1,6 +1,7 @@
-from disnake.ext import commands
+"""prefix commands for general commands"""
 
 import random
+from disnake.ext import commands
 
 from helpers import general_helper
 
@@ -10,14 +11,14 @@ class General(commands.Cog, name="general"):
 
     COG_EMOJI = "🤖"
 
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot: commands.Bot = bot
 
     @commands.command(
         name="ping",
         description="get bot's latency",
     )
-    async def ping(self, ctx: commands.Context):
+    async def ping(self, ctx: commands.Context) -> None:
         """get the bot's current websocket latency."""
         await ctx.send(f"pong! {round(self.bot.latency * 1000)}ms")
 
@@ -25,37 +26,26 @@ class General(commands.Cog, name="general"):
         name="shouldiorder",
         description="should you get indulge?",
     )
-    async def rng(self, ctx: commands.Context):
+    async def rng(self, ctx: commands.Context) -> None:
         """should you get indulge?"""
-        results = ["Hell yea boiii", "Nah save monet tday sadge"]
+        results: list[str] = ["Hell yea boiii", "Nah save monet tday sadge"]
         await ctx.send(f"<@{ctx.author.id}> {random.choice(results)}")
-
-    @commands.command(
-        name="peko",
-        description="peko",
-    )
-    async def peko(self, ctx: commands.Context):
-        """peko"""
-        content, embed, view = await general_helper.peko(ctx)
-        await ctx.send(content=content, embed=embed, view=view)
 
     @commands.command(
         name="fubu",
         description="fubu",
     )
-    async def fubu(self, ctx: commands.Context):
+    async def fubu(self, ctx: commands.Context) -> None:
         """fubu"""
-        content, embed, view = await general_helper.fubu(ctx)
-        await ctx.send(content=content, embed=embed, view=view)
+        await ctx.send(**await general_helper.fubu())
 
     @commands.command(
         name="holo",
         description="all live hololive streams",
     )
-    async def holo(self, ctx: commands.Context):
+    async def holo(self, ctx: commands.Context) -> None:
         """all live hololive streams"""
-        content, embed, view = await general_helper.holo(ctx)
-        await ctx.send(content=content, embed=embed, view=view)
+        await ctx.send(**await general_helper.holo())
 
 
 class GeneralAdmin(commands.Cog, name="general admin"):
@@ -63,24 +53,26 @@ class GeneralAdmin(commands.Cog, name="general admin"):
 
     COG_EMOJI = "📃"
 
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot: commands.Bot = bot
 
     @commands.command(
-        name="prefix",
+        name="set-prefix",
         description="set prefix for the server",
     )
     @commands.has_guild_permissions(manage_messages=True)
-    async def prefix(
+    async def set_prefix(
         self,
         ctx: commands.Context,
-        prefix: str = None,
-    ):
+        prefix: str | None = None,
+    ) -> None:
         """set prefix for the server"""
-        content = await general_helper.prefix(self.bot, ctx, prefix)
-        await ctx.send(content=content)
+        await ctx.send(
+            **await general_helper.set_prefix(self.bot, ctx, prefix)
+        )
 
 
-def setup(bot: commands.Bot):
+def setup(bot: commands.Bot) -> None:
+    """loads general cog into bot"""
     bot.add_cog(General(bot))
     bot.add_cog(GeneralAdmin(bot))

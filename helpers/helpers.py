@@ -1,6 +1,8 @@
 """helper functions not for bot commands"""
 
 import re
+from typing import TypedDict
+import disnake
 
 
 def validate_url(url: str) -> bool:
@@ -15,3 +17,13 @@ def validate_url(url: str) -> bool:
         re.IGNORECASE,
     )
     return re.match(regex, url) is not None
+
+
+class DiscordReturn(TypedDict, total=False):
+    """discord return type"""
+
+    content: str
+    embed: disnake.Embed
+    file: disnake.File
+    view: disnake.ui.View
+    allowed_mentions: disnake.AllowedMentions

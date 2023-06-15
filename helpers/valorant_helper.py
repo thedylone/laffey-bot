@@ -13,7 +13,7 @@ from views.views import (
 )
 
 from helpers import db_helper
-from helpers.helpers import validate_url
+from helpers.helpers import validate_url, DiscordReturn
 
 
 class Player:
@@ -75,12 +75,12 @@ class Player:
             account_request: aiohttp.ClientResponse = await session.get(
                 f"{self.API}/v1/account/{self.name}/{self.tag}"
             )
-            if account_request.status != 200:
-                raise ConnectionError("error retrieving account info!")
-            account_json: dict[str, dict] = await account_request.json()
-            account_data: dict | None = account_json.get("data")
-            if account_data is None:
-                raise ConnectionError("error retrieving account info!")
+        if account_request.status != 200:
+            raise ConnectionError("error retrieving account info!")
+        account_json: dict[str, dict] = await account_request.json()
+        account_data: dict | None = account_json.get("data")
+        if account_data is None:
+            raise ConnectionError("error retrieving account info!")
         self.puuid = account_data.get("puuid")
         self.region = account_data.get("region")
 
@@ -90,12 +90,12 @@ class Player:
             match_request: aiohttp.ClientResponse = await session.get(
                 f"{self.API}/v3/by-puuid/matches/{self.region}/{self.puuid}"
             )
-            if match_request.status != 200:
-                raise ConnectionError("error retrieving match history!")
-            match_json: dict[str, list] = await match_request.json()
-            match_data: list | None = match_json.get("data")
-            if match_data is None:
-                raise ConnectionError("error retrieving match history!")
+        if match_request.status != 200:
+            raise ConnectionError("error retrieving match history!")
+        match_json: dict[str, list] = await match_request.json()
+        match_data: list | None = match_json.get("data")
+        if match_data is None:
+            raise ConnectionError("error retrieving match history!")
         return match_data
 
     def update_stats(self, game: dict) -> None:
@@ -173,7 +173,7 @@ def use_prefix(
 async def ping(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
-) -> dict[str, str | disnake.Embed | disnake.File | None]:
+) -> DiscordReturn:
     """
     pings role and sends optional image.
     returns content, embed, file
@@ -206,7 +206,7 @@ async def ping_image_add(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
     new_image: str,
-) -> dict[str, str]:
+) -> DiscordReturn:
     """
     add custom image for ping.
     returns content
@@ -241,7 +241,7 @@ async def ping_image_add(
 async def ping_image_show(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
-) -> dict[str, str | disnake.Embed | None]:
+) -> DiscordReturn:
     """
     show custom image for ping.
     returns content, embed
@@ -266,7 +266,6 @@ async def ping_image_show(
     )
     embed.set_image(url=ping_image)
     return {
-        "content": None,
         "embed": embed,
     }
 
@@ -274,7 +273,7 @@ async def ping_image_show(
 async def ping_image_delete(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
-) -> dict[str, str]:
+) -> DiscordReturn:
     """
     delete custom image for ping
     returns content
@@ -302,7 +301,7 @@ async def info(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
     user: disnake.User | disnake.Member | None = None,
-) -> dict[str, str | disnake.Embed | None]:
+) -> DiscordReturn:
     """
     returns user's valorant info from the database.
     returns content, embed
@@ -355,7 +354,7 @@ async def watch(
     message: disnake.ApplicationCommandInteraction | commands.Context,
     name: str,
     tag: str,
-) -> dict[str, str]:
+) -> DiscordReturn:
     """
     add user's valorant info to the database.
     returns content
@@ -397,7 +396,7 @@ async def watch(
 async def unwatch(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
-) -> dict[str, str]:
+) -> DiscordReturn:
     """
     removes user's valorant info from the database.
     returns content
@@ -419,14 +418,14 @@ async def wait(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
     *wait_users: disnake.User,
-) -> dict[str, str]:
+) -> DiscordReturn:
     """
     pings you when tagged user(s) is/are done.
     returns content
     """
-    message_user_id = message.author.id
+    message_user_id: int = message.author.id
     if len(wait_users) == 0:
-        use_msg = f"use {use_prefix(message)}valorant-wait <tag the user>"
+        use_msg: str = f"use {use_prefix(message)}valorant-wait <tag the user>"
         return {
             "content": f"<@{message_user_id}> {use_msg}",
         }
@@ -490,7 +489,7 @@ async def wait(
 async def waitlist(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
-) -> dict[str, disnake.Embed]:
+) -> DiscordReturn:
     """
     prints valorant waitlist.
     returns embed
@@ -536,7 +535,7 @@ async def set_channel(
     | disnake.VoiceChannel
     | disnake.Thread
     | None = None,
-) -> dict[str, str]:
+) -> DiscordReturn:
     """
     set the channel the bot will send updates to.
     returns content
@@ -570,7 +569,7 @@ async def set_role(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
     role: disnake.Role | None = None,
-):
+) -> DiscordReturn:
     """
     set the role to ping.
     returns content
@@ -605,7 +604,7 @@ async def feeder_message_add(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
     new_message: str,
-) -> dict[str, str]:
+) -> DiscordReturn:
     """
     add custom message for feeder alert.
     returns content
@@ -652,7 +651,7 @@ async def feeder_message_add(
 async def feeder_message_show(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
-) -> dict[str, str | disnake.Embed | Menu | None]:
+) -> DiscordReturn:
     """
     show custom messages for feeder alert.
     returns content, embed, view
@@ -688,16 +687,15 @@ async def feeder_message_show(
             value += f"`{j+1}` {feeder_messages[j]} \n"
         embed.add_field(name="messages", value=value)
         embeds.append(embed)
-    return {
-        "embed": embeds[0],
-        "view": Menu(embeds) if len(feeder_messages) > step else None,
-    }
+    if len(feeder_messages) > step:
+        return {"embed": embeds[0], "view": Menu(embeds)}
+    return {"embed": embeds[0]}
 
 
 async def feeder_message_delete(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
-) -> dict[str, str | FeederMessagesView]:
+) -> DiscordReturn:
     """
     delete custom message for feeder alert.
     returns content, view
@@ -733,7 +731,7 @@ async def feeder_image_add(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
     new_image: str,
-) -> dict[str, str]:
+) -> DiscordReturn:
     """
     add custom image for feeder alert.
     returns content
@@ -782,7 +780,7 @@ async def feeder_image_add(
 async def feeder_image_show(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
-) -> dict[str, str | disnake.Embed | Menu | None]:
+) -> DiscordReturn:
     """
     show custom images for feeder alert.
     returns content, embed, view
@@ -811,16 +809,15 @@ async def feeder_image_show(
         )
         embed.set_image(url=image)
         embeds.append(embed)
-    return {
-        "embed": embeds[0],
-        "view": Menu(embeds) if len(feeder_images) > 1 else None,
-    }
+    if len(feeder_images) > 1:
+        return {"embed": embeds[0], "view": Menu(embeds)}
+    return {"embed": embeds[0]}
 
 
 async def feeder_image_delete(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
-) -> dict[str, str | FeederImagesView]:
+) -> DiscordReturn:
     """
     delete custom image for feeder alert.
     returns content, view
@@ -854,7 +851,7 @@ async def streaker_message_add(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
     new_message: str,
-) -> dict[str, str]:
+) -> DiscordReturn:
     """
     add custom message for streaker alert.
     returns content
@@ -901,7 +898,7 @@ async def streaker_message_add(
 async def streaker_message_show(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
-) -> dict[str, str | disnake.Embed | Menu | None]:
+) -> DiscordReturn:
     """
     show custom messages for streaker alert.
     returns content, embed, view
@@ -938,16 +935,15 @@ async def streaker_message_show(
             value += f"`{j+1}` {streaker_messages[j]} \n"
         embed.add_field(name="messages", value=value)
         embeds.append(embed)
-    return {
-        "embed": embeds[0],
-        "view": Menu(embeds) if len(streaker_messages) > step else None,
-    }
+    if len(streaker_messages) > step:
+        return {"embed": embeds[0], "view": Menu(embeds)}
+    return {"embed": embeds[0]}
 
 
 async def streaker_message_delete(
     bot: commands.Bot,
     message: disnake.ApplicationCommandInteraction | commands.Context,
-) -> dict[str, str | StreakerMessagesView]:
+) -> DiscordReturn:
     """
     delete custom message for streaker alert.
     returns content, view
