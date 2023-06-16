@@ -209,7 +209,7 @@ async def fubudex(data: dict) -> DiscordReturn:
                 name="mention",
                 description="videos not on the channels but are mentioned",
                 emoji="💬",
-                embed=mention_embed,
+                embed=_mention_embed,
             )
         )
     return {"embed": _home_embed, "view": PageView(embeds)}

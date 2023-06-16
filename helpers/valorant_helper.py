@@ -2,15 +2,23 @@
 
 import time
 import aiohttp
-import disnake
+from disnake import (
+    Embed,
+    File,
+    User,
+    Member,
+    Guild,
+    channel,
+    ApplicationCommandInteraction,
+    ModalInteraction,
+    TextChannel,
+    VoiceChannel,
+    Thread,
+    Role,
+)
 from disnake.ext import commands
 
-from views.views import (
-    Menu,
-    FeederMessagesView,
-    FeederImagesView,
-    StreakerMessagesView,
-)
+from views.views import Menu, DeleterView
 
 from helpers import db_helper
 from helpers.helpers import validate_url, DiscordReturn
@@ -162,7 +170,9 @@ class Player:
 
 
 def use_prefix(
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction
+    | commands.Context
+    | ModalInteraction,
 ) -> str | None:
     """returns the prefix to use depending on message"""
     if isinstance(message, commands.Context):
@@ -172,7 +182,7 @@ def use_prefix(
 
 async def ping(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction | commands.Context,
 ) -> DiscordReturn:
     """
     pings role and sends optional image.
@@ -191,20 +201,22 @@ async def ping(
     ping_role: int = guild_data[0].get("ping_role")
     if guild_data[0].get("ping_image"):
         url: str = guild_data[0].get("ping_image")
-        embed: disnake.Embed = disnake.Embed().set_image(url=url)
+        embed: Embed = Embed().set_image(url=url)
         return {
             "content": f"<@&{ping_role}>",
             "embed": embed,
         }
     return {
         "content": f"<@&{ping_role}>",
-        "file": disnake.File("jewelsignal.jpg"),
+        "file": File("jewelsignal.jpg"),
     }
 
 
 async def ping_image_add(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction
+    | commands.Context
+    | ModalInteraction,
     new_image: str,
 ) -> DiscordReturn:
     """
@@ -219,7 +231,7 @@ async def ping_image_add(
         return {
             "content": "invalid url!",
         }
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -240,13 +252,13 @@ async def ping_image_add(
 
 async def ping_image_show(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction | commands.Context,
 ) -> DiscordReturn:
     """
     show custom image for ping.
     returns content, embed
     """
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -260,7 +272,7 @@ async def ping_image_show(
             "content": f"no custom image for `{guild}`! {use_msg}",
         }
     ping_image: str = guild_data[0].get("ping_image")
-    embed = disnake.Embed(
+    embed = Embed(
         title="custom ping image",
         description="image sent with the ping",
     )
@@ -272,13 +284,13 @@ async def ping_image_show(
 
 async def ping_image_delete(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction | commands.Context,
 ) -> DiscordReturn:
     """
     delete custom image for ping
     returns content
     """
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -299,8 +311,8 @@ async def ping_image_delete(
 
 async def info(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
-    user: disnake.User | disnake.Member | None = None,
+    message: ApplicationCommandInteraction | commands.Context,
+    user: User | Member | None = None,
 ) -> DiscordReturn:
     """
     returns user's valorant info from the database.
@@ -318,7 +330,7 @@ async def info(
 
     player: Player = Player(player_data[0])
     # create embed
-    embed = disnake.Embed(
+    embed = Embed(
         title="valorant info", description=f"<@{user.id}> saved info"
     )
     embed.set_thumbnail(url=user.display_avatar.url)
@@ -351,7 +363,9 @@ async def info(
 
 async def watch(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction
+    | commands.Context
+    | ModalInteraction,
     name: str,
     tag: str,
 ) -> DiscordReturn:
@@ -360,10 +374,7 @@ async def watch(
     returns content
     """
     guild_id: int = 0
-    if (
-        not isinstance(message.channel, disnake.channel.DMChannel)
-        and message.guild
-    ):
+    if not isinstance(message.channel, channel.DMChannel) and message.guild:
         guild_id = message.guild.id
         guild_data: list = await db_helper.get_guild_data(bot, guild_id)
         if len(guild_data) == 0 or not guild_data[0].get("watch_channel"):
@@ -395,7 +406,7 @@ async def watch(
 
 async def unwatch(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction | commands.Context,
 ) -> DiscordReturn:
     """
     removes user's valorant info from the database.
@@ -416,8 +427,8 @@ async def unwatch(
 
 async def wait(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
-    *wait_users: disnake.User,
+    message: ApplicationCommandInteraction | commands.Context,
+    *wait_users: User,
 ) -> DiscordReturn:
     """
     pings you when tagged user(s) is/are done.
@@ -488,20 +499,17 @@ async def wait(
 
 async def waitlist(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction | commands.Context,
 ) -> DiscordReturn:
     """
     prints valorant waitlist.
     returns embed
     """
     guild_id: int = 0
-    if (
-        not isinstance(message.channel, disnake.channel.DMChannel)
-        and message.guild
-    ):
+    if not isinstance(message.channel, channel.DMChannel) and message.guild:
         guild_id = message.guild.id
     # create embed
-    embed = disnake.Embed(
+    embed = Embed(
         title="valorant waitlist", description="waitlist of watched users"
     )
     embed.set_thumbnail(url="https://i.redd.it/pxwk9pc6q9n91.jpg")
@@ -530,21 +538,18 @@ async def waitlist(
 
 async def set_channel(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
-    channel: disnake.TextChannel
-    | disnake.VoiceChannel
-    | disnake.Thread
-    | None = None,
+    message: ApplicationCommandInteraction | commands.Context,
+    _channel: TextChannel | VoiceChannel | Thread | None = None,
 ) -> DiscordReturn:
     """
     set the channel the bot will send updates to.
     returns content
     """
-    if channel is None:
+    if _channel is None:
         channel_id: int = message.channel.id
     else:
-        channel_id = channel.id
-    guild: disnake.Guild | None = message.guild
+        channel_id = _channel.id
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -567,8 +572,8 @@ async def set_channel(
 
 async def set_role(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
-    role: disnake.Role | None = None,
+    message: ApplicationCommandInteraction | commands.Context,
+    role: Role | None = None,
 ) -> DiscordReturn:
     """
     set the role to ping.
@@ -578,7 +583,7 @@ async def set_role(
         return {
             "content": f"use {use_prefix(message)}set-role <role>!",
         }
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -602,7 +607,9 @@ async def set_role(
 
 async def feeder_message_add(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction
+    | commands.Context
+    | ModalInteraction,
     new_message: str,
 ) -> DiscordReturn:
     """
@@ -613,7 +620,7 @@ async def feeder_message_add(
         return {
             "content": "message is too long! (max 100 characters)",
         }
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -650,13 +657,13 @@ async def feeder_message_add(
 
 async def feeder_message_show(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction | commands.Context,
 ) -> DiscordReturn:
     """
     show custom messages for feeder alert.
     returns content, embed, view
     """
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -675,10 +682,10 @@ async def feeder_message_show(
             "content": f"no custom messages for `{guild}`! {use_msg}",
         }
 
-    embeds: list[disnake.Embed] = []
+    embeds: list[Embed] = []
     step = 5  # number of messages per embed
     for i in range(0, len(feeder_messages), step):
-        embed = disnake.Embed(
+        embed = Embed(
             title="custom feeder messages",
             description="messsages randomly sent with the feeder alert",
         )
@@ -694,13 +701,13 @@ async def feeder_message_show(
 
 async def feeder_message_delete(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction | commands.Context,
 ) -> DiscordReturn:
     """
     delete custom message for feeder alert.
     returns content, view
     """
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -720,7 +727,7 @@ async def feeder_message_delete(
         }
     return {
         "content": "choose messages to delete",
-        "view": FeederMessagesView(bot, message, feeder_messages),
+        "view": DeleterView(bot, message, "feeder messages", feeder_messages),
     }
 
 
@@ -729,7 +736,9 @@ async def feeder_message_delete(
 
 async def feeder_image_add(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction
+    | commands.Context
+    | ModalInteraction,
     new_image: str,
 ) -> DiscordReturn:
     """
@@ -744,7 +753,7 @@ async def feeder_image_add(
         return {
             "content": "invalid url!",
         }
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -779,13 +788,13 @@ async def feeder_image_add(
 
 async def feeder_image_show(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction | commands.Context,
 ) -> DiscordReturn:
     """
     show custom images for feeder alert.
     returns content, embed, view
     """
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -801,9 +810,9 @@ async def feeder_image_show(
         return {
             "content": f"no custom image for `{guild}`! {use_msg}",
         }
-    embeds: list[disnake.Embed] = []
+    embeds: list[Embed] = []
     for image in feeder_images:
-        embed = disnake.Embed(
+        embed = Embed(
             title="custom feeder images",
             description="images randomly sent with the feeder alert",
         )
@@ -816,13 +825,13 @@ async def feeder_image_show(
 
 async def feeder_image_delete(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction | commands.Context,
 ) -> DiscordReturn:
     """
     delete custom image for feeder alert.
     returns content, view
     """
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -840,7 +849,7 @@ async def feeder_image_delete(
         }
     return {
         "content": "choose images to delete",
-        "view": FeederImagesView(bot, message, feeder_images),
+        "view": DeleterView(bot, message, "feeder images", feeder_images),
     }
 
 
@@ -849,7 +858,9 @@ async def feeder_image_delete(
 
 async def streaker_message_add(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction
+    | commands.Context
+    | ModalInteraction,
     new_message: str,
 ) -> DiscordReturn:
     """
@@ -860,7 +871,7 @@ async def streaker_message_add(
         return {
             "content": "message is too long! (max 100 characters)",
         }
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -897,13 +908,13 @@ async def streaker_message_add(
 
 async def streaker_message_show(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction | commands.Context,
 ) -> DiscordReturn:
     """
     show custom messages for streaker alert.
     returns content, embed, view
     """
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -923,10 +934,10 @@ async def streaker_message_show(
         return {
             "content": f"no custom messages for `{guild}`! {use_msg}",
         }
-    embeds: list[disnake.Embed] = []
+    embeds: list[Embed] = []
     step = 5  # number of messages per embed
     for i in range(0, len(streaker_messages), step):
-        embed = disnake.Embed(
+        embed = Embed(
             title="custom streaker messages",
             description="messsages randomly sent with the streaker alert",
         )
@@ -942,13 +953,13 @@ async def streaker_message_show(
 
 async def streaker_message_delete(
     bot: commands.Bot,
-    message: disnake.ApplicationCommandInteraction | commands.Context,
+    message: ApplicationCommandInteraction | commands.Context,
 ) -> DiscordReturn:
     """
     delete custom message for streaker alert.
     returns content, view
     """
-    guild: disnake.Guild | None = message.guild
+    guild: Guild | None = message.guild
     if guild is None:
         return {
             "content": "error! guild not found!",
@@ -970,5 +981,7 @@ async def streaker_message_delete(
         }
     return {
         "content": "choose messages to delete",
-        "view": StreakerMessagesView(bot, message, streaker_messages),
+        "view": DeleterView(
+            bot, message, "streaker messages", streaker_messages
+        ),
     }

@@ -8,7 +8,7 @@ import disnake
 from disnake.ext import commands
 
 from helpers import db_helper
-from cogs.help import help as custom_help
+from cogs.custom_help import help as custom_help
 
 dotenv_path: str = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
