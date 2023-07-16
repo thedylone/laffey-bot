@@ -99,11 +99,29 @@ async def update_guild_data(bot, guild_id: int, **fields) -> str:
     return out
 
 
+async def get_all_players(bot) -> list:
+    """returns all players"""
+    return await bot.db.fetch("select * from players")
+
+
+async def get_players_ids(bot) -> list[int]:
+    """returns all player ids"""
+    return [
+        player.get("player_id")
+        for player in await bot.db.fetch("select player_id from players")
+    ]
+
+
 async def get_player_data(bot, player_id: int) -> list:
-    """returns data for specified player"""
+    """returns data for specified player from player_id"""
     return await bot.db.fetch(
         "select * from players where player_id = $1", player_id
     )
+
+
+async def get_player_data_by_puuid(bot, puuid: str) -> list:
+    """returns data for specified player from puuid"""
+    return await bot.db.fetch("select * from players where puuid = $1", puuid)
 
 
 async def delete_player_data(bot, player_id: int) -> None:
