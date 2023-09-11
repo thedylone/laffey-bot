@@ -1,7 +1,6 @@
 """disnake modals"""
 
 from disnake import ModalInteraction, TextInputStyle
-from disnake.ext import commands
 from disnake.ui import TextInput, Modal
 
 from helpers import valorant_helper
@@ -10,8 +9,7 @@ from helpers import valorant_helper
 class ValorantWatchModal(Modal):
     """modal for adding a player to watch"""
 
-    def __init__(self, bot: commands.Bot) -> None:
-        self.bot: commands.Bot = bot
+    def __init__(self) -> None:
         components: list[TextInput] = [
             TextInput(
                 label="Username",
@@ -38,7 +36,6 @@ class ValorantWatchModal(Modal):
         await interaction.response.defer()
         await interaction.edit_original_message(
             **await valorant_helper.watch(
-                self.bot,
                 interaction,
                 interaction.text_values["name"],
                 interaction.text_values["tag"],
@@ -58,8 +55,7 @@ class ValorantWatchModal(Modal):
 class ValorantPingImageModal(Modal):
     """modal for adding a custom image for ping alert"""
 
-    def __init__(self, bot: commands.Bot) -> None:
-        self.bot: commands.Bot = bot
+    def __init__(self) -> None:
         components: list[TextInput] = [
             TextInput(
                 label="Custom Image URL",
@@ -79,7 +75,6 @@ class ValorantPingImageModal(Modal):
         await interaction.response.defer()
         await interaction.edit_original_message(
             **await valorant_helper.ping_image_add(
-                self.bot,
                 interaction,
                 interaction.text_values["url"],
             )
@@ -98,8 +93,7 @@ class ValorantPingImageModal(Modal):
 class ValorantFeederMessageModal(Modal):
     """modal for adding a custom message for feeder alert"""
 
-    def __init__(self, bot: commands.Bot) -> None:
-        self.bot: commands.Bot = bot
+    def __init__(self) -> None:
         components: list[TextInput] = [
             TextInput(
                 label="Custom Message",
@@ -119,7 +113,6 @@ class ValorantFeederMessageModal(Modal):
         await interaction.response.defer()
         await interaction.edit_original_message(
             **await valorant_helper.feeder_message_add(
-                self.bot,
                 interaction,
                 interaction.text_values["message"],
             )
@@ -138,8 +131,7 @@ class ValorantFeederMessageModal(Modal):
 class ValorantFeederImageModal(Modal):
     """modal for adding a custom image for feeder alert"""
 
-    def __init__(self, bot: commands.Bot) -> None:
-        self.bot: commands.Bot = bot
+    def __init__(self) -> None:
         components: list[TextInput] = [
             TextInput(
                 label="Custom Image URL",
@@ -159,7 +151,6 @@ class ValorantFeederImageModal(Modal):
         await interaction.response.defer()
         await interaction.edit_original_message(
             **await valorant_helper.feeder_image_add(
-                self.bot,
                 interaction,
                 interaction.text_values["url"],
             )
@@ -178,8 +169,7 @@ class ValorantFeederImageModal(Modal):
 class ValorantStreakerMessageModal(Modal):
     """modal for adding a custom message for streaker alert"""
 
-    def __init__(self, bot: commands.Bot) -> None:
-        self.bot: commands.Bot = bot
+    def __init__(self) -> None:
         components: list[TextInput] = [
             TextInput(
                 label="Custom Message",
@@ -199,7 +189,6 @@ class ValorantStreakerMessageModal(Modal):
         await interaction.response.defer()
         await interaction.edit_original_message(
             **await valorant_helper.streaker_message_add(
-                self.bot,
                 interaction,
                 interaction.text_values["message"],
             )

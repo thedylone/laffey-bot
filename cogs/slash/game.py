@@ -1,6 +1,7 @@
 """slash commands for game related commands"""
 
 from enum import Enum
+from typing import Optional, Union
 import disnake
 from disnake.ext import commands
 
@@ -19,9 +20,6 @@ class Valorant(commands.Cog):
 
     COG_EMOJI: str = "🕹️"
 
-    def __init__(self, bot: commands.Bot) -> None:
-        self.bot: commands.Bot = bot
-
     @commands.slash_command(
         name="valorant-info",
         description="view valorant data in database",
@@ -29,12 +27,12 @@ class Valorant(commands.Cog):
     async def valorant_info(
         self,
         inter: disnake.ApplicationCommandInteraction,
-        user: disnake.User | None = None,
+        user: Optional[disnake.User] = None,
     ) -> None:
         """returns user's valorant info from the database"""
         await inter.response.defer()
         await inter.edit_original_message(
-            **await valorant_helper.info(self.bot, inter, user)
+            **await valorant_helper.info(inter, user)
         )
 
     @commands.slash_command(
@@ -45,7 +43,7 @@ class Valorant(commands.Cog):
         self, inter: disnake.ApplicationCommandInteraction
     ) -> None:
         """add user's valorant info to the database"""
-        await inter.response.send_modal(modal=ValorantWatchModal(self.bot))
+        await inter.response.send_modal(modal=ValorantWatchModal())
 
     @commands.slash_command(
         name="valorant-unwatch",
@@ -57,7 +55,7 @@ class Valorant(commands.Cog):
         """removes user's valorant info from the database"""
         await inter.response.defer()
         await inter.edit_original_message(
-            **await valorant_helper.unwatch(self.bot, inter)
+            **await valorant_helper.unwatch(inter)
         )
 
     @commands.slash_command(
@@ -72,7 +70,7 @@ class Valorant(commands.Cog):
         """pings you when tagged user is done"""
         await inter.response.defer()
         await inter.edit_original_message(
-            **await valorant_helper.wait(self.bot, inter, wait_user)
+            **await valorant_helper.wait(inter, wait_user)
         )
 
     @commands.slash_command(
@@ -85,7 +83,7 @@ class Valorant(commands.Cog):
         """prints valorant waitlist"""
         await inter.response.defer()
         await inter.edit_original_message(
-            **await valorant_helper.waitlist(self.bot, inter)
+            **await valorant_helper.waitlist(inter)
         )
 
 
@@ -93,9 +91,6 @@ class ValorantAdmin(commands.Cog):
     """valorant admin commands"""
 
     COG_EMOJI: str = "🎮"
-
-    def __init__(self, bot: commands.Bot) -> None:
-        self.bot: commands.Bot = bot
 
     @commands.slash_command(
         name="set-channel",
@@ -105,15 +100,14 @@ class ValorantAdmin(commands.Cog):
     async def set_channel(
         self,
         inter: disnake.ApplicationCommandInteraction,
-        channel: disnake.TextChannel
-        | disnake.VoiceChannel
-        | disnake.Thread
-        | None = None,
+        channel: Optional[
+            Union[disnake.TextChannel, disnake.VoiceChannel, disnake.Thread]
+        ] = None,
     ) -> None:
         """set the channel the bot will send updates to"""
         await inter.response.defer()
         await inter.edit_original_message(
-            **await valorant_helper.set_channel(self.bot, inter, channel)
+            **await valorant_helper.set_channel(inter, channel)
         )
 
     @commands.slash_command(
@@ -129,7 +123,7 @@ class ValorantAdmin(commands.Cog):
         "set the role the bot will ping"
         await inter.response.defer()
         await inter.edit_original_message(
-            **await valorant_helper.set_role(self.bot, inter, role)
+            **await valorant_helper.set_role(inter, role)
         )
 
     class CustomOptions(str, Enum):
@@ -151,18 +145,16 @@ class ValorantAdmin(commands.Cog):
     ) -> None:
         """custom ping images functions"""
         if option == "add":
-            await inter.response.send_modal(
-                modal=ValorantPingImageModal(self.bot)
-            )
+            await inter.response.send_modal(modal=ValorantPingImageModal())
         elif option == "show":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant_helper.ping_image_show(self.bot, inter)
+                **await valorant_helper.ping_image_show(inter)
             )
         elif option == "delete":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant_helper.ping_image_delete(self.bot, inter)
+                **await valorant_helper.ping_image_delete(inter)
             )
         else:
             await inter.response.send_message(
@@ -181,18 +173,16 @@ class ValorantAdmin(commands.Cog):
     ) -> None:
         """custom feeder messages functions"""
         if option == "add":
-            await inter.response.send_modal(
-                modal=ValorantFeederMessageModal(self.bot)
-            )
+            await inter.response.send_modal(modal=ValorantFeederMessageModal())
         elif option == "show":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant_helper.feeder_message_show(self.bot, inter)
+                **await valorant_helper.feeder_message_show(inter)
             )
         elif option == "delete":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant_helper.feeder_message_delete(self.bot, inter)
+                **await valorant_helper.feeder_message_delete(inter)
             )
         else:
             await inter.response.send_message(
@@ -211,18 +201,16 @@ class ValorantAdmin(commands.Cog):
     ) -> None:
         """custom feeder images functions"""
         if option == "add":
-            await inter.response.send_modal(
-                modal=ValorantFeederImageModal(self.bot)
-            )
+            await inter.response.send_modal(modal=ValorantFeederImageModal())
         elif option == "show":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant_helper.feeder_image_show(self.bot, inter)
+                **await valorant_helper.feeder_image_show(inter)
             )
         elif option == "delete":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant_helper.feeder_image_delete(self.bot, inter)
+                **await valorant_helper.feeder_image_delete(inter)
             )
         else:
             await inter.response.send_message(
@@ -242,18 +230,16 @@ class ValorantAdmin(commands.Cog):
         """custom streaker messages functions"""
         if option == "add":
             await inter.response.send_modal(
-                modal=ValorantStreakerMessageModal(self.bot)
+                modal=ValorantStreakerMessageModal()
             )
         elif option == "show":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant_helper.streaker_message_show(self.bot, inter)
+                **await valorant_helper.streaker_message_show(inter)
             )
         elif option == "delete":
             await inter.edit_original_message(
-                **await valorant_helper.streaker_message_delete(
-                    self.bot, inter
-                )
+                **await valorant_helper.streaker_message_delete(inter)
             )
         else:
             await inter.response.send_message(
@@ -263,5 +249,5 @@ class ValorantAdmin(commands.Cog):
 
 def setup(bot: commands.Bot) -> None:
     """loads game cog into bot"""
-    bot.add_cog(Valorant(bot))
-    bot.add_cog(ValorantAdmin(bot))
+    bot.add_cog(Valorant())
+    bot.add_cog(ValorantAdmin())

@@ -10,9 +10,6 @@ class Crypto(commands.Cog, name="crypto"):
 
     COG_EMOJI: str = "💰"
 
-    def __init__(self, bot: commands.Bot) -> None:
-        self.bot: commands.Bot = bot
-
     @commands.command(name="sol", description="sol price")
     async def sol(self, ctx: commands.Context) -> None:
         """get the current price of SOL in USD."""
@@ -31,4 +28,4 @@ class Crypto(commands.Cog, name="crypto"):
 
 def setup(bot: commands.Bot) -> None:
     """loads crypto cog into bot"""
-    bot.add_cog(Crypto(bot))
+    bot.add_cog(Crypto())

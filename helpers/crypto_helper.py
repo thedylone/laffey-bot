@@ -2,10 +2,11 @@
 
 import os
 import aiohttp
+from typing import Optional
 
 from helpers.helpers import DiscordReturn
 
-COINAPI_TOKEN: str | None = os.getenv("CRYPTO_TOKEN")
+COINAPI_TOKEN: Optional[str] = os.getenv("CRYPTO_TOKEN")
 
 
 async def price(sym: str) -> DiscordReturn:
@@ -15,13 +16,12 @@ async def price(sym: str) -> DiscordReturn:
     """
     async with aiohttp.ClientSession() as session:
         url: str = f"https://rest.coinapi.io/v1/exchangerate/{sym}/USD"
-        headers: dict[str, str | None] = {"X-CoinAPI-Key": COINAPI_TOKEN}
+        headers: dict[str, Optional[str]] = {"X-CoinAPI-Key": COINAPI_TOKEN}
+        content: str = "error getting price"
         async with session.get(url, headers=headers) as request:
             if request.status == 200:
                 data: dict = await request.json()
                 content: str = f"1 {sym} = {data.get('rate'):.2f} USD"
-            else:
-                content = "error getting price"
-            return {
-                "content": content,
-            }
+        return {
+            "content": content,
+        }

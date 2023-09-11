@@ -1,6 +1,7 @@
 """slash commands for general commands"""
 
 import random
+from typing import Optional
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
@@ -60,9 +61,6 @@ class GeneralAdmin(commands.Cog):
 
     COG_EMOJI = "📃"
 
-    def __init__(self, bot: commands.Bot) -> None:
-        self.bot: commands.Bot = bot
-
     @commands.slash_command(
         name="set-prefix",
         description="set prefix for the server",
@@ -71,16 +69,16 @@ class GeneralAdmin(commands.Cog):
     async def set_prefix(
         self,
         inter: ApplicationCommandInteraction,
-        prefix: str | None = None,
+        prefix: Optional[str] = None,
     ) -> None:
         """set prefix for the server"""
         await inter.response.defer()
         await inter.edit_original_message(
-            **await general_helper.set_prefix(self.bot, inter, prefix)
+            **await general_helper.set_prefix(inter, prefix)
         )
 
 
 def setup(bot: commands.Bot) -> None:
     """loads general cog into bot"""
     bot.add_cog(General(bot))
-    bot.add_cog(GeneralAdmin(bot))
+    bot.add_cog(GeneralAdmin())

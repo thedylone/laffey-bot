@@ -1,6 +1,7 @@
 """prefix commands for general commands"""
 
 import random
+from typing import Optional
 from disnake.ext import commands
 
 from helpers import general_helper
@@ -53,9 +54,6 @@ class GeneralAdmin(commands.Cog, name="general admin"):
 
     COG_EMOJI = "📃"
 
-    def __init__(self, bot: commands.Bot) -> None:
-        self.bot: commands.Bot = bot
-
     @commands.command(
         name="set-prefix",
         description="set prefix for the server",
@@ -64,15 +62,13 @@ class GeneralAdmin(commands.Cog, name="general admin"):
     async def set_prefix(
         self,
         ctx: commands.Context,
-        prefix: str | None = None,
+        prefix: Optional[str] = None,
     ) -> None:
         """set prefix for the server"""
-        await ctx.send(
-            **await general_helper.set_prefix(self.bot, ctx, prefix)
-        )
+        await ctx.send(**await general_helper.set_prefix(ctx, prefix))
 
 
 def setup(bot: commands.Bot) -> None:
     """loads general cog into bot"""
     bot.add_cog(General(bot))
-    bot.add_cog(GeneralAdmin(bot))
+    bot.add_cog(GeneralAdmin())

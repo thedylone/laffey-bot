@@ -1,6 +1,7 @@
 """helper functions for valorant cog"""
 
 import aiohttp
+from typing import Dict, List, Literal, Tuple, Optional, Union
 from disnake import (
     ApplicationCommandInteraction,
     Embed,
@@ -17,7 +18,7 @@ from disnake import (
 )
 from disnake.ext import commands
 
-from helpers import db_helper
+from helpers.db_helper import db
 from helpers.helpers import DiscordReturn, validate_url
 from views.views import DeleterView, Menu
 
@@ -29,13 +30,13 @@ class Stats:
 
     def __init__(self) -> None:
         self.streak: int = 0
-        self.headshots: list[int | None] = []
-        self.bodyshots: list[int | None] = []
-        self.legshots: list[int | None] = []
-        self.acs: list[float | None] = []
+        self.headshots: List[Union[int, None]] = []
+        self.bodyshots: List[Union[int, None]] = []
+        self.legshots: List[Union[int, None]] = []
+        self.acs: List[Union[float, None]] = []
 
     @staticmethod
-    def sum_remove_none(_list: list) -> int | float:
+    def sum_remove_none(_list: List) -> Union[int, float]:
         """returns sum of list, removing None"""
         return sum(filter(None, _list))
 
@@ -64,16 +65,16 @@ class Match:
     mode: str = ""
     map: str = ""
     game_end: int = 0
-    players: dict[str, list[dict]] = {"red": [], "blue": []}
+    players: Dict[str, List[Dict]] = {"red": [], "blue": []}
     rounds_played: int = 0
-    score: dict[str, int] = {"red": 0, "blue": 0}
+    score: Dict[str, int] = {"red": 0, "blue": 0}
     surrender: bool = False
 
-    def __init__(self, match_data: dict) -> None:
+    def __init__(self, match_data: Dict) -> None:
         if match_data is None:
             return
-        metadata: dict | None = match_data.get("metadata")
-        players: dict[str, dict] | None = match_data.get("players")
+        metadata: Optional[Dict] = match_data.get("metadata")
+        players: Optional[Dict[str, Dict]] = match_data.get("players")
         if metadata is None or players is None:
             return
         self.update_metadata(metadata)
@@ -81,12 +82,12 @@ class Match:
             return
         self.players["red"] = players.get("red", [])
         self.players["blue"] = players.get("blue", [])
-        rounds: list[dict] | None = match_data.get("rounds")
+        rounds: Optional[List[Dict]] = match_data.get("rounds")
         if rounds is None:
             return
         self.update_rounds(rounds)
 
-    def update_metadata(self, metadata: dict) -> None:
+    def update_metadata(self, metadata: Dict) -> None:
         """update metadata from match data"""
         self.mode = metadata.get("mode", "")
         self.map = metadata.get("map", "")
@@ -94,7 +95,7 @@ class Match:
         length: int = metadata.get("game_length", 0)
         self.game_end = start + length
 
-    def update_rounds(self, rounds: list[dict]) -> None:
+    def update_rounds(self, rounds: List[Dict]) -> None:
         """update rounds from match data"""
         for _round in rounds:
             if _round.get("end_type") == "Surrendered":
@@ -105,33 +106,33 @@ class Match:
             self.score["blue"] += _round.get("winning_team") == "Blue"
 
     def check_players(
-        self, main_player: "Player", all_players: list["Player"]
-    ) -> tuple[list[dict], list[dict], str]:
-        """check players in match"""
+        self, main_player: "Player", all_players: List["Player"]
+    ) -> Tuple[List[Dict], List[Dict], Literal["red", "blue", ""]]:
+        """check players in match, returns red, blue, main_team"""
         main_puuid: str = main_player.puuid
         main_guild_id: int = main_player.guild_id
-        all_puuids_with_guild: dict[str, int] = {
-            player.puuid: player.guild_id for player in all_players
+        all_puuids_with_guild: Dict[str, "Player"] = {
+            player.puuid: player for player in all_players
         }
-        red_players: list[dict] = []
-        blue_players: list[dict] = []
+        red_players: List[Dict] = []
+        blue_players: List[Dict] = []
         main_team: str = ""
-        for player in self.players["red"]:
-            puuid: str = player.get("puuid", "")
-            guild_id: int = all_puuids_with_guild.get(puuid, -1)
+        for match_player in self.players["red"]:
+            puuid: str = match_player.get("puuid", "")
+            player: Optional[Player] = all_puuids_with_guild.get(puuid)
             if puuid == main_puuid:
                 main_team = "red"
-            elif guild_id != main_guild_id:
+            elif player is None or player.guild_id != main_guild_id:
                 continue
-            red_players.append(player)
-        for player in self.players["blue"]:
-            puuid: str = player.get("puuid", "")
-            guild_id: int = all_puuids_with_guild.get(puuid, -1)
+            red_players.append(match_player)
+        for match_player in self.players["blue"]:
+            puuid: str = match_player.get("puuid", "")
+            player: Optional[Player] = all_puuids_with_guild.get(puuid)
             if puuid == main_puuid:
                 main_team = "blue"
-            elif guild_id != main_guild_id:
+            elif player is None or player.guild_id != main_guild_id:
                 continue
-            blue_players.append(player)
+            blue_players.append(match_player)
         return red_players, blue_players, main_team
 
 
@@ -146,7 +147,7 @@ class Player(Stats):
     puuid: str = ""
     lasttime: int = 0
 
-    def __init__(self, *datas: dict, **kwargs: dict) -> None:
+    def __init__(self, *datas: Dict, **kwargs: Dict) -> None:
         super().__init__()
         for data in datas:
             for key, value in data.items():
@@ -166,10 +167,10 @@ class Player(Stats):
             account_request: aiohttp.ClientResponse = await session.get(
                 f"{API}/v1/account/{self.name}/{self.tag}"
             )
-        if account_request.status != 200:
-            raise ConnectionError("error retrieving account info!")
-        account_json: dict[str, dict] = await account_request.json()
-        account_data: dict | None = account_json.get("data")
+            if account_request.status != 200:
+                raise ConnectionError("error retrieving account info!")
+            account_json: Dict[str, Dict] = await account_request.json()
+        account_data: Optional[Dict] = account_json.get("data")
         if account_data is None:
             raise ConnectionError("error retrieving account info!")
         self.puuid = account_data.get("puuid") or self.puuid
@@ -181,39 +182,42 @@ class Player(Stats):
             account_request: aiohttp.ClientResponse = await session.get(
                 f"{API}/v1/by-puuid/account/{self.puuid}"
             )
-        if account_request.status != 200:
-            raise ConnectionError("error retrieving account info!")
-        account_json: dict[str, dict] = await account_request.json()
-        account_data: dict | None = account_json.get("data")
+            if account_request.status != 200:
+                raise ConnectionError("error retrieving account info!")
+            account_json: Dict[str, Dict] = await account_request.json()
+        account_data: Optional[Dict] = account_json.get("data")
         if account_data is None:
             raise ConnectionError("error retrieving account info!")
-        name: str | None = account_data.get("name")
-        tag: str | None = account_data.get("tag")
+        name: Optional[str] = account_data.get("name")
+        tag: Optional[str] = account_data.get("tag")
         if name is None or tag is None:
             raise ConnectionError("error retrieving account info!")
         self.name = name
         self.tag = tag
 
-    async def get_match_history(self) -> list[Match]:
+    async def get_match_history(self) -> List[Match]:
         """returns list of matches from oldest to newest"""
         async with aiohttp.ClientSession() as session:
             match_request: aiohttp.ClientResponse = await session.get(
                 f"{API}/v3/by-puuid/matches/{self.region}/{self.puuid}"
             )
-        if match_request.status != 200:
-            raise ConnectionError("error retrieving match history!")
-        match_json: dict[str, list] = await match_request.json()
-        match_data: list[dict] | None = match_json.get("data")
+            if match_request.status != 200:
+                raise ConnectionError("error retrieving match history!")
+            match_json: Dict[str, List] = await match_request.json()
+        match_data: Optional[List[Dict]] = match_json.get("data")
         if match_data is None:
             raise ConnectionError("error retrieving match history!")
         return [Match(data) for data in match_data][::-1]
 
     def process_match(self, match: Match) -> None:
         """process match information and updates player"""
+        # update lasttime
+        if self.lasttime >= match.game_end:
+            return
         if match.mode == "Deathmatch":
             return
-        red: list[dict]
-        blue: list[dict]
+        red: List[Dict]
+        blue: List[Dict]
         team: str
         red, blue, team = match.check_players(self, [])
         combined = red + blue
@@ -224,12 +228,10 @@ class Player(Stats):
             self.streak = max(self.streak + 1, 1)
         elif team == "Blue" and (match.score["blue"] > match.score["red"]):
             self.streak = min(self.streak - 1, -1)
-        # update lasttime
-        self.lasttime = max(self.lasttime, match.game_end)
         # only add stats for competitive/unrated
         if match.mode not in ("Competitive", "Unrated"):
             return
-        player_stats: dict | None = combined[0].get("stats")
+        player_stats: Optional[Dict] = combined[0].get("stats")
         if player_stats is None:
             return
         self.update_stats(
@@ -238,6 +240,8 @@ class Player(Stats):
             player_stats.get("bodyshots"),
             player_stats.get("legshots"),
         )
+
+    # def process_match_stats(self, stats: Dict) -> None:
 
     def update_stats(
         self, acs: float, headshots: int, bodyshots: int, legshots: int
@@ -248,15 +252,14 @@ class Player(Stats):
         self.bodyshots = self.bodyshots[-4:] + [bodyshots]
         self.legshots = self.legshots[-4:] + [legshots]
 
-    def process_matches(self, matches: list[Match]) -> None:
+    def process_matches(self, matches: List[Match]) -> None:
         """process list of matches and updates player"""
         for match in matches:
             self.process_match(match)
 
-    async def update_db(self, bot: commands.Bot) -> str:
+    async def update_db(self) -> str:
         """updates player data in database"""
-        return await db_helper.update_player_data(
-            bot,
+        return await db.update_player_data(
             self.player_id,
             guild_id=self.guild_id,
             name=self.name,
@@ -305,10 +308,10 @@ class Player(Stats):
 
 
 def use_prefix(
-    message: ApplicationCommandInteraction
-    | commands.Context
-    | ModalInteraction,
-) -> str | None:
+    message: Union[
+        ApplicationCommandInteraction, commands.Context, ModalInteraction
+    ],
+) -> Optional[str]:
     """returns the prefix to use depending on message"""
     if isinstance(message, commands.Context):
         return message.prefix
@@ -316,17 +319,16 @@ def use_prefix(
 
 
 async def ping(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
 ) -> DiscordReturn:
     """pings role and sends optional image."""
     if message.guild is None:
         guild_id = 0
     else:
         guild_id: int = message.guild.id
-    guild_data: list = await db_helper.get_guild_data(bot, guild_id)
+    guild_data: List = await db.get_guild_data(guild_id)
     if len(guild_data) == 0 or not guild_data[0].get("ping_role"):
-        prefix: str | None = use_prefix(message)
+        prefix: Optional[str] = use_prefix(message)
         return {
             "content": f"please set the role first using {prefix}set-role!",
         }
@@ -339,10 +341,9 @@ async def ping(
 
 
 async def ping_image_add(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction
-    | commands.Context
-    | ModalInteraction,
+    message: Union[
+        ApplicationCommandInteraction, commands.Context, ModalInteraction
+    ],
     new_image: str,
 ) -> DiscordReturn:
     """add custom image for ping."""
@@ -350,12 +351,10 @@ async def ping_image_add(
         return {"content": "url is too long! (max 100 characters)"}
     if not validate_url(new_image):
         return {"content": "invalid url!"}
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    result: str = await db_helper.update_guild_data(
-        bot, guild.id, ping_image=new_image
-    )
+    result: str = await db.update_guild_data(guild.id, ping_image=new_image)
     if result.startswith("INSERT"):
         content: str = f"successfully added custom ping image for `{guild}`"
     elif result.startswith("UPDATE"):
@@ -366,14 +365,13 @@ async def ping_image_add(
 
 
 async def ping_image_show(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
 ) -> DiscordReturn:
     """show custom image for ping."""
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    guild_data: list = await db_helper.get_guild_data(bot, guild.id)
+    guild_data: List = await db.get_guild_data(guild.id)
     if len(guild_data) == 0 or not guild_data[0].get("ping_image"):
         use_msg: str = (
             f'use {use_prefix(message)}ping-image add "<custom image>"!'
@@ -389,16 +387,13 @@ async def ping_image_show(
 
 
 async def ping_image_delete(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
 ) -> DiscordReturn:
     """delete custom image for ping"""
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    result: str = await db_helper.update_guild_data(
-        bot, guild.id, ping_image=None
-    )
+    result: str = await db.update_guild_data(guild.id, ping_image=None)
     if result.startswith("INSERT"):
         content: str = f"successfully deleted custom ping image for `{guild}`"
     elif result.startswith("UPDATE"):
@@ -409,15 +404,14 @@ async def ping_image_delete(
 
 
 async def info(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
-    user: User | Member | None = None,
+    message: Union[ApplicationCommandInteraction, commands.Context],
+    user: Optional[Union[User, Member]] = None,
 ) -> DiscordReturn:
     """returns user's valorant info from the database."""
     if user is None:
         # if no user specifieembedd, use author
         user = message.author
-    player_data: list = await db_helper.get_player_data(bot, user.id)
+    player_data: List = await db.get_player_data(user.id)
     if len(player_data) == 0:
         use_msg: str = f"use {use_prefix(message)}valorant-watch first!"
         return {"content": f"<@{user.id}> user not in database. {use_msg}"}
@@ -430,10 +424,9 @@ async def info(
 
 
 async def watch(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction
-    | commands.Context
-    | ModalInteraction,
+    message: Union[
+        ApplicationCommandInteraction, commands.Context, ModalInteraction
+    ],
     name: str,
     tag: str,
 ) -> DiscordReturn:
@@ -441,7 +434,7 @@ async def watch(
     guild_id: int = 0
     if not isinstance(message.channel, channel.DMChannel) and message.guild:
         guild_id = message.guild.id
-        guild_data: list = await db_helper.get_guild_data(bot, guild_id)
+        guild_data: List = await db.get_guild_data(guild_id)
         if len(guild_data) == 0 or not guild_data[0].get("watch_channel"):
             use_msg: str = f"use {use_prefix(message)}set-channel first!"
             return {"content": f"<@{message.author.id}> {use_msg}"}
@@ -453,7 +446,7 @@ async def watch(
     )
     await player.update_puuid_region()
     player.process_matches(await player.get_match_history())
-    result: str = await player.update_db(bot)
+    result: str = await player.update_db()
     if result.startswith("INSERT"):
         content: str = f"<@{user_id}> user added to database."
     elif result.startswith("UPDATE"):
@@ -464,14 +457,13 @@ async def watch(
 
 
 async def unwatch(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
 ) -> DiscordReturn:
     """removes user's valorant info from the database."""
     user_id: int = message.author.id
-    user_data: list = await db_helper.get_player_data(bot, user_id)
+    user_data: List = await db.get_player_data(user_id)
     if len(user_data):
-        await db_helper.delete_player_data(bot, user_id)
+        await db.delete_player_data(user_id)
         use_msg: str = f"add again using {use_prefix(message)}valorant-watch!"
         content: str = f"<@{user_id}> user removed from database. {use_msg}"
     else:
@@ -480,8 +472,7 @@ async def unwatch(
 
 
 async def wait(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
     *wait_users: User,
 ) -> DiscordReturn:
     """pings you when tagged user(s) is/are done."""
@@ -490,27 +481,25 @@ async def wait(
         use_msg: str = f"use {use_prefix(message)}valorant-wait <tag the user>"
         return {"content": f"<@{message_user_id}> {use_msg}"}
     extra_message: str = ""
-    success_waiting: list[int] = []
-    already_waited: list[int] = []
-    non_db: list[int] = []
+    success_waiting: List[int] = []
+    already_waited: List[int] = []
+    non_db: List[int] = []
     for wait_user_id in map(lambda user: user.id, wait_users):
         if wait_user_id == message_user_id:
             # if wait for self
             extra_message = "interesting but ok."
         # retrieve waitlist and player info
-        player_data: list = await db_helper.get_players_join_waitlist(
-            bot, wait_user_id
-        )
+        player_data: List = await db.get_players_join_waitlist(wait_user_id)
         if len(player_data):
-            current_waiters: list = player_data[0].get("waiting_id")
+            current_waiters: List = player_data[0].get("waiting_id")
             if current_waiters:
                 if message_user_id in current_waiters:
                     already_waited.append(wait_user_id)
                     continue
             else:
                 current_waiters = []
-            await db_helper.update_waitlist_data(
-                bot, wait_user_id, current_waiters + [message_user_id]
+            await db.update_waitlist_data(
+                wait_user_id, current_waiters + [message_user_id]
             )
             success_waiting.append(wait_user_id)
         else:
@@ -547,8 +536,7 @@ async def wait(
 
 
 async def waitlist(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
 ) -> DiscordReturn:
     """prints valorant waitlist."""
     guild_id: int = 0
@@ -559,7 +547,7 @@ async def waitlist(
         title="valorant waitlist", description="waitlist of watched users"
     )
     embed.set_thumbnail(url="https://i.redd.it/pxwk9pc6q9n91.jpg")
-    waitlist_data: list = await db_helper.get_waitlist_join_players(bot)
+    waitlist_data: List = await db.get_waitlist_join_players()
     for player in waitlist_data:
         player_id: int = player.get("player_id")
         if guild_id == 0 and message.author.id in player.get("waiting_id"):
@@ -581,20 +569,19 @@ async def waitlist(
 
 
 async def set_channel(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
-    _channel: TextChannel | VoiceChannel | Thread | None = None,
+    message: Union[ApplicationCommandInteraction, commands.Context],
+    _channel: Optional[Union[TextChannel, VoiceChannel, Thread]] = None,
 ) -> DiscordReturn:
     """set the channel the bot will send updates to."""
     if _channel is None:
         channel_id: int = message.channel.id
     else:
         channel_id = _channel.id
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    result: str = await db_helper.update_guild_data(
-        bot, guild.id, watch_channel=channel_id
+    result: str = await db.update_guild_data(
+        guild.id, watch_channel=channel_id
     )
     if result.startswith("INSERT"):
         content: str = (
@@ -608,19 +595,16 @@ async def set_channel(
 
 
 async def set_role(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
-    role: Role | None = None,
+    message: Union[ApplicationCommandInteraction, commands.Context],
+    role: Optional[Role] = None,
 ) -> DiscordReturn:
     """set the role to ping."""
     if role is None:
         return {"content": f"use {use_prefix(message)}set-role <role>!"}
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    result: str = await db_helper.update_guild_data(
-        bot, guild.id, ping_role=role.id
-    )
+    result: str = await db.update_guild_data(guild.id, ping_role=role.id)
     if result.startswith("INSERT"):
         content: str = f"successfully set role `{role}` for `{guild}`"
     elif result.startswith("UPDATE"):
@@ -631,22 +615,21 @@ async def set_role(
 
 
 async def feeder_message_add(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction
-    | commands.Context
-    | ModalInteraction,
+    message: Union[
+        ApplicationCommandInteraction, commands.Context, ModalInteraction
+    ],
     new_message: str,
 ) -> DiscordReturn:
     """add custom message for feeder alert."""
     if len(new_message) > 100:
         return {"content": "message is too long! (max 100 characters)"}
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    guild_data: list = await db_helper.get_guild_data(bot, guild.id)
+    guild_data: List = await db.get_guild_data(guild.id)
     if len(guild_data) == 0:
         return {"content": f"error! `{guild}` not in database"}
-    feeder_messages: list | None = guild_data[0].get("feeder_messages")
+    feeder_messages: Optional[List] = guild_data[0].get("feeder_messages")
     if feeder_messages and len(feeder_messages) >= 25:
         return {
             "content": "max number reached! delete before adding a new one!"
@@ -655,8 +638,8 @@ async def feeder_message_add(
         feeder_messages.append(new_message)
     else:
         feeder_messages = [new_message]
-    result: str = await db_helper.update_guild_data(
-        bot, guild.id, feeder_messages=feeder_messages
+    result: str = await db.update_guild_data(
+        guild.id, feeder_messages=feeder_messages
     )
     if result.startswith("INSERT"):
         content: str = (
@@ -670,24 +653,23 @@ async def feeder_message_add(
 
 
 async def feeder_message_show(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
 ) -> DiscordReturn:
     """show custom messages for feeder alert."""
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    guild_data: list = await db_helper.get_guild_data(bot, guild.id)
+    guild_data: List = await db.get_guild_data(guild.id)
     if len(guild_data) == 0:
         return {"content": f"error! `{guild}` not in database"}
-    feeder_messages: list[str] = guild_data[0].get("feeder_messages")
+    feeder_messages: List[str] = guild_data[0].get("feeder_messages")
     if not feeder_messages:
         use_msg: str = (
             f'use {use_prefix(message)}feeder-message add "<message>"!'
         )
         return {"content": f"no custom messages for `{guild}`! {use_msg}"}
 
-    embeds: list[Embed] = []
+    embeds: List[Embed] = []
     step = 5  # number of messages per embed
     for i in range(0, len(feeder_messages), step):
         embed = Embed(
@@ -705,17 +687,16 @@ async def feeder_message_show(
 
 
 async def feeder_message_delete(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
 ) -> DiscordReturn:
     """delete custom message for feeder alert."""
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    guild_data: list = await db_helper.get_guild_data(bot, guild.id)
+    guild_data: List = await db.get_guild_data(guild.id)
     if len(guild_data) == 0:
         return {"content": f"error! `{guild}` not in database"}
-    feeder_messages: list[str] = guild_data[0].get("feeder_messages")
+    feeder_messages: List[str] = guild_data[0].get("feeder_messages")
     if not feeder_messages:
         use_msg: str = (
             f'use {use_prefix(message)}feeder-message add "<message>"!'
@@ -723,15 +704,14 @@ async def feeder_message_delete(
         return {"content": f"no custom messages for `{guild}`! {use_msg}"}
     return {
         "content": "choose messages to delete",
-        "view": DeleterView(bot, message, "feeder messages", feeder_messages),
+        "view": DeleterView(message, "feeder messages", feeder_messages),
     }
 
 
 async def feeder_image_add(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction
-    | commands.Context
-    | ModalInteraction,
+    message: Union[
+        ApplicationCommandInteraction, commands.Context, ModalInteraction
+    ],
     new_image: str,
 ) -> DiscordReturn:
     """add custom image for feeder alert."""
@@ -739,13 +719,13 @@ async def feeder_image_add(
         return {"content": "url is too long! (max 100 characters)"}
     if not validate_url(new_image):
         return {"content": "invalid url!"}
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    guild_data: list = await db_helper.get_guild_data(bot, guild.id)
+    guild_data: List = await db.get_guild_data(guild.id)
     if len(guild_data) == 0:
         return {"content": f"error! `{guild}` not in database"}
-    feeder_images: list[str] | None = guild_data[0].get("feeder_images")
+    feeder_images: Optional[List[str]] = guild_data[0].get("feeder_images")
     if feeder_images and len(feeder_images) >= 10:
         return {
             "content": "max number reached! delete before adding a new one!"
@@ -754,8 +734,8 @@ async def feeder_image_add(
         feeder_images.append(new_image)
     else:
         feeder_images = [new_image]
-    result: str = await db_helper.update_guild_data(
-        bot, guild.id, feeder_images=feeder_images
+    result: str = await db.update_guild_data(
+        guild.id, feeder_images=feeder_images
     )
     if result.startswith("INSERT"):
         content: str = f"successfully added custom feeder image for `{guild}`"
@@ -767,21 +747,20 @@ async def feeder_image_add(
 
 
 async def feeder_image_show(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
 ) -> DiscordReturn:
     """show custom images for feeder alert."""
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    guild_data: list = await db_helper.get_guild_data(bot, guild.id)
+    guild_data: List = await db.get_guild_data(guild.id)
     if len(guild_data) == 0:
         return {"content": f"error! `{guild}` not in database"}
-    feeder_images: list[str] | None = guild_data[0].get("feeder_images")
+    feeder_images: Optional[List[str]] = guild_data[0].get("feeder_images")
     if not feeder_images:
         use_msg: str = f'use {use_prefix(message)}feeder-image add "<image>"!'
         return {"content": f"no custom image for `{guild}`! {use_msg}"}
-    embeds: list[Embed] = []
+    embeds: List[Embed] = []
     for image in feeder_images:
         embed = Embed(
             title="custom feeder images",
@@ -795,43 +774,41 @@ async def feeder_image_show(
 
 
 async def feeder_image_delete(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
 ) -> DiscordReturn:
     """delete custom image for feeder alert."""
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    guild_data: list = await db_helper.get_guild_data(bot, guild.id)
+    guild_data: List = await db.get_guild_data(guild.id)
     if len(guild_data) == 0:
         return {"content": f"error! `{guild}` not in database"}
-    feeder_images: list[str] | None = guild_data[0].get("feeder_images")
+    feeder_images: Optional[List[str]] = guild_data[0].get("feeder_images")
     if not feeder_images:
         use_msg: str = f'use {use_prefix(message)}feeder-image add "<image>"!'
         return {"content": f"no custom image for `{guild}`! {use_msg}"}
     return {
         "content": "choose images to delete",
-        "view": DeleterView(bot, message, "feeder images", feeder_images),
+        "view": DeleterView(message, "feeder images", feeder_images),
     }
 
 
 async def streaker_message_add(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction
-    | commands.Context
-    | ModalInteraction,
+    message: Union[
+        ApplicationCommandInteraction, commands.Context, ModalInteraction
+    ],
     new_message: str,
 ) -> DiscordReturn:
     """add custom message for streaker alert."""
     if len(new_message) > 100:
         return {"content": "message is too long! (max 100 characters)"}
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    guild_data: list = await db_helper.get_guild_data(bot, guild.id)
+    guild_data: List = await db.get_guild_data(guild.id)
     if len(guild_data) == 0:
         return {"content": f"error! `{guild}` not in database"}
-    streaker_messages: list | None = guild_data[0].get("streaker_messages")
+    streaker_messages: Optional[List] = guild_data[0].get("streaker_messages")
     if streaker_messages and len(streaker_messages) >= 25:
         return {
             "content": "max number reached! delete before adding a new one!"
@@ -840,8 +817,8 @@ async def streaker_message_add(
         streaker_messages.append(new_message)
     else:
         streaker_messages = [new_message]
-    result: str = await db_helper.update_guild_data(
-        bot, guild.id, streaker_messages=streaker_messages
+    result: str = await db.update_guild_data(
+        guild.id, streaker_messages=streaker_messages
     )
     if result.startswith("INSERT"):
         content: str = (
@@ -855,17 +832,16 @@ async def streaker_message_add(
 
 
 async def streaker_message_show(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
 ) -> DiscordReturn:
     """show custom messages for streaker alert."""
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    guild_data: list = await db_helper.get_guild_data(bot, guild.id)
+    guild_data: List = await db.get_guild_data(guild.id)
     if len(guild_data) == 0:
         return {"content": f"error! `{guild}` not in database"}
-    streaker_messages: list[str] | None = guild_data[0].get(
+    streaker_messages: Optional[List[str]] = guild_data[0].get(
         "streaker_messages"
     )
     if not streaker_messages:
@@ -873,7 +849,7 @@ async def streaker_message_show(
             f'use {use_prefix(message)}streaker-message add "<message>"!'
         )
         return {"content": f"no custom messages for `{guild}`! {use_msg}"}
-    embeds: list[Embed] = []
+    embeds: List[Embed] = []
     step = 5  # number of messages per embed
     for i in range(0, len(streaker_messages), step):
         embed = Embed(
@@ -891,17 +867,16 @@ async def streaker_message_show(
 
 
 async def streaker_message_delete(
-    bot: commands.Bot,
-    message: ApplicationCommandInteraction | commands.Context,
+    message: Union[ApplicationCommandInteraction, commands.Context],
 ) -> DiscordReturn:
     """delete custom message for streaker alert."""
-    guild: Guild | None = message.guild
+    guild: Optional[Guild] = message.guild
     if guild is None:
         return {"content": "error! guild not found!"}
-    guild_data: list = await db_helper.get_guild_data(bot, guild.id)
+    guild_data: List = await db.get_guild_data(guild.id)
     if len(guild_data) == 0:
         return {"content": f"error! `{guild}` not in database"}
-    streaker_messages: list[str] | None = guild_data[0].get(
+    streaker_messages: Optional[List[str]] = guild_data[0].get(
         "streaker_messages"
     )
     if not streaker_messages:
@@ -911,7 +886,5 @@ async def streaker_message_delete(
         return {"content": f"no custom messages for `{guild}`! {use_msg}"}
     return {
         "content": "choose messages to delete",
-        "view": DeleterView(
-            bot, message, "streaker messages", streaker_messages
-        ),
+        "view": DeleterView(message, "streaker messages", streaker_messages),
     }

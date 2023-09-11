@@ -5,10 +5,10 @@ import random
 import aiohttp
 
 import disnake
-from disnake.ext import tasks, commands
+from disnake.ext import tasks
+from disnake.ext.commands import Bot, Cog
 
-
-from helpers import db_helper
+from helpers.db_helper import db
 
 session = aiohttp.ClientSession()
 
@@ -57,7 +57,7 @@ class ValorantMatchBackground:
         self.combined_waiters = []
 
     async def get_player_data_from_db(self, puuid):
-        return await self.bot.db.fetch(
+        return await db.db.fetch(
             "select * from players where puuid = $1", puuid
         )
 
@@ -198,23 +198,22 @@ class ValorantMatchBackground:
             self.streak_values.append(
                 f"<@{id}> is on a {abs(new_streak)}-game {streaktype} streak!"
             )
-        await db_helper.update_player_data(self.bot, id, streak=new_streak)
+        await db.update_player_data(id, streak=new_streak)
 
     async def update_player_lasttime(self, id, member_data):
         """updates database lasttime if more recent"""
         if self.recent_time > member_data[0].get("lasttime"):
-            await db_helper.update_player_data(
-                self.bot,
+            await db.update_player_data(
                 id,
                 lasttime=self.recent_time,
             )
 
     async def update_player_waitlist(self, id):
         """updates database waitlist and adds to list of waiters"""
-        waitlist_data = await db_helper.get_waitlist_data(self.bot, id)
+        waitlist_data = await db.get_waitlist_data(id)
         if len(waitlist_data):
             self.combined_waiters += waitlist_data[0].get("waiting_id")
-            await db_helper.delete_waitlist_data(self.bot, id)
+            await db.delete_waitlist_data(id)
 
     def streakers_to_player_embed(self):
         """adds streakers info to player embed if there are any streakers"""
@@ -281,8 +280,7 @@ class ValorantMatchBackground:
 
             if self.mode in ("Competitive", "Unrated"):
                 # save stats
-                await db_helper.update_player_data(
-                    self.bot,
+                await db.update_player_data(
                     self.cycle_discord_id,
                     headshots=self.cycle_data.get("headshots")[-4:]
                     + [player_stats.get("headshots")],
@@ -298,7 +296,7 @@ class ValorantMatchBackground:
         self.feeders_to_player_embed()
 
         for member_id in self.party_red:
-            member_data = await db_helper.get_player_data(self.bot, member_id)
+            member_data = await db.get_player_data(member_id)
             if len(member_data) == 0:
                 continue
             win = self.rounds_red > self.rounds_blue
@@ -307,7 +305,7 @@ class ValorantMatchBackground:
             await self.update_player_waitlist(member_id)
 
         for member_id in self.party_blue:
-            member_data = await db_helper.get_player_data(self.bot, member_id)
+            member_data = await db.get_player_data(member_id)
             if len(member_data) == 0:
                 continue
             win = self.rounds_blue > self.rounds_red
@@ -325,7 +323,6 @@ class ValorantMatchBackground:
 
 
 class ValorantBackground:
-
     matches_url = "https://api.henrikdev.xyz/valorant/v3/by-puuid/matches"
     maps_url = "https://api.henrikdev.xyz/valorant/v1/content"
 
@@ -344,7 +341,7 @@ class ValorantBackground:
 
     async def get_player_id_from_db(self):
         """retrieve player_ids from players db"""
-        db_players = await self.bot.db.fetch("select player_id from players")
+        db_players = await db.db.fetch("select player_id from players")
         return list(map(lambda x: x.get("player_id"), db_players))
 
     async def check_current_user_exists(self):
@@ -355,9 +352,7 @@ class ValorantBackground:
         self.discord_user = await self.bot.getch_user(self.discord_id)
         if self.discord_user is None:
             return False
-        self.user_db_data = await db_helper.get_player_data(
-            self.bot, self.discord_id
-        )
+        self.user_db_data = await db.get_player_data(self.discord_id)
         if len(self.user_db_data) == 0:
             return False
         self.user_db_data = self.user_db_data[0]
@@ -366,7 +361,7 @@ class ValorantBackground:
     async def check_guild_channel(self):
         """checks if guild and channel are accessible and updates self"""
         guild_exists = self.bot.get_guild(self.guild)
-        self.guild_data = await db_helper.get_guild_data(self.bot, self.guild)
+        self.guild_data = await db.get_guild_data(self.guild)
         if guild_exists in self.bot.guilds and len(self.guild_data):
             # check if bot is still in the guild
             watch_channel_id = self.guild_data[0].get("watch_channel")
@@ -379,9 +374,7 @@ class ValorantBackground:
                 return
 
             # sends a warning that guild exists but channel is gone
-            await db_helper.update_guild_data(
-                self.bot, self.guild, watch_channel=0
-            )
+            await db.update_guild_data(self.guild, watch_channel=0)
             if guild_exists_channels:
                 await guild_exists_channels[0].send(
                     "The channel I am set to doesn't exist! Please set again."
@@ -390,16 +383,14 @@ class ValorantBackground:
         elif self.guild:
             # no longer have permission to DM user, just update guild data
             self.guild = 0
-            await db_helper.update_player_data(
-                self.bot, self.discord_id, guild_id=0
-            )
+            await db.update_player_data(self.discord_id, guild_id=0)
 
     async def check_recent_is_newer(self, metadata):
         """checks if recent game is newer than stored last time"""
         start_time = metadata.get("game_start")  # given in s
         duration = metadata.get("game_length") / 1000  # given in ms
         self.recent_time = start_time + duration + 100
-        user_data = await db_helper.get_player_data(self.bot, self.discord_id)
+        user_data = await db.get_player_data(self.discord_id)
         if len(user_data) == 0:
             return False
         user_data = user_data[0]
@@ -407,7 +398,7 @@ class ValorantBackground:
             return False
         return True
 
-    def check__invalid_gamemode(self, mode):
+    def check_invalid_gamemode(self, mode):
         """returns True if gamemode is one of invalid modes"""
         invalid = ["Deathmatch"]
         return any(mode == x for x in invalid)
@@ -450,7 +441,7 @@ class ValorantBackground:
             if not await self.check_recent_is_newer(metadata):
                 break
             mode = metadata.get("mode")
-            if self.check__invalid_gamemode(mode):
+            if self.check_invalid_gamemode(mode):
                 continue
             map_played = metadata.get("map")
             map_url = await self.retrieve_map_thumbnail(map_played)
@@ -471,26 +462,30 @@ class ValorantBackground:
             await match_bg.main()
 
 
-class Background(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
-        self.bot.valorant_watch_cycle = self.valorant_watch_cycle
+class Background(Cog):
+    """background tasks"""
 
-    async def get_player_id_from_db(self):
-        """retrieve player_ids from players db"""
-        db_players = await self.bot.db.fetch("select player_id from players")
-        return list(map(lambda x: x.get("player_id"), db_players))
+    def __init__(self, bot: Bot):
+        self.bot: Bot = bot
+        self.valorant_watch_cycle.start()
+
+    async def wait_until_db_ready(self) -> None:
+        """waits until the database is ready"""
+        while not db.loaded:
+            await asyncio.sleep(0.5)
 
     @tasks.loop()
     async def valorant_watch_cycle(self):
-        await self.bot.wait_until_ready()  # wait until the bot logs in
-        init_list = await self.get_player_id_from_db()
+        await self.wait_until_db_ready()
+        init_list = await db.get_all_players()
         for discord_id in init_list:
-            valo_bg = ValorantBackground(bot=self.bot, discord_id=discord_id)
+            valo_bg = ValorantBackground(
+                bot=self.bot, discord_id=discord_id.get("player_id")
+            )
             await valo_bg.main()
             # sleeps for number of seconds (avoid rate limit)
             await asyncio.sleep(0.5)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: Bot):
     bot.add_cog(Background(bot))

@@ -1,5 +1,6 @@
 """custom help command"""
 
+from typing import List, Tuple, Optional, Union
 import disnake
 from disnake import Embed
 from disnake.ext.commands import Command, HelpCommand, Cog, Group
@@ -11,7 +12,7 @@ from views.views import PageView, SelectEmbed
 class Help(HelpCommand):
     """show help commands"""
 
-    desc_list: list[str] = [
+    desc_list: List[str] = [
         "A discord bot by thedylone#3801",
         "More info on [the website](https://thedylone.github.io/laffey-bot/).",
         "[Support the bot on Ko-fi](https://ko-fi.com/thedylone)!",
@@ -34,18 +35,18 @@ class Help(HelpCommand):
             color=0x9444B3,
         )
         for cog, commands in mapping.items():
-            filtered: list[Command] = await self.filter_commands(
+            filtered: List[Command] = await self.filter_commands(
                 commands, sort=True
             )
-            command_signatures: list[str] = [
+            command_signatures: List[str] = [
                 self.get_command_signature(c) for c in filtered
             ]
             if command_signatures:
-                cog_name: str | None = getattr(cog, "qualified_name", None)
+                cog_name: Optional[str] = getattr(cog, "qualified_name", None)
                 if not cog_name:
                     continue
-                emoji: str | None = getattr(cog, "COG_EMOJI", None)
-                description: str | None = getattr(cog, "description", None)
+                emoji: Optional[str] = getattr(cog, "COG_EMOJI", None)
+                description: Optional[str] = getattr(cog, "description", None)
                 combined_name: str = (
                     emoji + " " + cog_name if emoji else cog_name
                 )
@@ -58,20 +59,20 @@ class Help(HelpCommand):
 
     async def send_bot_help(self, mapping: dict) -> None:
         home_embed: Embed = await self.bot_help_embed(mapping)
-        embeds: list[SelectEmbed] = []
+        embeds: List[SelectEmbed] = []
         for cog, commands in mapping.items():
-            filtered: list[Command] = await self.filter_commands(
+            filtered: List[Command] = await self.filter_commands(
                 commands, sort=True
             )
-            command_signatures: list[str] = [
+            command_signatures: List[str] = [
                 self.get_command_signature(c) for c in filtered
             ]
             if command_signatures:
-                cog_name: str | None = getattr(cog, "qualified_name", None)
+                cog_name: Optional[str] = getattr(cog, "qualified_name", None)
                 if not cog_name:
                     continue
                 emoji: str = str(getattr(cog, "COG_EMOJI", None))
-                description: str | None = str(
+                description: Optional[str] = str(
                     getattr(cog, "description", None)
                 )
                 embeds.append(
@@ -89,11 +90,11 @@ class Help(HelpCommand):
     async def cog_help_embed(self, cog: Cog) -> Embed:
         """returns the help embed for a cog"""
         embed = disnake.Embed(color=0x9444B3)
-        commands: list[Command] = cog.get_commands()
-        filtered: list[Command] = await self.filter_commands(
+        commands: List[Command] = cog.get_commands()
+        filtered: List[Command] = await self.filter_commands(
             commands, sort=True
         )
-        command_signatures: list[str] = [
+        command_signatures: List[str] = [
             self.get_command_signature(c) for c in filtered
         ]
         if command_signatures:
@@ -124,7 +125,7 @@ class Help(HelpCommand):
             color=0x9444B3,
         )
         embed.add_field(name="help", value=group.help)
-        alias: list[str] | tuple[str] = group.aliases
+        alias: Union[List[str], Tuple[str]] = group.aliases
         if alias:
             embed.add_field(
                 name="aliases",
@@ -132,7 +133,7 @@ class Help(HelpCommand):
                 inline=False,
             )
 
-        filtered: list[Command] = await self.filter_commands(
+        filtered: List[Command] = await self.filter_commands(
             group.commands, sort=True
         )
         for command in filtered:
@@ -151,7 +152,7 @@ class Help(HelpCommand):
             color=0x9444B3,
         )
         embed.add_field(name="help", value=command.help)
-        alias: list[str] | tuple[str] = command.aliases
+        alias: Union[List[str], Tuple[str]] = command.aliases
         if alias:
             embed.add_field(
                 name="aliases",

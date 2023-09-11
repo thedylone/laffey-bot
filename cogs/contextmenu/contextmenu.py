@@ -30,7 +30,7 @@ class ContextMenu(commands.Cog):
         """returns user's valorant info from the database"""
         await inter.response.defer()
         await inter.edit_original_message(
-            **await valorant_helper.info(self.bot, inter, user)
+            **await valorant_helper.info(inter, user)
         )
 
     @commands.user_command(name="valorant-wait")
@@ -42,7 +42,7 @@ class ContextMenu(commands.Cog):
         """pings you when tagged user is done"""
         await inter.response.defer()
         await inter.edit_original_message(
-            **await valorant_helper.wait(self.bot, inter, wait_user)
+            **await valorant_helper.wait(inter, wait_user)
         )
 
 

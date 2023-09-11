@@ -1,5 +1,7 @@
 """disnake views"""
 
+from typing import List, Union
+
 from disnake import (
     Embed,
     MessageInteraction,
@@ -10,7 +12,7 @@ from disnake import (
 from disnake.ext import commands
 from disnake.ui import View, Select, button, Button
 
-from helpers import db_helper
+from helpers.db_helper import db
 
 
 class SelectEmbed:
@@ -34,9 +36,9 @@ class SelectEmbed:
 class Menu(View):
     """class to create a menu"""
 
-    def __init__(self, embeds: list[Embed]) -> None:
+    def __init__(self, embeds: List[Embed]) -> None:
         super().__init__(timeout=None)
-        self.embeds: list[Embed] = embeds
+        self.embeds: List[Embed] = embeds
         self.embed_count: int = 0
 
         self.first_page.disabled = True
@@ -119,19 +121,17 @@ class Deleter(Select):
 
     def __init__(
         self,
-        bot: commands.Bot,
-        message: ApplicationCommandInteraction | commands.Context,
+        message: Union[ApplicationCommandInteraction, commands.Context],
         key: str,
-        objects: list[str],
+        objects: List[str],
     ) -> None:
-        self.bot: commands.Bot = bot
-        self.message: ApplicationCommandInteraction | commands.Context = (
-            message
-        )
+        self.message: Union[
+            ApplicationCommandInteraction, commands.Context
+        ] = message
         self.key: str = key
-        self.objects: list[str] = objects
+        self.objects: List[str] = objects
 
-        options: list[SelectOption] = [
+        options: List[SelectOption] = [
             SelectOption(label=str(i), description=obj)
             for i, obj in enumerate(objects)
         ]
@@ -160,8 +160,7 @@ class Deleter(Select):
             del self.objects[int(i)]
         # replace space in key with underscore
         key_underscore: str = self.key.replace(" ", "_")
-        result: str = await db_helper.update_guild_data(
-            self.bot,
+        result: str = await db.update_guild_data(
             self.message.guild.id,
             **{key_underscore: self.objects},
         )
@@ -182,27 +181,25 @@ class DeleterView(View):
 
     def __init__(
         self,
-        bot: commands.Bot,
-        message: ApplicationCommandInteraction | commands.Context,
+        message: Union[ApplicationCommandInteraction, commands.Context],
         key: str,
-        objects: list[str],
+        objects: List[str],
     ) -> None:
         super().__init__()
 
         # Adds the dropdown to our view object.
-        self.add_item(Deleter(bot, message, key, objects))
+        self.add_item(Deleter(message, key, objects))
 
 
 class PageSelect(Select):
     """class to create a select menu to choose a page"""
 
-    def __init__(self, embeds: list[SelectEmbed]) -> None:
-
-        self.embeds: list[SelectEmbed] = embeds
+    def __init__(self, embeds: List[SelectEmbed]) -> None:
+        self.embeds: List[SelectEmbed] = embeds
         self.embeds_dict: dict[str, SelectEmbed] = {}
         self.current_value: str = ""
 
-        options: list[SelectOption] = []
+        options: List[SelectOption] = []
         for embed in embeds:
             options.append(
                 SelectOption(
@@ -233,7 +230,7 @@ class PageSelect(Select):
 class PageView(View):
     """class to create a view for the page select menu"""
 
-    def __init__(self, embeds: list[SelectEmbed]) -> None:
+    def __init__(self, embeds: List[SelectEmbed]) -> None:
         super().__init__()
 
         self.add_item(PageSelect(embeds))

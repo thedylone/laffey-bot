@@ -4,36 +4,52 @@ import sys
 import argparse
 from os.path import join, dirname
 from dotenv import load_dotenv
+from typing import Optional, List
 from disnake import Intents, channel, Guild, Game
 from disnake.ext import commands
 
-from helpers import db_helper
+from helpers.db_helper import db
 from cogs.custom_help import help as custom_help
 
 dotenv_path: str = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
-BOT_TOKEN: str | None = os.environ.get("BOT_TOKEN")
+BOT_TOKEN: Optional[str] = os.environ.get("BOT_TOKEN")
 if not BOT_TOKEN:
     print("BOT_TOKEN missing")
     sys.exit(1)
+
+DATABASE_URL: Optional[str] = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    print("DATABASE_URL missing")
+    sys.exit(1)
+
+
+async def load_db() -> None:
+    """loads database"""
+    await db.create_db_pool(DATABASE_URL)
+    await db.create_guilds_table()
+    await db.create_players_table()
+    await db.create_waitlist_table()
+    global DATABASE_LOADED
+    DATABASE_LOADED = True
+    print("database loaded")
+
 
 DEFAULT_PREFIX: str = os.environ.get("DEFAULT_PREFIX", "?")
 SLASH_ENABLED: str = os.environ.get("SLASH_ENABLED", "1")
 PREFIX_ENABLED: str = os.environ.get("PREFIX_ENABLED", "1")
 DEBUG_MODE = False
-LOG_WEBHOOK: str | None = os.environ.get("LOG_WEBHOOK")
+LOG_WEBHOOK: Optional[str] = os.environ.get("LOG_WEBHOOK")
 
 
-async def get_prefix(_bot, message) -> list[str]:
+async def get_prefix(_bot, message) -> List[str]:
     """returns prefix for the guild"""
     custom_prefix: str = DEFAULT_PREFIX
     if not isinstance(message.channel, channel.DMChannel):
         guild_id: int = message.guild.id
-        guild_data: list = await db_helper.get_guild_data(_bot, guild_id)
+        guild_data: list = await db.get_guild_data(guild_id)
         if len(guild_data) == 0:
-            await db_helper.update_guild_data(
-                _bot, guild_id, prefix=DEFAULT_PREFIX
-            )
+            await db.update_guild_data(guild_id, prefix=DEFAULT_PREFIX)
         else:
             custom_prefix = guild_data[0].get("prefix")
     return commands.when_mentioned_or(custom_prefix)(_bot, message)
@@ -52,7 +68,7 @@ bot = commands.Bot(
 @bot.event
 async def on_guild_join(guild: Guild) -> None:
     """adds guild to database when bot joins a server"""
-    await db_helper.update_guild_data(bot, guild.id, prefix=DEFAULT_PREFIX)
+    await db.update_guild_data(guild.id, prefix=DEFAULT_PREFIX)
     msg: str = f"joined server {guild.name}"
     print(msg)
     if bot.owner:
@@ -62,7 +78,7 @@ async def on_guild_join(guild: Guild) -> None:
 @bot.event
 async def on_guild_remove(guild: Guild) -> None:
     """removes guild from database when bot leaves a server"""
-    await db_helper.delete_guild_data(bot, guild.id)
+    await db.delete_guild_data(guild.id)
     msg: str = f"left server {guild.name}"
     print(msg)
     if bot.owner:
@@ -77,32 +93,26 @@ async def on_ready() -> None:
     await bot.change_presence(
         activity=Game(f"with lolis | {DEFAULT_PREFIX}help")
     )
-    await db_helper.create_db_pool(bot)
-    await db_helper.create_guilds_table(bot)
-    await db_helper.create_players_table(bot)
-    await db_helper.create_waitlist_table(bot)
-
-
-# removes default help command
-# bot.remove_command("help")
+    await load_db()
 
 
 def autoload(command_type: str) -> None:
     """loads all cogs in the given folder"""
     for file in os.listdir(f"./cogs/{command_type}"):
-        if file.endswith(".py"):
-            extension: str = file[:-3]
-            try:
-                bot.load_extension(f"cogs.{command_type}.{extension}")
-                print(f"loaded '{extension}'")
-            except commands.ExtensionNotFound as err:
-                print("could not find extension: ", err)
-            except commands.ExtensionFailed as err:
-                print("failed to load extension: ", err)
-            except commands.ExtensionAlreadyLoaded as err:
-                print("extension already loaded: ", err)
-            except commands.NoEntryPointError as err:
-                print("extension has no setup function: ", err)
+        if not file.endswith(".py"):
+            continue
+        extension: str = file[:-3]
+        try:
+            bot.load_extension(f"cogs.{command_type}.{extension}")
+            print(f"loaded '{extension}'")
+        except commands.ExtensionNotFound as err:
+            print("could not find extension: ", err)
+        except commands.ExtensionFailed as err:
+            print("failed to load extension: ", err)
+        except commands.ExtensionAlreadyLoaded as err:
+            print("extension already loaded: ", err)
+        except commands.NoEntryPointError as err:
+            print("extension has no setup function: ", err)
 
 
 if __name__ == "__main__":
