@@ -635,6 +635,8 @@ class Player(Stats):
         """valorant puuid of the player"""
         self.lasttime: int = 0
         """unix timestamp of when the player last played a match"""
+        self.card: str = ""
+        """valorant card id of the player"""
         for data in datas:
             for key, value in data.items():
                 setattr(self, key, value)
@@ -661,9 +663,10 @@ class Player(Stats):
             raise ConnectionError("error retrieving account info!")
         self.puuid = account_data.get("puuid") or self.puuid
         self.region = account_data.get("region") or self.region
+        self.card = account_data.get("card", {}).get("id") or self.card
 
     async def update_name_tag(self) -> None:
-        """updates name and tag from api from puuid"""
+        """updates name tag and region from api from puuid"""
         async with aiohttp.ClientSession() as session:
             account_request: aiohttp.ClientResponse = await session.get(
                 f"{API}/v1/by-puuid/account/{self.puuid}"
@@ -676,10 +679,13 @@ class Player(Stats):
             raise ConnectionError("error retrieving account info!")
         name: Optional[str] = account_data.get("name")
         tag: Optional[str] = account_data.get("tag")
+        region: Optional[str] = account_data.get("region")
         if name is None or tag is None:
             raise ConnectionError("error retrieving account info!")
         self.name = name
         self.tag = tag
+        self.region = region or self.region
+        self.card = account_data.get("card", {}).get("id") or self.card
 
     async def get_match_history(self) -> List[Match]:
         """retrieve match history from api
@@ -819,6 +825,10 @@ class Player(Stats):
                 name="last updated",
                 value=f"<t:{int(self.lasttime)}>",
                 inline=True,
+            )
+            .set_image(
+                url=f"https://media.valorant-api.com/playercards/{self.card}"
+                + "/wideart.png"
             )
         )
         if self.num_games():

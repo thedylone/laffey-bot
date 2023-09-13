@@ -129,7 +129,16 @@ class Background(Cog):
         """
         self.bot: Bot = bot
         """bot instance"""
+        self.valorant_players: List[Player] = []
         self.valorant_watch_cycle.start()
+
+    async def init_valorant_players(self) -> None:
+        """initialises the list of valorant players"""
+        await wait_until_db_ready(db)
+        init_list: List[dict] = await db.get_all_players()
+        self.valorant_players: List[Player] = [
+            Player(data) for data in init_list
+        ]
 
     @tasks.loop()
     async def valorant_watch_cycle(self) -> None:
@@ -138,9 +147,8 @@ class Background(Cog):
         if a new match is found, trigger and send the alert
         """
         await wait_until_db_ready(db)
-        init_list: List[dict] = await db.get_all_players()
-        players: List[Player] = [Player(data) for data in init_list]
-        for player in players:
+        await self.init_valorant_players()
+        for player in self.valorant_players:
             if not await check_user_exists(self.bot, player.player_id):
                 # delete user?
                 continue
@@ -158,11 +166,27 @@ class Background(Cog):
                 if match.game_end <= player.lasttime:
                     continue
                 alert: Optional[DiscordReturn] = await match.trigger_alert(
-                    player, players
+                    player, self.valorant_players
                 )
                 if alert is None:
                     continue
                 await channel.send(**alert)
+            # sleeps for number of seconds (avoid rate limit)
+            await asyncio.sleep(0.5)
+
+    @tasks.loop(hours=24)
+    async def update_player_data(self) -> None:
+        """loops through all players and updates their name and tag"""
+        await wait_until_db_ready(db)
+        await self.init_valorant_players()
+        init_list: List[dict] = await db.get_all_players()
+        players: List[Player] = [Player(data) for data in init_list]
+        for player in players:
+            if not await check_user_exists(self.bot, player.player_id):
+                # delete user?
+                continue
+            await player.update_name_tag()
+            await player.update_db()
             # sleeps for number of seconds (avoid rate limit)
             await asyncio.sleep(0.5)
 

@@ -203,6 +203,8 @@ async def info(
         return {"content": f"<@{user.id}> user not in database. {use_msg}"}
 
     player: Player = Player(player_data[0])
+    await player.update_name_tag()
+    await player.update_db()
     # create embed
     return {
         "embed": player.info_embed().set_thumbnail(url=user.display_avatar.url)
