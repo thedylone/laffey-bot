@@ -1,13 +1,13 @@
 """disnake modals"""
 
 from disnake import ModalInteraction, TextInputStyle
-from disnake.ui import TextInput, Modal
+from disnake.ui import Modal, TextInput
 
-from helpers import valorant_helper
+from helpers import valorant
 
 
 class ValorantWatchModal(Modal):
-    """modal for adding a player to watch"""
+    """adds a player to the database via `valorant watch`"""
 
     def __init__(self) -> None:
         components: list[TextInput] = [
@@ -35,7 +35,7 @@ class ValorantWatchModal(Modal):
     async def callback(self, interaction: ModalInteraction, /) -> None:
         await interaction.response.defer()
         await interaction.edit_original_message(
-            **await valorant_helper.watch(
+            **await valorant.watch(
                 interaction,
                 interaction.text_values["name"],
                 interaction.text_values["tag"],
@@ -53,7 +53,7 @@ class ValorantWatchModal(Modal):
 
 
 class ValorantPingImageModal(Modal):
-    """modal for adding a custom image for ping alert"""
+    """adds a custom image for `valorant ping`"""
 
     def __init__(self) -> None:
         components: list[TextInput] = [
@@ -74,7 +74,7 @@ class ValorantPingImageModal(Modal):
     async def callback(self, interaction: ModalInteraction, /) -> None:
         await interaction.response.defer()
         await interaction.edit_original_message(
-            **await valorant_helper.ping_image_add(
+            **await valorant.ping_image_add(
                 interaction,
                 interaction.text_values["url"],
             )
@@ -90,8 +90,8 @@ class ValorantPingImageModal(Modal):
         )
 
 
-class ValorantFeederMessageModal(Modal):
-    """modal for adding a custom message for feeder alert"""
+class FeederMessageModal(Modal):
+    """adds a custom feeder alert message for the guild"""
 
     def __init__(self) -> None:
         components: list[TextInput] = [
@@ -112,7 +112,7 @@ class ValorantFeederMessageModal(Modal):
     async def callback(self, interaction: ModalInteraction, /) -> None:
         await interaction.response.defer()
         await interaction.edit_original_message(
-            **await valorant_helper.feeder_message_add(
+            **await valorant.feeder_message_add(
                 interaction,
                 interaction.text_values["message"],
             )
@@ -128,8 +128,8 @@ class ValorantFeederMessageModal(Modal):
         )
 
 
-class ValorantFeederImageModal(Modal):
-    """modal for adding a custom image for feeder alert"""
+class FeederImageModal(Modal):
+    """adds a custom feeder alert image for the guild"""
 
     def __init__(self) -> None:
         components: list[TextInput] = [
@@ -150,7 +150,7 @@ class ValorantFeederImageModal(Modal):
     async def callback(self, interaction: ModalInteraction, /) -> None:
         await interaction.response.defer()
         await interaction.edit_original_message(
-            **await valorant_helper.feeder_image_add(
+            **await valorant.feeder_image_add(
                 interaction,
                 interaction.text_values["url"],
             )
@@ -166,8 +166,8 @@ class ValorantFeederImageModal(Modal):
         )
 
 
-class ValorantStreakerMessageModal(Modal):
-    """modal for adding a custom message for streaker alert"""
+class StreakerMessageModal(Modal):
+    """adds a custom streaker alert message for the guild"""
 
     def __init__(self) -> None:
         components: list[TextInput] = [
@@ -188,7 +188,7 @@ class ValorantStreakerMessageModal(Modal):
     async def callback(self, interaction: ModalInteraction, /) -> None:
         await interaction.response.defer()
         await interaction.edit_original_message(
-            **await valorant_helper.streaker_message_add(
+            **await valorant.streaker_message_add(
                 interaction,
                 interaction.text_values["message"],
             )

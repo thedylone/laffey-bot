@@ -1,10 +1,9 @@
 """custom help command"""
+from typing import List, Optional, Tuple, Union
 
-from typing import List, Tuple, Optional, Union
 import disnake
 from disnake import Embed
-from disnake.ext.commands import Command, HelpCommand, Cog, Group
-
+from disnake.ext.commands import Cog, Command, Group, HelpCommand
 
 from views.views import PageView, SelectEmbed
 
@@ -13,7 +12,7 @@ class Help(HelpCommand):
     """show help commands"""
 
     desc_list: List[str] = [
-        "A discord bot by thedylone#3801",
+        "A discord bot by thedylone",
         "More info on [the website](https://thedylone.github.io/laffey-bot/).",
         "[Support the bot on Ko-fi](https://ko-fi.com/thedylone)!",
         "Use `help [command]` for more info on a command.",

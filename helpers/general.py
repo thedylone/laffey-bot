@@ -1,19 +1,17 @@
 """helper functions for general cog"""
-
 import os
 import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
+
 import aiohttp
 import dateutil.parser as dp
-from disnake import Embed, ApplicationCommandInteraction
+from disnake import ApplicationCommandInteraction, Embed
 from disnake.ext import commands
 
-from views.views import Menu, PageView, SelectEmbed
-
-from helpers.db_helper import db
+from helpers.db import db
 from helpers.helpers import DiscordReturn
-
+from views.views import Menu, PageView, SelectEmbed
 
 HOLODEX_TOKEN: Optional[str] = os.environ.get("HOLODEX_TOKEN")
 HOLO_DESC: str = "[live and upcoming videos](https://holodex.net/)"
@@ -28,38 +26,14 @@ NO_STREAM_EMBED: Embed = (
     .add_field(name="sadger badger", value="no strim rn", inline=False)
 )
 
-# store info for set channels
-CHANNELS: Dict[str, Dict] = {
-    "UC1DCedRgGHBdm81E1llLhOQ": {
-        "name": "Pekora Ch. 兎田ぺこら",
-        "emoji": "👯",
-        "color": 0x64FFFF,
-    },
-    "UCdn5BQ06XqgXoAxIhbqw5Rg": {
-        "name": "フブキCh。白上フブキ",
-        "emoji": "🌽",
-        "color": 0x64FFFF,
-    },
-    "UC5CwaMl1eIgY8h02uZw7u8A": {
-        "name": "Suisei Channel",
-        "emoji": "☄️",
-        "color": 0x0064FF,
-    },
-    "UChAnqc_AY5_I3Px5dig3X1Q": {
-        "name": "Korone Ch. 戌神ころね",
-        "emoji": "🥐",
-        "color": 0xFFFF00,
-    },
-}
-
 
 @dataclass
 class YoutubeChannel:
-    """class to store youtube channel data
+    """store youtube channel data
 
     parameters
     ----------
-    id: Optional[str]
+    id: str
         channel id
     name: Optional[str]
         channel name
@@ -68,27 +42,48 @@ class YoutubeChannel:
 
     attributes
     ----------
+    id: str
+        channel id
+    name: Optional[str]
+        channel name
+    photo: Optional[str]
+        channel photo url
     url: str
         channel url
     """
 
     id: str
     """channel id"""
-
     name: Optional[str]
     """channel name"""
-
     photo: Optional[str]
     """channel photo url"""
 
     @property
     def url(self) -> str:
-        """returns channel url"""
+        """channel url
+
+        returns
+        -------
+        str
+            channel url
+        """
         return f"https://www.youtube.com/channel/{self.id}"
 
     @staticmethod
     def from_dict(data: Dict) -> "YoutubeChannel":
-        """convert to YoutubeChannel from data"""
+        """create a YoutubeChannel from data
+
+        parameters
+        ----------
+        data: Dict
+            data to create YoutubeChannel from
+
+        returns
+        -------
+        YoutubeChannel
+            YoutubeChannel created from data
+        """
         id: Optional[str] = data.get("id")
         if not id:
             raise ValueError("channel id not found!")
@@ -101,31 +96,70 @@ class YoutubeChannel:
 
 @dataclass
 class Video:
-    """class to store video data"""
+    """store video data
+
+    parameters
+    ----------
+    id: str
+        video id
+    channel: YoutubeChannel
+        video channel
+    title: Optional[str]
+        video title
+    status: Optional[str]
+        video status
+    start_scheduled: Optional[str]
+        video scheduled start time
+
+    attributes
+    ----------
+    id: str
+        video id
+    channel: YoutubeChannel
+        video channel
+    title: Optional[str]
+        video title
+    status: Optional[str]
+        video status
+    start_scheduled: Optional[str]
+        video scheduled start time
+    url: str
+        video url
+    timestamp: float
+        video POSIX timestamp from scheduled start time
+    """
 
     id: str
     """video id"""
-
     channel: YoutubeChannel
     """video channel"""
-
     title: Optional[str]
     """video title"""
-
     status: Optional[str]
     """video status"""
-
     start_scheduled: Optional[str]
     """video scheduled start time"""
 
     @property
     def url(self) -> str:
-        """returns video url"""
+        """video url
+
+        returns
+        -------
+        str
+            video url
+        """
         return f"https://www.youtube.com/watch?v={self.id}"
 
     @property
     def timestamp(self) -> float:
-        """returns video timestamp"""
+        """video POSIX timestamp from scheduled start time
+
+        returns
+        -------
+        float
+            video POSIX timestamp
+        """
         return (
             dp.parse(self.start_scheduled).timestamp()
             if self.start_scheduled
@@ -139,7 +173,18 @@ class Video:
 
     @staticmethod
     def from_dict(data: Dict) -> "Video":
-        """convert to Video from data"""
+        """create a Video from data
+
+        parameters
+        ----------
+        data: Dict
+            data to create Video from
+
+        returns
+        -------
+        Video
+            Video created from data
+        """
         id: Optional[str] = data.get("id")
         if not id:
             raise ValueError("video id not found!")
@@ -156,42 +201,126 @@ class Video:
 
 
 class Channel:
-    """Holodex Channel class"""
+    """Holodex channel
+
+    attributes
+    ----------
+    name: str
+        channel name
+    emoji: str
+        channel emoji
+    color: int
+        channel color
+    live_status: str
+        channel live status
+    embed: Embed
+        channel embed
+    videos: List[Video]
+        channel videos
+    """
 
     def __init__(self, name: str, emoji: str, color: int) -> None:
+        """initialises with the channel name, emoji, and color
+
+        parameters
+        ----------
+        name: str
+            channel name
+        emoji: str
+            channel emoji
+        color: int
+            channel color
+        """
+
         self.name: str = name
+        """channel name"""
         self.emoji: str = emoji
+        """channel emoji"""
         self.color: int = color
-        self.live_status = "isn't live :("
+        """channel color"""
+        self.live_status: str = "isn't live :("
+        """channel live status"""
         self.embed = Embed(
             title=name,
             description=HOLO_DESC,
         )
+        """channel embed"""
         self.videos: List[Video] = []
+        """channel videos"""
 
     def add_vid_to_embed(self, video: Video) -> None:
-        """add video to embed"""
+        """add video to embed fields
+
+        if video is live, set live status to "is live!"
+
+        parameters
+        ----------
+        video: Video
+            video to add to embed
+        """
         if video.status == "live":
             self.live_status = "is live!"
-        self.set_embed_thumbnail(video.channel.photo)
         self.embed.add_field(
             name=video.status,
             value=str(video),
             inline=False,
-        )
+        ).set_thumbnail(url=video.channel.photo)
 
     def add_vids_to_embed(self, videos: List[Video]) -> None:
-        """add videos to embed"""
+        """add videos to embed fields
+
+        parameters
+        ----------
+        videos: List[Video]
+            videos to add to embed
+        """
         for vid in videos:
             self.add_vid_to_embed(vid)
 
-    def set_embed_thumbnail(self, thumbnail: Optional[str]) -> None:
-        """set embed thumbnail"""
-        self.embed.set_thumbnail(url=thumbnail)
+    def clone(self) -> "Channel":
+        """clone the channel with the same name, emoji, and color
+
+        returns
+        -------
+        Channel
+            cloned channel
+        """
+        return Channel(name=self.name, emoji=self.emoji, color=self.color)
+
+
+# store info for set channels
+CHANNELS: Dict[str, Channel] = {
+    "UC1DCedRgGHBdm81E1llLhOQ": Channel(
+        name="Pekora Ch. 兎田ぺこら",
+        emoji="👯",
+        color=0x64FFFF,
+    ),
+    "UCdn5BQ06XqgXoAxIhbqw5Rg": Channel(
+        name="フブキCh。白上フブキ",
+        emoji="🌽",
+        color=0x64FFFF,
+    ),
+    "UC5CwaMl1eIgY8h02uZw7u8A": Channel(
+        name="Suisei Channel",
+        emoji="☄️",
+        color=0x0064FF,
+    ),
+    "UChAnqc_AY5_I3Px5dig3X1Q": Channel(
+        name="Korone Ch. 戌神ころね",
+        emoji="🥐",
+        color=0xFFFF00,
+    ),
+}
 
 
 def home_embed() -> Embed:
-    """returns home embed"""
+    """create the home embed for the page view
+
+    returns
+    -------
+    Embed
+        home embed
+    """
     return Embed(
         title="hololive",
         description=HOLO_DESC,
@@ -200,7 +329,13 @@ def home_embed() -> Embed:
 
 
 def mention_embed() -> Embed:
-    """returns mention embed"""
+    """create the mention embed for the page view
+
+    returns
+    -------
+    Embed
+        mention embed
+    """
     return Embed(
         title="mentioned streams",
         description="not on their channels",
@@ -209,10 +344,20 @@ def mention_embed() -> Embed:
 
 
 async def holodex(data: Dict) -> DiscordReturn:
-    """
-    get all live hololive videos.
-    sends a request to the Holodex API.
-    returns content, embed, view
+    """create embeds and menu from holodex video data
+
+    parameters
+    ----------
+    data: Dict
+        holodex video data
+
+    returns
+    -------
+    DiscordReturn
+        embed: Embed
+            home embed
+        view: Menu
+            menu
     """
     if not data:
         # no videos available
@@ -238,14 +383,24 @@ async def holodex(data: Dict) -> DiscordReturn:
 
 
 async def fubudex(data: Dict) -> DiscordReturn:
-    """
-    get upcoming videos with a set dictionary of channels.
-    sends a request to the Holodex API.
-    returns content, embed, view
+    """create embeds and page view from fubudex video data
+
+    parameters
+    ----------
+    data: Dict
+        fubudex video data
+
+    returns
+    -------
+    DiscordReturn
+        embed: Embed
+            home embed
+        view: PageView
+            page view
     """
     # store info for set channels
     focus_channels: Dict[str, Channel] = {
-        link: Channel(**info) for link, info in CHANNELS.items()
+        link: channel.clone() for link, channel in CHANNELS.items()
     }
     if not data:
         # no videos available
@@ -306,10 +461,17 @@ async def fubudex(data: Dict) -> DiscordReturn:
 
 
 async def holo() -> DiscordReturn:
-    """
-    get all live hololive videos.
-    calls the holodex() function.
-    returns content, embed, view
+    """retrieves all live hololive videos from holodex
+
+    returns
+    -------
+    DiscordReturn
+        content: str
+            no Holodex Token! contact the person running the bot
+        embed: Embed
+            embed containing the live videos
+        view: Menu
+            menu to navigate through the embeds
     """
     if not HOLODEX_TOKEN:
         return {
@@ -336,10 +498,17 @@ async def holo() -> DiscordReturn:
 
 
 async def fubu() -> DiscordReturn:
-    """
-    get upcoming videos for a set list of channels.
-    calls the fubudex() function.
-    returns content, embed, view
+    """retrieves upcoming videos for a selection of channels from holodex
+
+    returns
+    -------
+    DiscordReturn
+        content: str
+            no Holodex Token! contact the person running the bot
+        embed: Embed
+            embed containing the upcoming videos
+        view: PageView
+            page view to navigate through the embeds
     """
     if not HOLODEX_TOKEN:
         return {
@@ -365,10 +534,22 @@ async def set_prefix(
     message: Union[ApplicationCommandInteraction, commands.Context],
     prefix: Optional[str],
 ) -> DiscordReturn:
-    """
-    set prefix for the server.
-    if prefix is not provided, shows the current prefix.
-    returns content
+    """set the prefix for the guild
+
+    if prefix is None, return the current prefix
+
+    parameters
+    ----------
+    message: Union[ApplicationCommandInteraction, commands.Context]
+        message to respond to
+    prefix: Optional[str]
+        prefix to set
+
+    returns
+    -------
+    DiscordReturn
+        content: str
+            current prefix and how to set prefix or success message
     """
     if prefix:
         prefix = re.sub("[^ !#-&(-~]", "", prefix)

@@ -1,9 +1,8 @@
 """slash commands for crypto related commands"""
-
 from disnake import ApplicationCommandInteraction
-from disnake.ext.commands import Cog, Bot, slash_command
+from disnake.ext.commands import Bot, Cog, slash_command
 
-from helpers import crypto_helper
+from helpers import crypto
 
 
 class Crypto(Cog):
@@ -11,22 +10,29 @@ class Crypto(Cog):
 
     COG_EMOJI: str = "💰"
 
-    @slash_command(name="sol", description="sol price")
+    @slash_command(
+        name="sol", description="get the current price of SOL in USD"
+    )
     async def sol(self, inter: ApplicationCommandInteraction) -> None:
-        """get the current price of SOL in USD."""
+        """get the current price of SOL in USD"""
         await inter.response.defer()
-        await inter.edit_original_message(**await crypto_helper.price("SOL"))
+        await inter.edit_original_message(**await crypto.price("SOL"))
 
-    @slash_command(name="btc", description="btc price")
+    @slash_command(
+        name="btc", description="get the current price of BTC in USD"
+    )
     async def btc(self, inter: ApplicationCommandInteraction) -> None:
-        """get the current price of BTC in USD."""
-        await inter.edit_original_message(**await crypto_helper.price("BTC"))
-
-    @slash_command(name="eth", description="eth price")
-    async def eth(self, inter: ApplicationCommandInteraction) -> None:
-        """get the current price of ETH in USD."""
+        """get the current price of BTC in USD"""
         await inter.response.defer()
-        await inter.edit_original_message(**await crypto_helper.price("ETH"))
+        await inter.edit_original_message(**await crypto.price("BTC"))
+
+    @slash_command(
+        name="eth", description="get the current price of ETH in USD"
+    )
+    async def eth(self, inter: ApplicationCommandInteraction) -> None:
+        """get the current price of ETH in USD"""
+        await inter.response.defer()
+        await inter.edit_original_message(**await crypto.price("ETH"))
 
 
 def setup(bot: Bot) -> None:

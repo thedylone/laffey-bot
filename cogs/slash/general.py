@@ -2,10 +2,11 @@
 
 import random
 from typing import Optional
+
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
-from helpers import general_helper
+from helpers import general
 
 
 class General(commands.Cog):
@@ -18,10 +19,10 @@ class General(commands.Cog):
 
     @commands.slash_command(
         name="ping",
-        description="get bot's latency",
+        description="get the bot's current websocket latency",
     )
     async def ping(self, inter: ApplicationCommandInteraction) -> None:
-        """get the bot's current websocket latency."""
+        """get the bot's current websocket latency"""
         await inter.response.send_message(
             f"pong! {round(self.bot.latency * 1000)}ms"
         )
@@ -44,7 +45,7 @@ class General(commands.Cog):
     async def fubu(self, inter: ApplicationCommandInteraction) -> None:
         """fubu"""
         await inter.response.defer()
-        await inter.edit_original_message(**await general_helper.fubu())
+        await inter.edit_original_message(**await general.fubu())
 
     @commands.slash_command(
         name="holo",
@@ -53,7 +54,7 @@ class General(commands.Cog):
     async def holo(self, inter: ApplicationCommandInteraction) -> None:
         """all live hololive streams"""
         await inter.response.defer()
-        await inter.edit_original_message(**await general_helper.holo())
+        await inter.edit_original_message(**await general.holo())
 
 
 class GeneralAdmin(commands.Cog):
@@ -63,7 +64,7 @@ class GeneralAdmin(commands.Cog):
 
     @commands.slash_command(
         name="set-prefix",
-        description="set prefix for the server",
+        description="set the prefix for the guild",
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def set_prefix(
@@ -71,10 +72,16 @@ class GeneralAdmin(commands.Cog):
         inter: ApplicationCommandInteraction,
         prefix: Optional[str] = None,
     ) -> None:
-        """set prefix for the server"""
+        """set the prefix for the guild
+
+        parameters
+        ----------
+        prefix: str
+            the new prefix for the guild
+        """
         await inter.response.defer()
         await inter.edit_original_message(
-            **await general_helper.set_prefix(inter, prefix)
+            **await general.set_prefix(inter, prefix)
         )
 
 

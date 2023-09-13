@@ -1,10 +1,10 @@
 """prefix commands for general commands"""
-
 import random
 from typing import Optional
+
 from disnake.ext import commands
 
-from helpers import general_helper
+from helpers import general
 
 
 class General(commands.Cog, name="general"):
@@ -17,11 +17,11 @@ class General(commands.Cog, name="general"):
 
     @commands.command(
         name="ping",
-        description="get bot's latency",
+        description="get the bot's current websocket latency",
     )
     async def ping(self, ctx: commands.Context) -> None:
-        """get the bot's current websocket latency."""
-        await ctx.send(f"pong! {round(self.bot.latency * 1000)}ms")
+        """get the bot's current websocket latency"""
+        await ctx.reply(f"pong! {round(self.bot.latency * 1000)}ms")
 
     @commands.command(
         name="shouldiorder",
@@ -30,7 +30,7 @@ class General(commands.Cog, name="general"):
     async def rng(self, ctx: commands.Context) -> None:
         """should you get indulge?"""
         results: list[str] = ["Hell yea boiii", "Nah save monet tday sadge"]
-        await ctx.send(f"<@{ctx.author.id}> {random.choice(results)}")
+        await ctx.reply(f"<@{ctx.author.id}> {random.choice(results)}")
 
     @commands.command(
         name="fubu",
@@ -38,7 +38,8 @@ class General(commands.Cog, name="general"):
     )
     async def fubu(self, ctx: commands.Context) -> None:
         """fubu"""
-        await ctx.send(**await general_helper.fubu())
+        async with ctx.typing():
+            await ctx.reply(**await general.fubu())
 
     @commands.command(
         name="holo",
@@ -46,7 +47,8 @@ class General(commands.Cog, name="general"):
     )
     async def holo(self, ctx: commands.Context) -> None:
         """all live hololive streams"""
-        await ctx.send(**await general_helper.holo())
+        async with ctx.typing():
+            await ctx.reply(**await general.holo())
 
 
 class GeneralAdmin(commands.Cog, name="general admin"):
@@ -56,7 +58,7 @@ class GeneralAdmin(commands.Cog, name="general admin"):
 
     @commands.command(
         name="set-prefix",
-        description="set prefix for the server",
+        description="set the prefix for the guild",
     )
     @commands.has_guild_permissions(manage_messages=True)
     async def set_prefix(
@@ -64,8 +66,18 @@ class GeneralAdmin(commands.Cog, name="general admin"):
         ctx: commands.Context,
         prefix: Optional[str] = None,
     ) -> None:
-        """set prefix for the server"""
-        await ctx.send(**await general_helper.set_prefix(ctx, prefix))
+        """set the prefix for the guild
+
+        parameters
+        ----------
+        prefix: str
+            the new prefix for the guild
+
+        example
+        -------
+        >>> set-prefix !
+        """
+        await ctx.reply(**await general.set_prefix(ctx, prefix))
 
 
 def setup(bot: commands.Bot) -> None:

@@ -1,15 +1,16 @@
 """main file initializing the bot and loading cogs"""
+import argparse
 import os
 import sys
-import argparse
-from os.path import join, dirname
-from dotenv import load_dotenv
-from typing import Optional, List
-from disnake import Intents, channel, Guild, Game
-from disnake.ext import commands
+from os.path import dirname, join
+from typing import List, Optional
 
-from helpers.db_helper import db
+from disnake import Game, Guild, Intents, channel
+from disnake.ext import commands
+from dotenv import load_dotenv
+
 from cogs.custom_help import help as custom_help
+from helpers.db import db
 
 dotenv_path: str = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
@@ -24,22 +25,10 @@ if not DATABASE_URL:
     sys.exit(1)
 
 
-async def load_db() -> None:
-    """loads database"""
-    await db.create_db_pool(DATABASE_URL)
-    await db.create_guilds_table()
-    await db.create_players_table()
-    await db.create_waitlist_table()
-    global DATABASE_LOADED
-    DATABASE_LOADED = True
-    print("database loaded")
-
-
 DEFAULT_PREFIX: str = os.environ.get("DEFAULT_PREFIX", "?")
 SLASH_ENABLED: str = os.environ.get("SLASH_ENABLED", "1")
 PREFIX_ENABLED: str = os.environ.get("PREFIX_ENABLED", "1")
 DEBUG_MODE = False
-LOG_WEBHOOK: Optional[str] = os.environ.get("LOG_WEBHOOK")
 
 
 async def get_prefix(_bot, message) -> List[str]:
@@ -93,7 +82,7 @@ async def on_ready() -> None:
     await bot.change_presence(
         activity=Game(f"with lolis | {DEFAULT_PREFIX}help")
     )
-    await load_db()
+    await db.load_db(DATABASE_URL)
 
 
 def autoload(command_type: str) -> None:

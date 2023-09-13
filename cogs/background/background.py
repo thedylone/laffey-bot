@@ -1,23 +1,36 @@
 """background tasks"""
 import asyncio
+from typing import List, Optional, Union
+
 import aiohttp
-
-from typing import Optional, List, Union
-
-from disnake import Guild, TextChannel, User, Thread
+from disnake import Guild, TextChannel, Thread, User
 from disnake.abc import GuildChannel, PrivateChannel
 from disnake.ext import tasks
 from disnake.ext.commands import Bot, Cog
 
-from helpers.db_helper import db
+from helpers.db import Database, db
 from helpers.helpers import DiscordReturn
-from helpers.valorant_helper import Player, Match
+from helpers.valorant_classes import Match, Player
 
 session = aiohttp.ClientSession()
 
 
 async def check_user_exists(bot: Bot, discord_id: int) -> bool:
-    """returns True if user exists in database and as Discord user"""
+    """checks if user is accessible to the bot and
+    if user has data in the database
+
+    parameters
+    ----------
+    bot: disnake.ext.commands.Bot
+        bot instance
+    discord_id: int
+        discord id of the user to check
+
+    returns
+    -------
+    bool
+        True if user is accessible and has data in the database
+    """
     if await bot.getch_user(discord_id) is None:
         return False
     if len(await db.get_player_data(discord_id)) == 0:
@@ -28,7 +41,30 @@ async def check_user_exists(bot: Bot, discord_id: int) -> bool:
 async def check_guild_channel(
     bot: Bot, guild_id: int, discord_id: int
 ) -> Optional[TextChannel]:
-    """checks if guild and channel are accessible and"""
+    """checks if guild is accessible to the bot
+
+    if guild is accessible, retrieve the saved channel and check if the channel
+    is accessible to the bot and exists in the guild
+
+    if saved channel is not accessible or does not exist, send a warning to the
+    guild's first channel and update the database
+
+    if guild is not accessible, update the database with guild_id=0
+
+    parameters
+    ----------
+    bot: disnake.ext.commands.Bot
+        bot instance
+    guild_id: int
+        discord id of the guild to check
+    discord_id: int
+        discord id of the user to check and update
+
+    returns
+    -------
+    Optional[disnake.TextChannel]
+        the saved channel if it exists and is accessible to the bot
+    """
     guild_exists: Optional[Guild] = bot.get_guild(guild_id)
     guild_data: List = await db.get_guild_data(guild_id)
     if guild_exists in bot.guilds and len(guild_data):
@@ -54,21 +90,54 @@ async def check_guild_channel(
         await db.update_player_data(discord_id, guild_id=0)
 
 
+async def wait_until_db_ready(db: Database) -> None:
+    """waits until the database is ready
+
+    this is to avoid the bot starting the cycle tasks before the database
+    is ready. the database is ready when the loaded attribute is True
+
+    parameters
+    ----------
+    db: helpers.db.Database
+        database instance
+    """
+    while not db.loaded:
+        await asyncio.sleep(0.5)
+
+
 class Background(Cog):
-    """background tasks"""
+    """background tasks
+
+    starts the cycle tasks once the database is ready
+
+    attributes
+    ----------
+    bot: disnake.ext.commands.Bot
+        bot instance
+    valorant_watch_cycle: disnake.ext.tasks.Loop
+        task to loop through all players and check for new matches
+    """
 
     def __init__(self, bot: Bot) -> None:
-        self.bot: Bot = bot
-        self.valorant_watch_cycle.start()
+        """initialises the Background cog with the bot instance and starts the
+        cycle tasks
 
-    async def wait_until_db_ready(self) -> None:
-        """waits until the database is ready"""
-        while not db.loaded:
-            await asyncio.sleep(0.5)
+        parameters
+        ----------
+        bot: disnake.ext.commands.Bot
+            bot instance
+        """
+        self.bot: Bot = bot
+        """bot instance"""
+        self.valorant_watch_cycle.start()
 
     @tasks.loop()
     async def valorant_watch_cycle(self) -> None:
-        await self.wait_until_db_ready()
+        """loops through all players and checks for new matches
+
+        if a new match is found, trigger and send the alert
+        """
+        await wait_until_db_ready(db)
         init_list: List[dict] = await db.get_all_players()
         players: List[Player] = [Player(data) for data in init_list]
         for player in players:
@@ -99,4 +168,13 @@ class Background(Cog):
 
 
 def setup(bot: Bot) -> None:
+    """adds the Background cog to the bot
+
+    required for `bot.load_extension` to work
+
+    parameters
+    ----------
+    bot: disnake.ext.commands.Bot
+        bot instance
+    """
     bot.add_cog(Background(bot))

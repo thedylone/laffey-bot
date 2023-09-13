@@ -1,43 +1,50 @@
 """disnake views"""
-
+from dataclasses import dataclass
 from typing import List, Union
 
 from disnake import (
-    Embed,
-    MessageInteraction,
     ApplicationCommandInteraction,
     ButtonStyle,
+    Embed,
+    MessageInteraction,
     SelectOption,
 )
 from disnake.ext import commands
-from disnake.ui import View, Select, button, Button
+from disnake.ui import Button, Select, View, button
 
-from helpers.db_helper import db
+from helpers.db import db
 
 
+@dataclass
 class SelectEmbed:
-    """class to store information about an embed for the select menu"""
+    """stores information about an embed for the select menu
 
-    def __init__(
-        self,
-        embed: Embed,
-        name: str = "",
-        color: int = 0,
-        description: str = "",
-        emoji: str = "",
-    ) -> None:
-        self.embed: Embed = embed
-        self.name: str = name
-        self.color: int = color
-        self.description: str = description
-        self.emoji: str = emoji
+    parameters
+    ----------
+    embed: Embed
+        embed to show
+    name: Optional[str]
+        name of the embed
+    color: Optional[int]
+        color of the embed
+    description: Optional[str]
+        description of the embed
+    emoji: Optional[str]
+        emoji of the embed
+    """
+
+    embed: Embed
+    name: str = ""
+    color: int = 0
+    description: str = ""
+    emoji: str = ""
 
 
 class Menu(View):
-    """class to create a menu"""
+    """menu view with buttons to navigate through pages"""
 
     def __init__(self, embeds: List[Embed]) -> None:
-        super().__init__(timeout=None)
+        super().__init__(timeout=300)
         self.embeds: List[Embed] = embeds
         self.embed_count: int = 0
 
@@ -117,7 +124,7 @@ class Menu(View):
 
 
 class Deleter(Select):
-    """class to create a select menu to delete custom messages/images"""
+    """select menu to delete custom messages/images"""
 
     def __init__(
         self,
@@ -177,7 +184,7 @@ class Deleter(Select):
 
 
 class DeleterView(View):
-    """class to create a view for the deleter select menu"""
+    """view for the deleter select menu"""
 
     def __init__(
         self,
@@ -192,7 +199,7 @@ class DeleterView(View):
 
 
 class PageSelect(Select):
-    """class to create a select menu to choose a page"""
+    """select menu to choose a page"""
 
     def __init__(self, embeds: List[SelectEmbed]) -> None:
         self.embeds: List[SelectEmbed] = embeds
@@ -228,7 +235,7 @@ class PageSelect(Select):
 
 
 class PageView(View):
-    """class to create a view for the page select menu"""
+    """view for the page select menu"""
 
     def __init__(self, embeds: List[SelectEmbed]) -> None:
         super().__init__()

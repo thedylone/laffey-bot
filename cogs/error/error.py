@@ -1,5 +1,4 @@
 """handles errors for the bot"""
-
 from disnake.ext import commands
 
 
@@ -7,7 +6,9 @@ class ErrorHandler(commands.Cog):
     """A cog for global error handling."""
 
     def __init__(self, bot: commands.Bot) -> None:
+        """initialises the error handler with the bot instance"""
         self.bot: commands.Bot = bot
+        """bot instance"""
 
     @commands.Cog.listener()
     async def on_command_error(
@@ -15,7 +16,15 @@ class ErrorHandler(commands.Cog):
         ctx: commands.Context,
         error: commands.CommandError,
     ) -> None:
-        """A global error handler cog."""
+        """A global error handler cog.
+
+        parameters
+        ----------
+        ctx: commands.Context
+            context of the command
+        error: commands.CommandError
+            error raised by the command
+        """
         if isinstance(error, commands.CommandNotFound):
             # Return because we don't want to show for every command not found
             return
@@ -33,7 +42,7 @@ class ErrorHandler(commands.Cog):
         else:
             message = "Oh no! Something went wrong while running the command!"
 
-        await ctx.send(message)
+        await ctx.reply(message)
 
 
 def setup(bot: commands.Bot) -> None:
