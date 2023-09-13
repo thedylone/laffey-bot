@@ -2,6 +2,7 @@
 
 import aiohttp
 from typing import Dict, List, Literal, Tuple, Optional, Union
+import random
 from disnake import (
     ApplicationCommandInteraction,
     Embed,
@@ -34,11 +35,29 @@ class Stats:
         self.bodyshots: List[Union[int, None]] = []
         self.legshots: List[Union[int, None]] = []
         self.acs: List[Union[float, None]] = []
+        self.kills: int = 0
+        self.deaths: int = 0
+        self.assists: int = 0
+        self.prev_acs: float = 0
 
     @staticmethod
     def sum_remove_none(_list: List) -> Union[int, float]:
         """returns sum of list, removing None"""
         return sum(filter(None, _list))
+
+    @staticmethod
+    def is_feeding(deaths: int, kills: int):
+        """checks if player is feeding"""
+        return deaths >= (kills + (1.1 * 2.71) ** (kills / 5) + 2.9)
+
+    def check_feeding(self) -> bool:
+        """checks if player is feeding"""
+        return self.is_feeding(self.deaths, self.kills)
+
+    def check_streaking(self) -> bool:
+        if abs(self.streak) >= 3:
+            return True
+        return False
 
     def num_games(self) -> int:
         """returns number of games"""
@@ -62,21 +81,20 @@ class Stats:
 class Match:
     """class for valorant match"""
 
-    mode: str = ""
-    map: str = ""
-    game_end: int = 0
-    players: Dict[str, List[Dict]] = {"red": [], "blue": []}
-    rounds_played: int = 0
-    score: Dict[str, int] = {"red": 0, "blue": 0}
-    surrender: bool = False
-
     def __init__(self, match_data: Dict) -> None:
         if match_data is None:
-            return
+            raise ValueError("match data is None!")
         metadata: Optional[Dict] = match_data.get("metadata")
         players: Optional[Dict[str, Dict]] = match_data.get("players")
         if metadata is None or players is None:
-            return
+            raise ValueError("match data is None!")
+        self.mode: str = ""
+        self.map: str = ""
+        self.game_end: int = 0
+        self.players: Dict[str, List[Dict]] = {"red": [], "blue": []}
+        self.rounds_played: int = 0
+        self.score: Dict[str, int] = {"red": 0, "blue": 0}
+        self.surrender: bool = False
         self.update_metadata(metadata)
         if self.mode == "Deathmatch":
             return
@@ -86,6 +104,39 @@ class Match:
         if rounds is None:
             return
         self.update_rounds(rounds)
+
+    @property
+    def red_win(self) -> int:
+        """returns 1 if red won, -1 if blue won, 0 if draw"""
+        if self.score["red"] > self.score["blue"]:
+            return 1
+        if self.score["blue"] > self.score["red"]:
+            return -1
+        return 0
+
+    @property
+    async def map_thumbnail(self) -> str:
+        """returns map thumbnail url"""
+        async with aiohttp.ClientSession() as session:
+            map_request: aiohttp.ClientResponse = await session.get(
+                "https://valorant-api.com/v1/maps"
+            )
+            if map_request.status != 200:
+                raise ConnectionError("error retrieving map info!")
+            map_json: Dict[str, List] = await map_request.json()
+        map_data: Optional[List[Dict]] = map_json.get("data")
+        if map_data is None:
+            raise ConnectionError("error retrieving map info!")
+        for map_info in map_data:
+            if map_info.get("displayName") == self.map:
+                return map_info.get("splash", "")
+        return ""
+
+    @property
+    async def default_embed(self) -> Embed:
+        return Embed(
+            title="valorant watch",
+        ).set_thumbnail(await self.map_thumbnail)
 
     def update_metadata(self, metadata: Dict) -> None:
         """update metadata from match data"""
@@ -105,35 +156,208 @@ class Match:
             self.score["red"] += _round.get("winning_team") == "Red"
             self.score["blue"] += _round.get("winning_team") == "Blue"
 
+    def get_player_data(
+        self, player: "Player"
+    ) -> Optional[Tuple[Dict, Literal["red", "blue"]]]:
+        """retreives player info from match data"""
+        for team in ("red", "blue"):
+            for match_player in self.players[team]:
+                if match_player.get("puuid") == player.puuid:
+                    return match_player, team
+        return None
+
     def check_players(
         self, main_player: "Player", all_players: List["Player"]
-    ) -> Tuple[List[Dict], List[Dict], Literal["red", "blue", ""]]:
-        """check players in match, returns red, blue, main_team"""
-        main_puuid: str = main_player.puuid
+    ) -> Tuple[List["Player"], List["Player"]]:
+        """check players in the match who are in the same guild
+        returns a tuple of red players and blue players
+        each team is a list of dicts with keys "player" and "match_player"
+        """
         main_guild_id: int = main_player.guild_id
         all_puuids_with_guild: Dict[str, "Player"] = {
             player.puuid: player for player in all_players
         }
-        red_players: List[Dict] = []
-        blue_players: List[Dict] = []
-        main_team: str = ""
+        red_players: List["Player"] = []
+        blue_players: List["Player"] = []
         for match_player in self.players["red"]:
             puuid: str = match_player.get("puuid", "")
             player: Optional[Player] = all_puuids_with_guild.get(puuid)
-            if puuid == main_puuid:
-                main_team = "red"
-            elif player is None or player.guild_id != main_guild_id:
+            if player is None or player.guild_id != main_guild_id:
                 continue
-            red_players.append(match_player)
+            red_players.append(player)
         for match_player in self.players["blue"]:
             puuid: str = match_player.get("puuid", "")
             player: Optional[Player] = all_puuids_with_guild.get(puuid)
-            if puuid == main_puuid:
-                main_team = "blue"
-            elif player is None or player.guild_id != main_guild_id:
+            if player is None or player.guild_id != main_guild_id:
                 continue
-            blue_players.append(match_player)
-        return red_players, blue_players, main_team
+            blue_players.append(player)
+        return red_players, blue_players
+
+    def add_players_to_embed(
+        self,
+        embed: Embed,
+        red_players: List["Player"],
+        blue_players: List["Player"],
+    ) -> None:
+        """add players to embed"""
+        if len(red_players) == 0 and len(blue_players) == 0:
+            return
+        desc: str = ""
+        red_players_str: str = "and ".join(
+            [f"<@{player.player_id}>" for player in red_players]
+        )
+        blue_players_str: str = "and ".join(
+            [f"<@{player.player_id}>" for player in blue_players]
+        )
+        action: dict[int, str] = {
+            1: f"just wonnered a {self.mode} game",
+            -1: f"just losted a {self.mode} game",
+            0: f"just finished a {self.mode} game",
+        }
+        color: dict[int, int] = {1: 0x17DC33, -1: 0xDC3317, 0: 0x767676}
+        if len(red_players) > 0:
+            # mention red players
+            desc += red_players_str + " "
+            # won/lost/draw
+            desc += action[self.red_win] + " "
+            # score
+            desc += f"__**{self.score['red']} - {self.score['blue']}**__ "
+            # if surrendered
+            if self.surrender:
+                desc += "(surrender) "
+            # map played
+            desc += f"on **{self.map} **"
+            # timestamp
+            desc += f"<t:{int(self.game_end)}:R>!"
+            # set color
+            embed.color = color[self.red_win]
+            if len(blue_players) > 0:
+                # both teams
+                desc += "\n" + blue_players_str + " "
+                desc += "played on the other team!"
+                embed.color = color[0]
+        else:
+            # mention blue players
+            desc += blue_players_str + " "
+            # won/lost/draw
+            desc += action[-self.red_win] + " "
+            # score
+            desc += f"__**{self.score['blue']} - {self.score['red']}**__ "
+            # if surrendered
+            if self.surrender:
+                desc += "(surrender) "
+            # map played
+            desc += f"on **{self.map} **"
+            # timestamp
+            desc += f"<t:{int(self.game_end)}:R>!"
+            # set color
+            embed.color = color[-self.red_win]
+        embed.description = desc
+        return
+
+    async def add_feeders_to_embed(
+        self, embed: Embed, feeders: List["Player"]
+    ) -> None:
+        """adds feeders info to embed if any"""
+        if len(feeders) == 0:
+            return
+        # default messages and images
+        messages: list[str] = ["lmao", "git gud"]
+        images: list[str] = [
+            "https://i.ytimg.com/vi/PZe1FbclgpM/maxresdefault.jpg"
+        ]
+        # retrieve guild's custom if set
+        guild_id: int = feeders[0].guild_id
+        guild_data: List = await db.get_guild_data(guild_id)
+        if len(guild_data) > 0:
+            _messages = guild_data[0].get("feeder_messages")
+            _images = guild_data[0].get("feeder_images")
+            messages = _messages if _messages else messages
+            images = _images if _images else images
+        # add feeders to embed
+        embed.add_field(
+            name=f"feeder alert❗❗ {random.choice(messages)}",
+            value="\n".join(
+                [
+                    f"<@{feeder.player_id}> finished"
+                    + f" {feeder.kills}/{feeder.deaths}/{feeder.assists}"
+                    + f" with an ACS of {int(feeder.prev_acs)}"
+                    for feeder in feeders
+                ]
+            ),
+            inline=False,
+        ).set_image(url=random.choice(images))
+
+    async def add_streakers_to_embed(
+        self, embed: Embed, streakers: List["Player"]
+    ) -> None:
+        """adds streakers info to embed if any"""
+        if len(streakers) == 0:
+            return
+        # default messages
+        messages: list[str] = ["wow streak", "damn"]
+        # retrieve guild's custom if set
+        guild_id: int = streakers[0].guild_id
+        guild_data: List = await db.get_guild_data(guild_id)
+        if len(guild_data) > 0:
+            _messages = guild_data[0].get("streak_messages")
+            messages = _messages if _messages else messages
+        # add streakers to embed
+        embed.add_field(
+            name=f"streaker alert 👀👀 {random.choice(messages)}",
+            value="\n".join(
+                [
+                    f"<@{streaker.player_id}> is on a"
+                    + f" {abs(streaker.streak)}-game"
+                    + f" {'winning' if streaker.streak > 0 else 'losing'}"
+                    + " streak!"
+                    for streaker in streakers
+                ]
+            ),
+            inline=False,
+        )
+
+    def waiters_to_content(self, waiters: List[int]):
+        """returns content for waiters"""
+        if len(waiters) == 0:
+            return ""
+        _waiters = map(str, (set(waiters)))
+        return f"removing <@{'<@'.join(_waiters)}> from waitlist!"
+
+    async def trigger_alert(
+        self, main_player: "Player", all_players: List["Player"]
+    ) -> Optional[DiscordReturn]:
+        """trigger the valorant watch alert and
+        return an embed with content if any"""
+        embed: Embed = await self.default_embed
+        red_players: List["Player"]
+        blue_players: List["Player"]
+        red_players, blue_players = self.check_players(
+            main_player, all_players
+        )
+        if len(red_players) == 0 and len(blue_players) == 0:
+            return
+        feeders: list["Player"] = []
+        streakers: list["Player"] = []
+        waiters: list[int] = []
+        for player in red_players + blue_players:
+            player.process_match(self)
+            if player.check_feeding():
+                feeders.append(player)
+            if self.game_end > player.lasttime and player.check_streaking():
+                streakers.append(player)
+            waitlist_data: List = await db.get_waitlist_data(player.player_id)
+            if len(waitlist_data) > 0:
+                waiters += waitlist_data[0].get("waiting_id", [])
+                await db.delete_waitlist_data(player.player_id)
+            await player.update_db()
+        self.add_players_to_embed(embed, red_players, blue_players)
+        await self.add_feeders_to_embed(embed, feeders)
+        await self.add_streakers_to_embed(embed, streakers)
+        return {
+            "content": self.waiters_to_content(waiters),
+            "embed": embed,
+        }
 
 
 class Player(Stats):
@@ -212,30 +436,38 @@ class Player(Stats):
     def process_match(self, match: Match) -> None:
         """process match information and updates player"""
         # update lasttime
+        check: Optional[
+            Tuple[Dict, Literal["red", "blue"]]
+        ] = match.get_player_data(self)
+        if check is None:
+            return
+        player: Dict
+        team: Literal["red", "blue"]
+        player, team = check
+        player_stats: Optional[Dict] = player.get("stats")
+        if player_stats is None:
+            return
+        self.kills = player_stats.get("kills")
+        self.deaths = player_stats.get("deaths")
+        self.assists = player_stats.get("assists")
+        self.prev_acs = player_stats.get("score") / match.rounds_played
         if self.lasttime >= match.game_end:
             return
+        self.lasttime = match.game_end
         if match.mode == "Deathmatch":
             return
-        red: List[Dict]
-        blue: List[Dict]
-        team: str
-        red, blue, team = match.check_players(self, [])
-        combined = red + blue
-        if len(combined) == 0:
-            return
         # update streak
-        if team == "Red" and (match.score["red"] > match.score["blue"]):
-            self.streak = max(self.streak + 1, 1)
-        elif team == "Blue" and (match.score["blue"] > match.score["red"]):
+        if match.red_win == 0:
+            pass
+        elif (team == "red") ^ (match.red_win == 1):
             self.streak = min(self.streak - 1, -1)
+        else:
+            self.streak = max(self.streak + 1, 1)
         # only add stats for competitive/unrated
         if match.mode not in ("Competitive", "Unrated"):
             return
-        player_stats: Optional[Dict] = combined[0].get("stats")
-        if player_stats is None:
-            return
         self.update_stats(
-            player_stats.get("score") / match.rounds_played,
+            self.prev_acs,
             player_stats.get("headshots"),
             player_stats.get("bodyshots"),
             player_stats.get("legshots"),
