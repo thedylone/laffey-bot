@@ -13,7 +13,7 @@ API = "https://api.henrikdev.xyz/valorant"
 
 AGENT_EMOJIS: Dict[str, str] = {
     "Astra": "<:Astra:1151750182594158683>",
-    "Breach": "<:Breach:1151750182594158684>",
+    "Breach": "<:Breach:1151750197563625552>",
     "Brimstone": "<:Brimstone:1151750210347880488>",
     "Chamber": "<:Chamber:1151750241016614973>",
     "Cypher": "<:Cypher:1151750244795691048>",
