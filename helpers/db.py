@@ -78,7 +78,8 @@ class Database:
             headshots integer[],
             bodyshots integer[],
             legshots integer[],
-            acs double precision[]
+            acs double precision[],
+            rank text COLLATE pg_catalog."default"
             )"""
         )
 

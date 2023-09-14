@@ -7,8 +7,34 @@ from disnake import Embed
 
 from helpers.db import db
 from helpers.helpers import DiscordReturn
+from views.views import PageView, SelectEmbed
 
 API = "https://api.henrikdev.xyz/valorant"
+
+AGENT_EMOJIS: Dict[str, str] = {
+    "Astra": "<:Astra:1151750182594158683>",
+    "Breach": "<:Breach:1151750182594158684>",
+    "Brimstone": "<:Brimstone:1151750210347880488>",
+    "Chamber": "<:Chamber:1151750241016614973>",
+    "Cypher": "<:Cypher:1151750244795691048>",
+    "Deadlock": "<:Deadlock:1151750250520907837>",
+    "Fade": "<:Fade:1151750255851876402>",
+    "Gekko": "<:Gekko:1151750262013313116>",
+    "Harbor": "<:Harbor:1151750266018877440>",
+    "Jett": "<:Jett:1151750270905233449>",
+    "KAY/O": "<:KAYO:1151750276416548926>",
+    "Killjoy": "<:Killjoy:1151750281336463391>",
+    "Neon": "<:Neon:1151750288743596042>",
+    "Omen": "<:Omen:1151750293604810783>",
+    "Phoenix": "<:Phoenix:1151750298512150528>",
+    "Raze": "<:Raze:1151750304270917673>",
+    "Reyna": "<:Reyna:1151750307940945930>",
+    "Sage": "<:Sage:1151750313120890931>",
+    "Skye": "<:Skye:1151750320280584202>",
+    "Sova": "<:Sova:1151750325917728789>",
+    "Viper": "<:Viper:1151750330778923039>",
+    "Yoru": "<:Yoru:1151750334327296071>",
+}
 
 
 class Stats:
@@ -221,6 +247,7 @@ class Match:
         """score for each team"""
         self.surrender: bool = False
         """True if match was surrendered, False otherwise"""
+        self._map_thumbnail: str = ""
 
         self.update_metadata(metadata)
         if self.mode == "Deathmatch":
@@ -260,6 +287,8 @@ class Match:
         str
             map thumbnail url if map name matches, empty string otherwise
         """
+        if self._map_thumbnail != "":
+            return self._map_thumbnail
         async with aiohttp.ClientSession() as session:
             map_request: aiohttp.ClientResponse = await session.get(
                 "https://valorant-api.com/v1/maps"
@@ -272,21 +301,98 @@ class Match:
             raise ConnectionError("error retrieving map info!")
         for map_info in map_data:
             if map_info.get("displayName") == self.map:
-                return map_info.get("splash", "")
+                self._map_thumbnail = map_info.get("splash", "")
+                return self._map_thumbnail
         return ""
 
     @property
-    async def default_embed(self) -> Embed:
-        """default embed containing map thumbnail if any
+    async def alert_embed(self) -> Embed:
+        """creates an alert embed containing map thumbnail if any
 
         returns
         -------
         Embed
-            default embed containing map thumbnail if any
+            alert embed containing map thumbnail if any
         """
         return Embed(
             title="valorant watch",
         ).set_thumbnail(await self.map_thumbnail)
+
+    @property
+    async def stats_embed(self) -> Embed:
+        """creates a stats embed containing map thumbnail if any
+
+        returns
+        -------
+        Embed
+            stats embed containing map thumbnail if any
+        """
+        stats_embed: Embed = Embed(
+            title="match stats",
+            description=f"🔴 **{self.score['red']} - {self.score['blue']}** 🔵",
+            color=0x3737E1,
+        ).set_thumbnail(await self.map_thumbnail)
+        all_players_sorted: List[Dict] = sorted(
+            self.players["red"] + self.players["blue"],
+            key=lambda player: player.get("stats", {}).get("score", 0),
+            reverse=True,
+        )
+        for player in all_players_sorted:
+            team: Literal["🔴", "🔵"] = (
+                "🔴" if player.get("team") == "Red" else "🔵"
+            )
+            stats: Dict = player.get("stats", {})
+            kda: str = "/".join(
+                [
+                    str(stats.get("kills", 0)),
+                    str(stats.get("deaths", 0)),
+                    str(stats.get("assists", 0)),
+                ]
+            )
+            acs: float = stats.get("score", 0) / self.rounds_played
+            emoji: str = AGENT_EMOJIS.get(player.get("character", ""), "")
+            stats_embed.add_field(
+                name=f"{team} {player.get('name')}#{player.get('tag')}",
+                value=f"{emoji} {kda}  |  {int(acs)} ACS"
+                + (
+                    f"  |  {player.get('currenttier_patched', 'Unranked')}"
+                    if self.mode == "Competitive"
+                    else ""
+                ),
+                inline=False,
+            )
+        return stats_embed
+
+    @property
+    async def default_embeds(self) -> DiscordReturn:
+        """default embeds containing map thumbnail if any
+
+        creates a page view with an alert embed and a stats embed
+
+        returns
+        -------
+        DiscordReturn
+            embed: disnake.Embed
+                default embed containing map thumbnail if any
+            view: views.PageView
+                pageview containing alert and stats embeds
+        """
+        alert_embed: Embed = await self.alert_embed
+        embeds: list[SelectEmbed] = [
+            SelectEmbed(
+                embed=alert_embed,
+                name="alert",
+                description="match alert",
+                emoji="🔔",
+            ),
+            SelectEmbed(
+                embed=await self.stats_embed,
+                name="stats",
+                description="match stats",
+                emoji="📊",
+            ),
+        ]
+        return {"embed": alert_embed, "view": PageView(embeds)}
 
     def update_metadata(self, metadata: Dict) -> None:
         """updates mode, map, and game_end from match data metadata
@@ -532,7 +638,7 @@ class Match:
         if len(waiters) == 0:
             return ""
         _waiters = map(str, (set(waiters)))
-        return f"removing <@{'<@'.join(_waiters)}> from waitlist!"
+        return f"removing <@{'> and <@'.join(_waiters)}> from waitlist!"
 
     async def trigger_alert(
         self, main_player: "Player", all_players: List["Player"]
@@ -555,7 +661,8 @@ class Match:
         Optional[DiscordReturn]
             embed with content if any
         """
-        embed: Embed = await self.default_embed
+        default: DiscordReturn = await self.default_embeds
+        alert_embed: Embed = default.get("embed", Embed())
         red_players: List["Player"]
         blue_players: List["Player"]
         red_players, blue_players = self.check_players(
@@ -577,12 +684,12 @@ class Match:
                 waiters += waitlist_data[0].get("waiting_id", [])
                 await db.delete_waitlist_data(player.player_id)
             await player.update_db()
-        self.add_players_to_embed(embed, red_players, blue_players)
-        await self.add_feeders_to_embed(embed, feeders)
-        await self.add_streakers_to_embed(embed, streakers)
+        self.add_players_to_embed(alert_embed, red_players, blue_players)
+        await self.add_feeders_to_embed(alert_embed, feeders)
+        await self.add_streakers_to_embed(alert_embed, streakers)
         return {
             "content": self.waiters_to_content(waiters),
-            "embed": embed,
+            **default,
         }
 
 
@@ -605,6 +712,10 @@ class Player(Stats):
         valorant puuid of the player
     lasttime: int
         unix timestamp of when the player last played a match
+    card: str
+        valorant card id of the player
+    rank: str
+        valorant rank of the player
     """
 
     def __init__(self, *datas: Dict, **kwargs: Dict) -> None:
@@ -637,6 +748,8 @@ class Player(Stats):
         """unix timestamp of when the player last played a match"""
         self.card: str = ""
         """valorant card id of the player"""
+        self.rank: str = ""
+        """valorant rank of the player"""
         for data in datas:
             for key, value in data.items():
                 setattr(self, key, value)
@@ -751,6 +864,8 @@ class Player(Stats):
         # only add stats for competitive/unrated
         if match.mode not in ("Competitive", "Unrated"):
             return
+        if match.mode == "Competitive":
+            self.rank = player.get("currenttier_patched", self.rank)
         self.update_stats(
             self.prev_acs,
             player_stats.get("headshots"),
@@ -801,6 +916,7 @@ class Player(Stats):
             bodyshots=self.bodyshots,
             legshots=self.legshots,
             acs=self.acs,
+            rank=self.rank,
         )
 
     def info_embed(self) -> Embed:
@@ -815,31 +931,50 @@ class Player(Stats):
             Embed(
                 title="valorant info",
                 description=f"<@{self.player_id}> saved info",
+                color=0x3737E1,
             )
             .add_field(
                 name="username",
                 value=f"{self.name}#{self.tag}",
-                inline=True,
             )
             .add_field(
                 name="last updated",
                 value=f"<t:{int(self.lasttime)}>",
-                inline=True,
             )
             .set_image(
                 url=f"https://media.valorant-api.com/playercards/{self.card}"
                 + "/wideart.png"
             )
         )
+        if self.rank:
+            embed.add_field(
+                name="",
+                value="",
+                inline=False,
+            )
+            embed.add_field(
+                name="rank",
+                value=self.rank,
+            )
+        if self.streak:
+            embed.add_field(
+                name="streak",
+                value=f"{abs(self.streak)}-game "
+                + ("winning " if self.streak > 0 else "losing ")
+                + "streak",
+            )
         if self.num_games():
+            embed.add_field(
+                name="",
+                value="",
+                inline=False,
+            )
             embed.add_field(
                 name="headshot %",
                 value=f"{self.avg_headshots():.0%}",
-                inline=False,
             ).add_field(
                 name="ACS",
                 value=int(self.avg_acs()),
-                inline=True,
             ).set_footer(
                 text=f"from last {self.num_games()} ranked/unrated games"
             )

@@ -238,6 +238,6 @@ class PageView(View):
     """view for the page select menu"""
 
     def __init__(self, embeds: List[SelectEmbed]) -> None:
-        super().__init__()
+        super().__init__(timeout=600)
 
         self.add_item(PageSelect(embeds))
