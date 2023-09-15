@@ -56,7 +56,14 @@ bot = commands.Bot(
 
 @bot.event
 async def on_guild_join(guild: Guild) -> None:
-    """adds guild to database when bot joins a server"""
+    """adds guild to database when bot joins a server
+    and sends a message to the owner of the bot
+
+    parameters
+    ----------
+    guild: Guild
+        the guild that the bot joined
+    """
     await db.update_guild_data(guild.id, prefix=DEFAULT_PREFIX)
     msg: str = f"joined server {guild.name}"
     print(msg)
@@ -66,7 +73,14 @@ async def on_guild_join(guild: Guild) -> None:
 
 @bot.event
 async def on_guild_remove(guild: Guild) -> None:
-    """removes guild from database when bot leaves a server"""
+    """removes guild from database when bot leaves a server
+    and sends a message to the owner of the bot
+
+    parameters
+    ----------
+    guild: Guild
+        the guild that the bot left
+    """
     await db.delete_guild_data(guild.id)
     msg: str = f"left server {guild.name}"
     print(msg)
@@ -76,7 +90,10 @@ async def on_guild_remove(guild: Guild) -> None:
 
 @bot.event
 async def on_ready() -> None:
-    """runs when bot is ready"""
+    """runs when bot is ready
+
+    sets the activity of the bot and loads the database
+    """
     print(f"logged in {bot.user.name}")
     # set activity of the bot
     await bot.change_presence(
@@ -86,7 +103,13 @@ async def on_ready() -> None:
 
 
 def autoload(command_type: str) -> None:
-    """loads all cogs in the given folder"""
+    """loads all cogs in the given folder
+
+    parameters
+    ----------
+    command_type: str
+        the name of the folder to load cogs from
+    """
     for file in os.listdir(f"./cogs/{command_type}"):
         if not file.endswith(".py"):
             continue

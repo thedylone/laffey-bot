@@ -209,8 +209,12 @@ class Match:
         1 if red won, -1 if blue won, 0 if draw
     map_thumbnail: str
         map thumbnail url if map name matches, empty string otherwise
-    default_embed: Embed
-        default embed containing map thumbnail if any
+    alert_embed: Embed
+        creates an alert embed containing map thumbnail if any
+    stats_embed: Embed
+        creates a stats embed containing map thumbnail if any
+    default_embeds: DiscordReturn
+        creates a page view with an alert embed and a stats embed
     """
 
     def __init__(self, match_data: Dict) -> None:
