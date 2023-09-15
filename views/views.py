@@ -1,24 +1,52 @@
-import disnake
+"""disnake views"""
+from dataclasses import dataclass
+from typing import List, Union
 
-from helpers import db_helper
+from disnake import (
+    ApplicationCommandInteraction,
+    ButtonStyle,
+    Embed,
+    MessageInteraction,
+    SelectOption,
+)
+from disnake.ext import commands
+from disnake.ui import Button, Select, View, button
+
+from helpers.db import db
 
 
+@dataclass
 class SelectEmbed:
-    def __init__(
-        self, name="", color=None, description="", emoji="", embed=None
-    ):
-        self.name = name
-        self.color = color
-        self.description = description
-        self.emoji = emoji
-        self.embed = embed
+    """stores information about an embed for the select menu
+
+    parameters
+    ----------
+    embed: Embed
+        embed to show
+    name: Optional[str]
+        name of the embed
+    color: Optional[int]
+        color of the embed
+    description: Optional[str]
+        description of the embed
+    emoji: Optional[str]
+        emoji of the embed
+    """
+
+    embed: Embed
+    name: str = ""
+    color: int = 0
+    description: str = ""
+    emoji: str = ""
 
 
-class Menu(disnake.ui.View):
-    def __init__(self, embeds):
-        super().__init__(timeout=None)
-        self.embeds = embeds
-        self.embed_count = 0
+class Menu(View):
+    """menu view with buttons to navigate through pages"""
+
+    def __init__(self, embeds: List[Embed]) -> None:
+        super().__init__(timeout=300)
+        self.embeds: List[Embed] = embeds
+        self.embed_count: int = 0
 
         self.first_page.disabled = True
         self.prev_page.disabled = True
@@ -27,14 +55,15 @@ class Menu(disnake.ui.View):
         for i, embed in enumerate(self.embeds):
             embed.set_footer(text=f"Page {i + 1} of {len(self.embeds)}")
 
-    @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.blurple)
+    @button(emoji="⏪", style=ButtonStyle.blurple)
     async def first_page(
         self,
-        button: disnake.ui.Button,
-        interaction: disnake.MessageInteraction,
-    ):
+        _button: Button,
+        interaction: MessageInteraction,
+    ) -> None:
+        """go to first page"""
         self.embed_count = 0
-        embed = self.embeds[self.embed_count]
+        embed: Embed = self.embeds[self.embed_count]
         embed.set_footer(text=f"Page 1 of {len(self.embeds)}")
 
         self.first_page.disabled = True
@@ -43,14 +72,15 @@ class Menu(disnake.ui.View):
         self.last_page.disabled = False
         await interaction.response.edit_message(embed=embed, view=self)
 
-    @disnake.ui.button(emoji="◀", style=disnake.ButtonStyle.secondary)
+    @button(emoji="◀", style=ButtonStyle.secondary)
     async def prev_page(
         self,
-        button: disnake.ui.Button,
-        interaction: disnake.MessageInteraction,
-    ):
+        _button: Button,
+        interaction: MessageInteraction,
+    ) -> None:
+        """go to previous page"""
         self.embed_count -= 1
-        embed = self.embeds[self.embed_count]
+        embed: Embed = self.embeds[self.embed_count]
 
         self.next_page.disabled = False
         self.last_page.disabled = False
@@ -59,14 +89,15 @@ class Menu(disnake.ui.View):
             self.prev_page.disabled = True
         await interaction.response.edit_message(embed=embed, view=self)
 
-    @disnake.ui.button(emoji="▶", style=disnake.ButtonStyle.secondary)
+    @button(emoji="▶", style=ButtonStyle.secondary)
     async def next_page(
         self,
-        button: disnake.ui.Button,
-        interaction: disnake.MessageInteraction,
-    ):
+        _button: Button,
+        interaction: MessageInteraction,
+    ) -> None:
+        """go to next page"""
         self.embed_count += 1
-        embed = self.embeds[self.embed_count]
+        embed: Embed = self.embeds[self.embed_count]
 
         self.first_page.disabled = False
         self.prev_page.disabled = False
@@ -75,14 +106,15 @@ class Menu(disnake.ui.View):
             self.last_page.disabled = True
         await interaction.response.edit_message(embed=embed, view=self)
 
-    @disnake.ui.button(emoji="⏩", style=disnake.ButtonStyle.blurple)
+    @button(emoji="⏩", style=ButtonStyle.blurple)
     async def last_page(
         self,
-        button: disnake.ui.Button,
-        interaction: disnake.MessageInteraction,
-    ):
+        _button: Button,
+        interaction: MessageInteraction,
+    ) -> None:
+        """go to last page"""
         self.embed_count = len(self.embeds) - 1
-        embed = self.embeds[self.embed_count]
+        embed: Embed = self.embeds[self.embed_count]
 
         self.first_page.disabled = False
         self.prev_page.disabled = False
@@ -91,160 +123,93 @@ class Menu(disnake.ui.View):
         await interaction.response.edit_message(embed=embed, view=self)
 
 
-class FeederMessages(disnake.ui.Select):
-    def __init__(self, bot, message, feeder_messages):
+class Deleter(Select):
+    """select menu to delete custom messages/images"""
 
-        self.bot = bot
-        self.message = message
-        self.feeder_messages = feeder_messages
+    def __init__(
+        self,
+        message: Union[ApplicationCommandInteraction, commands.Context],
+        key: str,
+        objects: List[str],
+    ) -> None:
+        self.message: Union[
+            ApplicationCommandInteraction, commands.Context
+        ] = message
+        self.key: str = key
+        self.objects: List[str] = objects
 
-        options = [
-            disnake.SelectOption(label=i, description=message)
-            for i, message in enumerate(self.feeder_messages)
+        options: List[SelectOption] = [
+            SelectOption(label=str(i), description=obj)
+            for i, obj in enumerate(objects)
         ]
 
         super().__init__(
-            placeholder="choose messages to delete...",
+            placeholder=f"choose {key} to delete...",
             min_values=1,
-            max_values=len(self.feeder_messages),
+            max_values=len(self.objects),
             options=options,
         )
 
-    async def callback(self, inter: disnake.MessageInteraction):
-        if inter.author.id != self.message.author.id:
-            await inter.response.send_message(
+    async def callback(self, interaction: MessageInteraction, /) -> None:
+        if interaction.author.id != self.message.author.id:
+            await interaction.response.send_message(
                 "only the user who sent this can use it!",
                 ephemeral=True,
             )
             return
-        await inter.response.defer()
-        for i in sorted(self.values, reverse=True):
-            del self.feeder_messages[int(i)]
-        await db_helper.update_guild_data(
-            self.bot,
-            self.message.guild.id,
-            feeder_messages=self.feeder_messages,
-        )
-        await inter.edit_original_message(
-            content=f"successfully deleted {len(self.values)} custom messages",
-            view=None,
-        )
-
-
-class FeederMessagesView(disnake.ui.View):
-    def __init__(self, bot, message, feeder_messages):
-        super().__init__()
-
-        # Adds the dropdown to our view object.
-        self.add_item(FeederMessages(bot, message, feeder_messages))
-
-
-class FeederImages(disnake.ui.Select):
-    def __init__(self, bot, message, feeder_images):
-
-        self.bot = bot
-        self.message = message
-        self.feeder_images = feeder_images
-
-        options = [
-            disnake.SelectOption(label=i, description=image)
-            for i, image in enumerate(self.feeder_images)
-        ]
-
-        super().__init__(
-            placeholder="choose images to delete...",
-            min_values=1,
-            max_values=len(self.feeder_images),
-            options=options,
-        )
-
-    async def callback(self, inter: disnake.MessageInteraction):
-        if inter.author.id != self.message.author.id:
-            await inter.response.send_message(
-                "only the user who sent this can use it!",
-                ephemeral=True,
+        await interaction.response.defer()
+        if self.message.guild is None:
+            await interaction.edit_original_message(
+                content="this command can only be used in a server",
             )
             return
-        await inter.response.defer()
         for i in sorted(self.values, reverse=True):
-            del self.feeder_images[int(i)]
-        await db_helper.update_guild_data(
-            self.bot,
+            del self.objects[int(i)]
+        # replace space in key with underscore
+        key_underscore: str = self.key.replace(" ", "_")
+        result: str = await db.update_guild_data(
             self.message.guild.id,
-            feeder_images=self.feeder_images,
+            **{key_underscore: self.objects},
         )
-        await inter.edit_original_message(
-            content=f"successfully deleted {len(self.values)} custom images",
-            view=None,
-        )
-
-
-class FeederImagesView(disnake.ui.View):
-    def __init__(self, bot, message, feeder_images):
-        super().__init__()
-
-        # Adds the dropdown to our view object.
-        self.add_item(FeederImages(bot, message, feeder_images))
-
-
-class StreakerMessages(disnake.ui.Select):
-    def __init__(self, bot, message, streaker_messages):
-
-        self.bot = bot
-        self.message = message
-        self.streaker_messages = streaker_messages
-
-        options = [
-            disnake.SelectOption(label=i, description=message)
-            for i, message in enumerate(self.streaker_messages)
-        ]
-
-        super().__init__(
-            placeholder="choose messages to delete...",
-            min_values=1,
-            max_values=len(self.streaker_messages),
-            options=options,
-        )
-
-    async def callback(self, inter: disnake.MessageInteraction):
-        if inter.author.id != self.message.author.id:
-            await inter.response.send_message(
-                "only the user who sent this can use it!",
-                ephemeral=True,
+        if result.startswith("UPDATE"):
+            await interaction.edit_original_message(
+                content=f"successfully deleted {len(self.values)} {self.key}",
+                view=None,
             )
-            return
-        await inter.response.defer()
-        for i in sorted(self.values, reverse=True):
-            del self.streaker_messages[int(i)]
-        await db_helper.update_guild_data(
-            self.bot,
-            self.message.guild.id,
-            streaker_messages=self.streaker_messages,
-        )
-        await inter.edit_original_message(
-            content=f"successfully deleted {len(self.values)} custom messages",
-            view=None,
-        )
+        else:
+            await interaction.edit_original_message(
+                content="something went wrong",
+                view=None,
+            )
 
 
-class StreakerMessagesView(disnake.ui.View):
-    def __init__(self, bot, message, streaker_messages):
+class DeleterView(View):
+    """view for the deleter select menu"""
+
+    def __init__(
+        self,
+        message: Union[ApplicationCommandInteraction, commands.Context],
+        key: str,
+        objects: List[str],
+    ) -> None:
         super().__init__()
 
         # Adds the dropdown to our view object.
-        self.add_item(StreakerMessages(bot, message, streaker_messages))
+        self.add_item(Deleter(message, key, objects))
 
 
-class PageSelect(disnake.ui.Select):
-    def __init__(self, embeds) -> None:
+class PageSelect(Select):
+    """select menu to choose a page"""
 
-        self.embeds = embeds
-        self.embeds_dict = {}
+    def __init__(self, embeds: List[SelectEmbed]) -> None:
+        self.embeds: List[SelectEmbed] = embeds
+        self.embeds_dict: dict[str, SelectEmbed] = {}
+        self.current_value: str = ""
 
-        options = []
+        options: List[SelectOption] = []
         for embed in embeds:
             options.append(
-                disnake.SelectOption(
+                SelectOption(
                     label=embed.name,
                     description=embed.description,
                     emoji=embed.emoji,
@@ -259,57 +224,20 @@ class PageSelect(disnake.ui.Select):
             options=options,
         )
 
-    async def callback(self, inter: disnake.MessageInteraction):
-        embed = self.embeds_dict[self.values[0]].embed
-        await inter.response.edit_message(
+    async def callback(self, interaction: MessageInteraction, /) -> None:
+        if self.current_value == self.values[0]:
+            return
+        self.current_value = self.values[0]
+        embed: Embed = self.embeds_dict[self.values[0]].embed
+        await interaction.response.edit_message(
             embed=embed, view=PageView(self.embeds)
         )
 
 
-class PageView(disnake.ui.View):
-    def __init__(self, embeds):
-        super().__init__()
+class PageView(View):
+    """view for the page select menu"""
+
+    def __init__(self, embeds: List[SelectEmbed]) -> None:
+        super().__init__(timeout=600)
 
         self.add_item(PageSelect(embeds))
-
-
-class HelpSelect(disnake.ui.Select):
-    def __init__(self, help_command, embeds) -> None:
-
-        self.embeds = embeds
-        self.help_command = help_command
-        self.current_embed = ""
-
-        options = []
-        for embed in embeds:
-            options.append(
-                disnake.SelectOption(
-                    label=embed.name,
-                    description=embed.description,
-                    emoji=embed.emoji,
-                )
-            )
-
-        super().__init__(
-            placeholder="choose category to show...",
-            min_values=1,
-            max_values=1,
-            options=options,
-        )
-
-    async def callback(self, inter: disnake.MessageInteraction):
-        if self.current_embed != self.values[0]:
-            self.current_embed = self.values[0]
-            embed = await self.help_command.cog_help_embed(
-                self.help_command.context.bot.get_cog(self.values[0])
-            )
-            await inter.response.edit_message(
-                embed=embed, view=HelpView(self.help_command, self.embeds)
-            )
-
-
-class HelpView(disnake.ui.View):
-    def __init__(self, help_command, embeds):
-        super().__init__()
-
-        self.add_item(HelpSelect(help_command, embeds))

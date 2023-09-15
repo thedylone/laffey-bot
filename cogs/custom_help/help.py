@@ -1,14 +1,18 @@
 """custom help command"""
+from typing import List, Optional, Tuple, Union
+
 import disnake
+from disnake import Embed
+from disnake.ext.commands import Cog, Command, Group, HelpCommand
 
-from views.views import HelpView, SelectEmbed
+from views.views import PageView, SelectEmbed
 
 
-class Help(disnake.ext.commands.HelpCommand):
+class Help(HelpCommand):
     """show help commands"""
 
-    desc_list = [
-        "A discord bot by thedylone#3801",
+    desc_list: List[str] = [
+        "A discord bot by thedylone",
         "More info on [the website](https://thedylone.github.io/laffey-bot/).",
         "[Support the bot on Ko-fi](https://ko-fi.com/thedylone)!",
         "Use `help [command]` for more info on a command.",
@@ -16,30 +20,35 @@ class Help(disnake.ext.commands.HelpCommand):
     ]
 
     def __init__(self) -> None:
-        self.description = "\n".join(self.desc_list)
+        self.description: str = "\n".join(self.desc_list)
         super().__init__()
 
-    def get_command_signature(self, command):
+    def get_command_signature(self, command: Command) -> str:
         return f"{command.qualified_name} {command.signature}"
 
-    async def bot_help_embed(self, mapping):
-        home_embed = disnake.Embed(
+    async def bot_help_embed(self, mapping) -> Embed:
+        """returns the help embed for the bot"""
+        home_embed = Embed(
             title="🏠 help home",
             description=self.description,
             color=0x9444B3,
         )
         for cog, commands in mapping.items():
-            filtered = await self.filter_commands(commands, sort=True)
-            command_signatures = [
+            filtered: List[Command] = await self.filter_commands(
+                commands, sort=True
+            )
+            command_signatures: List[str] = [
                 self.get_command_signature(c) for c in filtered
             ]
             if command_signatures:
-                cog_name = getattr(cog, "qualified_name", None)
+                cog_name: Optional[str] = getattr(cog, "qualified_name", None)
                 if not cog_name:
                     continue
-                emoji = getattr(cog, "COG_EMOJI", None)
-                description = getattr(cog, "description", None)
-                combined_name = emoji + " " + cog_name if emoji else cog_name
+                emoji: Optional[str] = getattr(cog, "COG_EMOJI", None)
+                description: Optional[str] = getattr(cog, "description", None)
+                combined_name: str = (
+                    emoji + " " + cog_name if emoji else cog_name
+                )
                 home_embed.add_field(
                     name=combined_name,
                     value=description,
@@ -47,39 +56,51 @@ class Help(disnake.ext.commands.HelpCommand):
                 )
         return home_embed
 
-    async def send_bot_help(self, mapping):
-        home_embed = await self.bot_help_embed(mapping)
-        embeds = []
+    async def send_bot_help(self, mapping: dict) -> None:
+        home_embed: Embed = await self.bot_help_embed(mapping)
+        embeds: List[SelectEmbed] = []
         for cog, commands in mapping.items():
-            filtered = await self.filter_commands(commands, sort=True)
-            command_signatures = [
+            filtered: List[Command] = await self.filter_commands(
+                commands, sort=True
+            )
+            command_signatures: List[str] = [
                 self.get_command_signature(c) for c in filtered
             ]
             if command_signatures:
-                cog_name = getattr(cog, "qualified_name", None)
+                cog_name: Optional[str] = getattr(cog, "qualified_name", None)
                 if not cog_name:
                     continue
-                emoji = getattr(cog, "COG_EMOJI", None)
-                description = getattr(cog, "description", None)
+                emoji: str = str(getattr(cog, "COG_EMOJI", None))
+                description: Optional[str] = str(
+                    getattr(cog, "description", None)
+                )
                 embeds.append(
                     SelectEmbed(
-                        name=cog_name, description=description, emoji=emoji
+                        name=cog_name,
+                        description=description,
+                        emoji=emoji,
+                        embed=await self.cog_help_embed(cog),
                     )
                 )
 
-        view = HelpView(self, embeds)
+        view = PageView(embeds)
         await self.get_destination().send(embed=home_embed, view=view)
 
-    async def cog_help_embed(self, cog):
+    async def cog_help_embed(self, cog: Cog) -> Embed:
+        """returns the help embed for a cog"""
         embed = disnake.Embed(color=0x9444B3)
-        commands = cog.get_commands()
-        filtered = await self.filter_commands(commands, sort=True)
-        command_signatures = [self.get_command_signature(c) for c in filtered]
+        commands: List[Command] = cog.get_commands()
+        filtered: List[Command] = await self.filter_commands(
+            commands, sort=True
+        )
+        command_signatures: List[str] = [
+            self.get_command_signature(c) for c in filtered
+        ]
         if command_signatures:
-            cog_name = getattr(cog, "qualified_name", "no category")
-            emoji = getattr(cog, "COG_EMOJI", None)
-            description = getattr(cog, "description", None)
-            combined_name = emoji + " " + cog_name if emoji else cog_name
+            cog_name: str = getattr(cog, "qualified_name", "no category")
+            emoji: str = str(getattr(cog, "COG_EMOJI", None))
+            description: str = str(getattr(cog, "description", None))
+            combined_name: str = emoji + " " + cog_name if emoji else cog_name
             embed.title = combined_name
             embed.description = (
                 description if description else self.description
@@ -92,18 +113,18 @@ class Help(disnake.ext.commands.HelpCommand):
                 )
         return embed
 
-    async def send_cog_help(self, cog):
-        embed = await self.cog_help_embed(cog)
+    async def send_cog_help(self, cog: Cog) -> None:
+        embed: Embed = await self.cog_help_embed(cog)
         await self.get_destination().send(embed=embed)
 
-    async def send_group_help(self, group):
+    async def send_group_help(self, group: Group) -> None:
         embed = disnake.Embed(
             title=self.get_command_signature(group),
             description=self.description,
             color=0x9444B3,
         )
         embed.add_field(name="help", value=group.help)
-        alias = group.aliases
+        alias: Union[List[str], Tuple[str]] = group.aliases
         if alias:
             embed.add_field(
                 name="aliases",
@@ -111,7 +132,9 @@ class Help(disnake.ext.commands.HelpCommand):
                 inline=False,
             )
 
-        filtered = await self.filter_commands(group.commands, sort=True)
+        filtered: List[Command] = await self.filter_commands(
+            group.commands, sort=True
+        )
         for command in filtered:
             embed.add_field(
                 name=self.get_command_signature(command),
@@ -121,14 +144,14 @@ class Help(disnake.ext.commands.HelpCommand):
 
         await self.get_destination().send(embed=embed)
 
-    async def send_command_help(self, command):
+    async def send_command_help(self, command: Command) -> None:
         embed = disnake.Embed(
             title=self.get_command_signature(command),
             description=self.description,
             color=0x9444B3,
         )
         embed.add_field(name="help", value=command.help)
-        alias = command.aliases
+        alias: Union[List[str], Tuple[str]] = command.aliases
         if alias:
             embed.add_field(
                 name="aliases",
@@ -138,6 +161,6 @@ class Help(disnake.ext.commands.HelpCommand):
 
         await self.get_destination().send(embed=embed)
 
-    async def send_error_message(self, error):
+    async def send_error_message(self, error: Exception) -> None:
         embed = disnake.Embed(title="error", description=error)
         await self.get_destination().send(embed=embed)

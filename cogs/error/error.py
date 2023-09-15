@@ -1,25 +1,38 @@
+"""handles errors for the bot"""
 from disnake.ext import commands
 
 
 class ErrorHandler(commands.Cog):
     """A cog for global error handling."""
 
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
+    def __init__(self, bot: commands.Bot) -> None:
+        """initialises the error handler with the bot instance"""
+        self.bot: commands.Bot = bot
+        """bot instance"""
 
     @commands.Cog.listener()
     async def on_command_error(
         self,
         ctx: commands.Context,
         error: commands.CommandError,
-    ):
-        """A global error handler cog."""
+    ) -> None:
+        """A global error handler cog.
+
+        parameters
+        ----------
+        ctx: commands.Context
+            context of the command
+        error: commands.CommandError
+            error raised by the command
+        """
         if isinstance(error, commands.CommandNotFound):
             # Return because we don't want to show for every command not found
             return
         if isinstance(error, commands.CommandOnCooldown):
-            cooldown = f"Try again after {round(error.retry_after, 1)} seconds"
-            message = f"This command is on cooldown. {cooldown}."
+            cooldown: str = (
+                f"Try again after {round(error.retry_after, 1)} seconds"
+            )
+            message: str = f"This command is on cooldown. {cooldown}."
         elif isinstance(error, commands.MissingPermissions):
             message = "You don't have the permissions to run this command!"
         elif isinstance(error, commands.UserInputError):
@@ -29,8 +42,9 @@ class ErrorHandler(commands.Cog):
         else:
             message = "Oh no! Something went wrong while running the command!"
 
-        await ctx.send(message)
+        await ctx.reply(message)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: commands.Bot) -> None:
+    """loads error handler cog into bot"""
     bot.add_cog(ErrorHandler(bot))

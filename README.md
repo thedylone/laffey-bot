@@ -42,6 +42,9 @@ RIOT_TOKEN
 HOLODEX_TOKEN
 > place your [Holodex](https://holodex.net/) API key in here.
 
+CRYPTO_TOKEN
+> place your [CoinAPI](https://www.coinapi.io/) API key in here.
+
 DEFAULT_PREFIX
 > place the prefix the bot will default to when joining a new server
 
