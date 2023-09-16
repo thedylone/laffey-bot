@@ -1,8 +1,165 @@
 """helper functions for database operations"""
-from typing import List, Optional
+from typing import List, Optional, TypedDict
 
-import asyncpg
+from asyncpg import create_pool
 from asyncpg.pool import Pool
+
+
+class GuildData(TypedDict):
+    """schema for guilds table
+
+    attributes
+    ----------
+    guild_id: int
+        discord id of the guild
+    prefix: str
+        prefix for the guild
+    watch_channel: Optional[int]
+        discord id of the channel to send alerts
+    ping_role: Optional[int]
+        discord id of the role to ping
+    ping_image: Optional[str]
+        url of custom image to send with ping
+    feeder_messages: Optional[List[str]]
+        list of messages to send when a feeder is detected
+    feeder_images: Optional[List[str]]
+        list of images to send when a feeder is detected
+    streaker_messages: Optional[List[str]]
+        list of messages to send when a streaker is detected
+    """
+
+    guild_id: int
+    """discord id of the guild"""
+    prefix: str
+    """prefix for the guild"""
+    watch_channel: Optional[int]
+    """discord id of the channel to send alerts"""
+    ping_role: Optional[int]
+    """discord id of the role to ping"""
+    ping_image: Optional[str]
+    """url of custom image to send with ping"""
+    feeder_messages: Optional[List[str]]
+    """list of messages to send when a feeder is detected"""
+    feeder_images: Optional[List[str]]
+    """list of images to send when a feeder is detected"""
+    streaker_messages: Optional[List[str]]
+    """list of messages to send when a streaker is detected"""
+
+
+class PlayerData(TypedDict):
+    """schema for players table
+
+    attributes
+    ----------
+    player_id: int
+        discord id of the player
+    guild_id: Optional[int]
+        discord id of the guild the player is in
+    name: Optional[str]
+        valorant name of the player
+    tag: Optional[str]
+        valorant tag of the player
+    region: Optional[str]
+        valorant region of the player
+    puuid: Optional[str]
+        valorant puuid of the player
+    lastTime: Optional[float]
+        last time the player played a game
+    streak: Optional[int]
+        current streak of the player
+    headshots: Optional[List[int]]
+        list of headshots for the player per game
+    bodyshots: Optional[List[int]]
+        list of bodyshots for the player per game
+    legshots: Optional[List[int]]
+        list of legshots for the player per game
+    acs: Optional[List[float]]
+        list of acs for the player per game
+    rank: Optional[str]
+        valorant rank of the player
+    """
+
+    player_id: int
+    """discord id of the player"""
+    guild_id: Optional[int]
+    """discord id of the guild the player is in"""
+    name: Optional[str]
+    """valorant name of the player"""
+    tag: Optional[str]
+    """valorant tag of the player"""
+    region: Optional[str]
+    """valorant region of the player"""
+    puuid: Optional[str]
+    """valorant puuid of the player"""
+    lastTime: Optional[float]
+    """last time the player played a game"""
+    streak: Optional[int]
+    """current streak of the player"""
+    headshots: Optional[List[int]]
+    """list of headshots for the player per game"""
+    bodyshots: Optional[List[int]]
+    """list of bodyshots for the player per game"""
+    legshots: Optional[List[int]]
+    """list of legshots for the player per game"""
+    acs: Optional[List[float]]
+    """list of acs for the player per game"""
+    rank: Optional[str]
+    """valorant rank of the player"""
+
+
+class WaitlistData(TypedDict):
+    """schema for waitlist table
+
+    attributes
+    ----------
+    player_id: int
+        discord id of the player who is being waited for
+    waiting_id: Optional[List[int]]
+        list of discord ids of players who are waiting for the player
+    """
+
+    player_id: int
+    """discord id of the player who is being waited for"""
+    waiting_id: Optional[List[int]]
+    """list of discord ids of players who are waiting for the player"""
+
+
+class PlayerWaitlistData(PlayerData, WaitlistData):
+    """schema for join waitlist query
+
+    attributes
+    ----------
+    player_id: int
+        discord id of the player
+    guild_id: Optional[int]
+        discord id of the guild the player is in
+    name: Optional[str]
+        valorant name of the player
+    tag: Optional[str]
+        valorant tag of the player
+    region: Optional[str]
+        valorant region of the player
+    puuid: Optional[str]
+        valorant puuid of the player
+    lastTime: Optional[float]
+        last time the player played a game
+    streak: Optional[int]
+        current streak of the player
+    headshots: Optional[List[int]]
+        list of headshots for the player per game
+    bodyshots: Optional[List[int]]
+        list of bodyshots for the player per game
+    legshots: Optional[List[int]]
+        list of legshots for the player per game
+    acs: Optional[List[float]]
+        list of acs for the player per game
+    rank: Optional[str]
+        valorant rank of the player
+    waiting_id: Optional[List[int]]
+        list of discord ids of players who are waiting for the player
+    """
+
+    ...
 
 
 class Database:
@@ -31,7 +188,7 @@ class Database:
         url: str
             url to connect to database
         """
-        db: Optional[Pool] = await asyncpg.create_pool(url)
+        db: Optional[Pool] = await create_pool(url)
         if db is None:
             raise Exception("Database not initialized")
         self.db = db
@@ -113,7 +270,7 @@ class Database:
         await self.create_waitlist_table()
         self.loaded = True
 
-    async def get_guild_data(self, guild_id: int) -> List[asyncpg.Record]:
+    async def get_guild_data(self, guild_id: int) -> List[GuildData]:
         """returns data for specified guild from guild_id
 
         parameters
@@ -123,7 +280,7 @@ class Database:
 
         returns
         -------
-        List[asyncpg.Record]
+        List[GuildData]
             data for specified guild
         """
         return await self.db.fetch(
@@ -163,12 +320,8 @@ class Database:
         str
             output of the query
         """
-        _cols: tuple = ("player_id", *fields.keys())
-        # check if guild exists
-        data: List = await self.db.fetch(
-            f"select {_cols} from guilds where guild_id = $1",
-            guild_id,
-        )
+        # check if guild exists in database
+        data: List[GuildData] = await self.get_guild_data(guild_id)
         if len(data) == 0:
             # if guild does not exist, insert
             cols: str = ", ".join(fields.keys())
@@ -191,12 +344,12 @@ class Database:
             )
         return out
 
-    async def get_all_players(self) -> List[asyncpg.Record]:
+    async def get_all_players(self) -> List[PlayerData]:
         """returns all players in database
 
         returns
         -------
-        List[asyncpg.Record]
+        List[PlayerData]
             all players in database
         """
         return await self.db.fetch("select * from players")
@@ -209,12 +362,12 @@ class Database:
         List[int]
             all player ids in database
         """
-        return [
-            player.get("player_id")
-            for player in await self.db.fetch("select player_id from players")
-        ]
+        players: List[PlayerData] = await self.db.fetch(
+            "select player_id from players"
+        )
+        return [player["player_id"] for player in players]
 
-    async def get_player_data(self, player_id: int) -> List[asyncpg.Record]:
+    async def get_player_data(self, player_id: int) -> List[PlayerData]:
         """returns data for specified player from player_id
 
         parameters
@@ -224,16 +377,14 @@ class Database:
 
         returns
         -------
-        List[asyncpg.Record]
+        List[PlayerData]
             data for specified player
         """
         return await self.db.fetch(
             "select * from players where player_id = $1", player_id
         )
 
-    async def get_player_data_by_puuid(
-        self, puuid: str
-    ) -> List[asyncpg.Record]:
+    async def get_player_data_by_puuid(self, puuid: str) -> List[PlayerData]:
         """returns data for specified player from puuid
 
         parameters
@@ -243,7 +394,7 @@ class Database:
 
         returns
         -------
-        List[asyncpg.Record]
+        List[PlayerData]
             data for specified player
         """
         return await self.db.fetch(
@@ -278,11 +429,7 @@ class Database:
         fields: dict
             fields to update
         """
-        _cols: tuple = ("player_id", *fields.keys())
-        data: list = await self.db.fetch(
-            f"select {_cols} from players where player_id = $1",
-            player_id,
-        )
+        data: List[PlayerData] = await self.get_player_data(player_id)
         if len(data) == 0:
             cols: str = ", ".join(fields.keys())
             vals: str = ", ".join([f"${i+2}" for i in range(len(fields))])
@@ -303,7 +450,7 @@ class Database:
             )
         return out
 
-    async def get_waitlist_data(self, player_id: int) -> List[asyncpg.Record]:
+    async def get_waitlist_data(self, player_id: int) -> List[WaitlistData]:
         """returns data for specified waitlisted player from player_id
 
         parameters
@@ -313,7 +460,7 @@ class Database:
 
         returns
         -------
-        List[asyncpg.Record]
+        List[WaitlistData]
             data for specified waitlisted player
         """
         return await self.db.fetch(
@@ -353,8 +500,8 @@ class Database:
         str
             output of the query
         """
-        data: list = await self.db.fetch(
-            "select waiting_id from waitlist where player_id = $1", player_id
+        data: List[WaitlistData] = await self.db.fetch(
+            "select * from waitlist where player_id = $1", player_id
         )
         if len(data) == 0:
             out: str = await self.db.execute(
@@ -370,9 +517,9 @@ class Database:
             )
         return out
 
-    async def get_players_join_waitlist(
+    async def get_player_join_waiters(
         self, player_id: int
-    ) -> List[asyncpg.Record]:
+    ) -> List[PlayerWaitlistData]:
         """returns data for specified player from player_id and
         waitlist data for the player
 
@@ -383,32 +530,30 @@ class Database:
 
         returns
         -------
-        List[asyncpg.Record]
+        List[PlayerWaitlistData]
             data for specified player and waitlist data for the player
         """
-        select = "select waitlist.waiting_id"
         left_join = "players left join waitlist"
         on_str = "on waitlist.player_id = players.player_id"
         where = "where players.player_id = $1"
         return await self.db.fetch(
-            f"{select} from {left_join} {on_str} {where}",
+            f"select * from {left_join} {on_str} {where}",
             player_id,
         )
 
-    async def get_waitlist_join_players(self) -> List[asyncpg.Record]:
+    async def get_waiteds_join_player(self) -> List[PlayerWaitlistData]:
         """returns waitlist data for all players in waitlist and
         player data for each player
 
         returns
         -------
-        List[asyncpg.Record]
+        List[PlayerWaitlistData]
             waitlist data for all players in waitlist and
             player data for each player
         """
-        select = "select * "
         inner_join = "waitlist inner join players"
         on_str = "on waitlist.player_id = players.player_id"
-        return await self.db.fetch(f"{select} from {inner_join} {on_str}")
+        return await self.db.fetch(f"select * from {inner_join} {on_str}")
 
 
 db = Database()

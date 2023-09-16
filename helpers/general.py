@@ -14,8 +14,8 @@ from disnake import (
 )
 from disnake.ext import commands
 
-from helpers.db import db
-from helpers.helpers import DiscordReturn
+from helpers.db import GuildData, db
+from helpers.helpers import DiscordReturn, use_prefix
 from views.views import Menu, PageView, SelectEmbed
 
 HOLODEX_TOKEN: Optional[str] = os.environ.get("HOLODEX_TOKEN")
@@ -599,14 +599,9 @@ async def set_prefix(
             content = "error updating prefix! try again later"
         return {"content": content}
 
-    guild_data: List[Dict] = await db.get_guild_data(guild_id)
-    current_prefix: Optional[str] = guild_data[0].get("prefix")
-    use_prefix: Optional[str] = (
-        message.prefix if isinstance(message, commands.Context) else "/"
-    )
-    current_msg: str = f"current prefix: {current_prefix}"
-    use_msg: str = f'use {use_prefix}set-prefix "<new prefix>"'
-    info_msg = '(include "" for multiple worded prefix)'
+    guild_data: List[GuildData] = await db.get_guild_data(guild_id)
     return {
-        "content": f"{current_msg}\n{use_msg} {info_msg}",
+        "content": f"current prefix: {guild_data[0]['prefix']}"
+        + f'\nuse {use_prefix(message)}set-prefix "<new prefix>"'
+        + ' (include "" for multiple worded prefix)',
     }

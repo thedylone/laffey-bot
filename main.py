@@ -10,7 +10,7 @@ from disnake.ext import commands
 from dotenv import load_dotenv
 
 from cogs.custom_help import help as custom_help
-from helpers.db import db
+from helpers.db import GuildData, db
 
 dotenv_path: str = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
@@ -36,11 +36,11 @@ async def get_prefix(_bot, message) -> List[str]:
     custom_prefix: str = DEFAULT_PREFIX
     if not isinstance(message.channel, channel.DMChannel):
         guild_id: int = message.guild.id
-        guild_data: list = await db.get_guild_data(guild_id)
+        guild_data: List[GuildData] = await db.get_guild_data(guild_id)
         if len(guild_data) == 0:
             await db.update_guild_data(guild_id, prefix=DEFAULT_PREFIX)
         else:
-            custom_prefix = guild_data[0].get("prefix")
+            custom_prefix = guild_data[0]["prefix"]
     return commands.when_mentioned_or(custom_prefix)(_bot, message)
 
 
@@ -136,7 +136,7 @@ if __name__ == "__main__":
         help="run in debug mode",
     )
     args: argparse.Namespace = parser.parse_args()
-    DEBUG_MODE = args.debug
+    DEBUG_MODE: bool = args.debug
     if not DEBUG_MODE:
         autoload("error")  # loads error handler
     autoload("background")  # loads background tasks
