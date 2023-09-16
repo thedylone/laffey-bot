@@ -3,7 +3,7 @@ import asyncio
 from typing import List, Optional, Union
 
 import aiohttp
-from disnake import Guild, TextChannel, Thread, User
+from disnake import Embed, Guild, Message, TextChannel, Thread, User
 from disnake.abc import GuildChannel, PrivateChannel
 from disnake.ext import tasks
 from disnake.ext.commands import Bot, Cog
@@ -11,6 +11,7 @@ from disnake.ext.commands import Bot, Cog
 from helpers.db import Database, db
 from helpers.helpers import DiscordReturn
 from helpers.valorant_classes import Match, Player
+from views.views import PageView, SelectEmbed
 
 session = aiohttp.ClientSession()
 
@@ -170,7 +171,33 @@ class Background(Cog):
                 )
                 if alert is None:
                     continue
-                await channel.send(**alert)
+                reply: Message = await channel.send(**alert)
+                alert_embed: Optional[Embed] = alert.get("embed")
+                if alert_embed is None:
+                    continue
+                embeds: List[SelectEmbed] = [
+                    SelectEmbed(
+                        embed=alert_embed,
+                        name="alert",
+                        description="match alert",
+                        emoji="🔔",
+                    ),
+                    SelectEmbed(
+                        embed=await match.stats_embed,
+                        name="stats",
+                        description="match stats",
+                        emoji="📊",
+                    ),
+                ]
+                await reply.edit(
+                    view=PageView(
+                        reply=reply,
+                        embeds=embeds,
+                        timeout=60 * 60,
+                        reset_to_home=True,
+                    )
+                )
+
             # sleeps for number of seconds (avoid rate limit)
             await asyncio.sleep(0.5)
 

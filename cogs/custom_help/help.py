@@ -2,7 +2,7 @@
 from typing import List, Optional, Tuple, Union
 
 import disnake
-from disnake import Embed
+from disnake import Embed, Message
 from disnake.ext.commands import Cog, Command, Group, HelpCommand
 
 from views.views import PageView, SelectEmbed
@@ -57,8 +57,16 @@ class Help(HelpCommand):
         return home_embed
 
     async def send_bot_help(self, mapping: dict) -> None:
+        reply: Message = await self.context.reply("fetching help...")
         home_embed: Embed = await self.bot_help_embed(mapping)
-        embeds: List[SelectEmbed] = []
+        embeds: List[SelectEmbed] = [
+            SelectEmbed(
+                embed=home_embed,
+                name="help",
+                description="overview",
+                emoji="🏠",
+            )
+        ]
         for cog, commands in mapping.items():
             filtered: List[Command] = await self.filter_commands(
                 commands, sort=True
@@ -83,8 +91,11 @@ class Help(HelpCommand):
                     )
                 )
 
-        view = PageView(embeds)
-        await self.get_destination().send(embed=home_embed, view=view)
+        await reply.edit(
+            content=None,
+            embed=home_embed,
+            view=PageView(reply=reply, embeds=embeds, reset_to_home=False),
+        )
 
     async def cog_help_embed(self, cog: Cog) -> Embed:
         """returns the help embed for a cog"""

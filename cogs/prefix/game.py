@@ -309,7 +309,10 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     async def feeder_message_show(self, ctx: commands.Context) -> None:
         """shows the custom feeder alert messages for the guild if set"""
-        await ctx.reply(**await valorant.feeder_message_show(ctx))
+        reply: disnake.Message = await ctx.reply("custom feeder messages:")
+        await reply.edit(
+            **await valorant.feeder_message_show(message=ctx, reply=reply)
+        )
 
     @feeder_message.command(
         name="delete",
@@ -321,7 +324,10 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     async def feeder_message_delete(self, ctx: commands.Context) -> None:
         """deletes custom feeder alert messages for the guild
         from the database"""
-        await ctx.reply(**await valorant.feeder_message_delete(ctx))
+        reply: disnake.Message = await ctx.reply("custom feeder messages:")
+        await reply.edit(
+            **await valorant.feeder_message_delete(message=ctx, reply=reply)
+        )
 
     @commands.group(
         name="feeder-image",
@@ -374,7 +380,10 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     async def feeder_image_show(self, ctx: commands.Context) -> None:
         """shows the custom feeder alert images for the guild if set"""
-        await ctx.reply(**await valorant.feeder_image_show(ctx))
+        reply: disnake.Message = await ctx.reply("custom feeder images:")
+        await reply.edit(
+            **await valorant.feeder_image_show(message=ctx, reply=reply)
+        )
 
     @feeder_image.command(
         name="delete",
@@ -386,7 +395,10 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     async def feeder_image_delete(self, ctx: commands.Context) -> None:
         """deletes custom feeder alert images for the guild
         from the database"""
-        await ctx.reply(**await valorant.feeder_image_delete(ctx))
+        reply: disnake.Message = await ctx.reply("custom feeder images:")
+        await reply.edit(
+            **await valorant.feeder_image_delete(message=ctx, reply=reply)
+        )
 
     @commands.group(
         name="streaker-message",
@@ -441,7 +453,10 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     )
     async def streaker_message_show(self, ctx: commands.Context) -> None:
         """shows the custom streaker alert images for the guild if set"""
-        await ctx.reply(**await valorant.streaker_message_show(ctx))
+        reply: disnake.Message = await ctx.reply("custom streaker messages:")
+        await reply.edit(
+            **await valorant.streaker_message_show(message=ctx, reply=reply)
+        )
 
     @streaker_message.command(
         name="delete",
@@ -453,7 +468,10 @@ class ValorantAdmin(commands.Cog, name="valorant admin"):
     async def streaker_message_delete(self, ctx: commands.Context) -> None:
         """deletes custom streaker alert images for the guild
         from the database"""
-        await ctx.reply(**await valorant.streaker_message_delete(ctx))
+        reply: disnake.Message = await ctx.reply("custom streaker messages:")
+        await reply.edit(
+            **await valorant.streaker_message_delete(message=ctx, reply=reply)
+        )
 
 
 def setup(bot: commands.Bot) -> None:

@@ -7,7 +7,6 @@ from disnake import Embed
 
 from helpers.db import db
 from helpers.helpers import DiscordReturn
-from views.views import PageView, SelectEmbed
 
 API = "https://api.henrikdev.xyz/valorant"
 
@@ -367,37 +366,6 @@ class Match:
             )
         return stats_embed
 
-    @property
-    async def default_embeds(self) -> DiscordReturn:
-        """default embeds containing map thumbnail if any
-
-        creates a page view with an alert embed and a stats embed
-
-        returns
-        -------
-        DiscordReturn
-            embed: disnake.Embed
-                default embed containing map thumbnail if any
-            view: views.PageView
-                pageview containing alert and stats embeds
-        """
-        alert_embed: Embed = await self.alert_embed
-        embeds: list[SelectEmbed] = [
-            SelectEmbed(
-                embed=alert_embed,
-                name="alert",
-                description="match alert",
-                emoji="🔔",
-            ),
-            SelectEmbed(
-                embed=await self.stats_embed,
-                name="stats",
-                description="match stats",
-                emoji="📊",
-            ),
-        ]
-        return {"embed": alert_embed, "view": PageView(embeds)}
-
     def update_metadata(self, metadata: Dict) -> None:
         """updates mode, map, and game_end from match data metadata
 
@@ -665,8 +633,7 @@ class Match:
         Optional[DiscordReturn]
             embed with content if any
         """
-        default: DiscordReturn = await self.default_embeds
-        alert_embed: Embed = default.get("embed", Embed())
+        alert_embed: Embed = await self.alert_embed
         red_players: List["Player"]
         blue_players: List["Player"]
         red_players, blue_players = self.check_players(
@@ -693,7 +660,7 @@ class Match:
         await self.add_streakers_to_embed(alert_embed, streakers)
         return {
             "content": self.waiters_to_content(waiters),
-            **default,
+            "embed": alert_embed,
         }
 
 

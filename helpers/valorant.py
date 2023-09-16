@@ -6,7 +6,9 @@ from disnake import (
     Embed,
     File,
     Guild,
+    InteractionMessage,
     Member,
+    Message,
     ModalInteraction,
     Role,
     TextChannel,
@@ -555,6 +557,7 @@ async def feeder_message_add(
 
 async def feeder_message_show(
     message: Union[ApplicationCommandInteraction, commands.Context],
+    reply: Union[InteractionMessage, Message],
 ) -> DiscordReturn:
     """shows the custom feeder alert messages for the guild if set
 
@@ -565,6 +568,8 @@ async def feeder_message_show(
     ----------
     message: Union[ApplicationCommandInteraction, commands.Context]
         interaction instance to respond to
+    reply: Union[InteractionMessage, Message]
+        the reply message the bot sent in response to the command
 
     returns
     -------
@@ -601,12 +606,13 @@ async def feeder_message_show(
         embed.add_field(name="messages", value=value)
         embeds.append(embed)
     if len(feeder_messages) > step:
-        return {"embed": embeds[0], "view": Menu(embeds)}
+        return {"embed": embeds[0], "view": Menu(reply=reply, embeds=embeds)}
     return {"embed": embeds[0]}
 
 
 async def feeder_message_delete(
     message: Union[ApplicationCommandInteraction, commands.Context],
+    reply: Union[InteractionMessage, Message],
 ) -> DiscordReturn:
     """deletes custom feeder alert message(s) for the guild from the database
 
@@ -617,6 +623,8 @@ async def feeder_message_delete(
     ----------
     message: Union[ApplicationCommandInteraction, commands.Context]
         interaction instance to respond to
+    reply: Union[InteractionMessage, Message]
+        the reply message the bot sent in response to the command
 
     returns
     -------
@@ -640,7 +648,12 @@ async def feeder_message_delete(
         }
     return {
         "content": "choose messages to delete",
-        "view": DeleterView(message, "feeder messages", feeder_messages),
+        "view": DeleterView(
+            message=message,
+            reply=reply,
+            key="feeder messages",
+            objects=feeder_messages,
+        ),
     }
 
 
@@ -680,7 +693,7 @@ async def feeder_image_add(
     guild_data: List = await db.get_guild_data(guild.id)
     if len(guild_data) == 0:
         return {"content": f"error! `{guild}` not in database"}
-    feeder_images: List[str] = guild_data[0].get("feeder_images", [])
+    feeder_images: List[str] = guild_data[0].get("feeder_images")
     if len(feeder_images) >= 10:
         return {"content": "too many! delete an image to add a new one!"}
     result: str = await db.update_guild_data(
@@ -697,6 +710,7 @@ async def feeder_image_add(
 
 async def feeder_image_show(
     message: Union[ApplicationCommandInteraction, commands.Context],
+    reply: Union[InteractionMessage, Message],
 ) -> DiscordReturn:
     """shows custom feeder alert images for the guild if set
 
@@ -706,6 +720,8 @@ async def feeder_image_show(
     ----------
     message: Union[ApplicationCommandInteraction, commands.Context]
         interaction instance to respond to
+    reply: Union[InteractionMessage, Message]
+        the reply message the bot sent in response to the command
 
     returns
     -------
@@ -738,12 +754,13 @@ async def feeder_image_show(
         embed.set_image(url=image)
         embeds.append(embed)
     if len(feeder_images) > 1:
-        return {"embed": embeds[0], "view": Menu(embeds)}
+        return {"embed": embeds[0], "view": Menu(reply=reply, embeds=embeds)}
     return {"embed": embeds[0]}
 
 
 async def feeder_image_delete(
     message: Union[ApplicationCommandInteraction, commands.Context],
+    reply: Union[InteractionMessage, Message],
 ) -> DiscordReturn:
     """deletes custom feeder alert image(s) for the guild from the database
 
@@ -753,6 +770,8 @@ async def feeder_image_delete(
     ----------
     message: Union[ApplicationCommandInteraction, commands.Context]
         interaction instance to respond to
+    reply: Union[InteractionMessage, Message]
+        the reply message the bot sent in response to the command
 
     returns
     -------
@@ -776,7 +795,12 @@ async def feeder_image_delete(
         }
     return {
         "content": "choose images to delete",
-        "view": DeleterView(message, "feeder images", feeder_images),
+        "view": DeleterView(
+            message=message,
+            reply=reply,
+            key="feeder images",
+            objects=feeder_images,
+        ),
     }
 
 
@@ -833,6 +857,7 @@ async def streaker_message_add(
 
 async def streaker_message_show(
     message: Union[ApplicationCommandInteraction, commands.Context],
+    reply: Union[InteractionMessage, Message],
 ) -> DiscordReturn:
     """shows custom streaker alert messages for the guild if set
 
@@ -843,6 +868,8 @@ async def streaker_message_show(
     ----------
     message: Union[ApplicationCommandInteraction, commands.Context]
         interaction instance to respond to
+    reply: Union[InteractionMessage, Message]
+        the reply message the bot sent in response to the command
 
     returns
     -------
@@ -879,12 +906,13 @@ async def streaker_message_show(
         embed.add_field(name="messages", value=value)
         embeds.append(embed)
     if len(streaker_messages) > step:
-        return {"embed": embeds[0], "view": Menu(embeds)}
+        return {"embed": embeds[0], "view": Menu(reply=reply, embeds=embeds)}
     return {"embed": embeds[0]}
 
 
 async def streaker_message_delete(
     message: Union[ApplicationCommandInteraction, commands.Context],
+    reply: Union[InteractionMessage, Message],
 ) -> DiscordReturn:
     """deletes custom streaker alert message(s) for the guild from the database
 
@@ -894,6 +922,8 @@ async def streaker_message_delete(
     ----------
     message: Union[ApplicationCommandInteraction, commands.Context]
         interaction instance to respond to
+    reply: Union[InteractionMessage, Message]
+        the reply message the bot sent in response to the command
 
     returns
     -------
@@ -917,5 +947,10 @@ async def streaker_message_delete(
         }
     return {
         "content": "choose messages to delete",
-        "view": DeleterView(message, "streaker messages", streaker_messages),
+        "view": DeleterView(
+            message=message,
+            reply=reply,
+            key="streaker messages",
+            objects=streaker_messages,
+        ),
     }

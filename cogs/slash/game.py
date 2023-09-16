@@ -232,12 +232,16 @@ class ValorantAdmin(commands.Cog):
         elif option == "show":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant.feeder_message_show(inter)
+                **await valorant.feeder_message_show(
+                    message=inter, reply=await inter.original_message()
+                )
             )
         elif option == "delete":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant.feeder_message_delete(inter)
+                **await valorant.feeder_message_delete(
+                    message=inter, reply=await inter.original_message()
+                )
             )
         else:
             await inter.response.send_message(
@@ -266,12 +270,16 @@ class ValorantAdmin(commands.Cog):
         elif option == "show":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant.feeder_image_show(inter)
+                **await valorant.feeder_image_show(
+                    message=inter, reply=await inter.original_message()
+                )
             )
         elif option == "delete":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant.feeder_image_delete(inter)
+                **await valorant.feeder_image_delete(
+                    message=inter, reply=await inter.original_message()
+                )
             )
         else:
             await inter.response.send_message(
@@ -300,11 +308,16 @@ class ValorantAdmin(commands.Cog):
         elif option == "show":
             await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant.streaker_message_show(inter)
+                **await valorant.streaker_message_show(
+                    message=inter, reply=await inter.original_message()
+                )
             )
         elif option == "delete":
+            await inter.response.defer()
             await inter.edit_original_message(
-                **await valorant.streaker_message_delete(inter)
+                **await valorant.streaker_message_delete(
+                    message=inter, reply=await inter.original_message()
+                )
             )
         else:
             await inter.response.send_message(
