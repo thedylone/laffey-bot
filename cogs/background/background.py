@@ -3,14 +3,15 @@ import asyncio
 from typing import List, Optional, Union
 
 import aiohttp
-from disnake import Guild, TextChannel, Thread, User
+from disnake import Embed, Guild, Message, TextChannel, Thread, User
 from disnake.abc import GuildChannel, PrivateChannel
 from disnake.ext import tasks
 from disnake.ext.commands import Bot, Cog
 
-from helpers.db import Database, db
+from helpers.db import Database, GuildData, PlayerData, db
 from helpers.helpers import DiscordReturn
 from helpers.valorant_classes import Match, Player
+from views.views import PageView, SelectEmbed
 
 session = aiohttp.ClientSession()
 
@@ -66,10 +67,13 @@ async def check_guild_channel(
         the saved channel if it exists and is accessible to the bot
     """
     guild_exists: Optional[Guild] = bot.get_guild(guild_id)
-    guild_data: List = await db.get_guild_data(guild_id)
+    guild_data: List[GuildData] = await db.get_guild_data(guild_id)
     if guild_exists in bot.guilds and len(guild_data):
         # bot is still in the guild
-        watch_channel_id = guild_data[0].get("watch_channel")
+        watch_channel_id: Optional[int] = guild_data[0]["watch_channel"]
+        if watch_channel_id is None:
+            # no channel saved
+            return
         channel_exists: Optional[
             Union[GuildChannel, Thread, PrivateChannel]
         ] = bot.get_channel(watch_channel_id)
@@ -135,7 +139,7 @@ class Background(Cog):
     async def init_valorant_players(self) -> None:
         """initialises the list of valorant players"""
         await wait_until_db_ready(db)
-        init_list: List[dict] = await db.get_all_players()
+        init_list: List[PlayerData] = await db.get_all_players()
         self.valorant_players: List[Player] = [
             Player(data) for data in init_list
         ]
@@ -152,13 +156,10 @@ class Background(Cog):
             if not await check_user_exists(self.bot, player.player_id):
                 # delete user?
                 continue
-            channel: Optional[
-                Union[TextChannel, User]
-            ] = await check_guild_channel(
+            channel: Optional[Union[TextChannel, User]]
+            channel = await check_guild_channel(
                 self.bot, player.guild_id, player.player_id
-            ) or await self.bot.getch_user(
-                player.player_id
-            )
+            ) or await self.bot.getch_user(player.player_id)
             if channel is None:
                 continue
             matches: List[Match] = await player.get_match_history()
@@ -170,7 +171,33 @@ class Background(Cog):
                 )
                 if alert is None:
                     continue
-                await channel.send(**alert)
+                reply: Message = await channel.send(**alert)
+                alert_embed: Optional[Embed] = alert.get("embed")
+                if alert_embed is None:
+                    continue
+                embeds: List[SelectEmbed] = [
+                    SelectEmbed(
+                        embed=alert_embed,
+                        name="alert",
+                        description="match alert",
+                        emoji="🔔",
+                    ),
+                    SelectEmbed(
+                        embed=await match.stats_embed,
+                        name="stats",
+                        description="match stats",
+                        emoji="📊",
+                    ),
+                ]
+                await reply.edit(
+                    view=PageView(
+                        reply=reply,
+                        embeds=embeds,
+                        timeout=60 * 60,
+                        reset_to_home=True,
+                    )
+                )
+
             # sleeps for number of seconds (avoid rate limit)
             await asyncio.sleep(0.5)
 
@@ -179,7 +206,7 @@ class Background(Cog):
         """loops through all players and updates their name and tag"""
         await wait_until_db_ready(db)
         await self.init_valorant_players()
-        init_list: List[dict] = await db.get_all_players()
+        init_list: List[PlayerData] = await db.get_all_players()
         players: List[Player] = [Player(data) for data in init_list]
         for player in players:
             if not await check_user_exists(self.bot, player.player_id):

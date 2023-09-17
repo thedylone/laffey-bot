@@ -5,9 +5,8 @@ from typing import Dict, List, Literal, Optional, Tuple, Union
 import aiohttp
 from disnake import Embed
 
-from helpers.db import db
+from helpers.db import GuildData, PlayerData, WaitlistData, db
 from helpers.helpers import DiscordReturn
-from views.views import PageView, SelectEmbed
 
 API = "https://api.henrikdev.xyz/valorant"
 
@@ -367,37 +366,6 @@ class Match:
             )
         return stats_embed
 
-    @property
-    async def default_embeds(self) -> DiscordReturn:
-        """default embeds containing map thumbnail if any
-
-        creates a page view with an alert embed and a stats embed
-
-        returns
-        -------
-        DiscordReturn
-            embed: disnake.Embed
-                default embed containing map thumbnail if any
-            view: views.PageView
-                pageview containing alert and stats embeds
-        """
-        alert_embed: Embed = await self.alert_embed
-        embeds: list[SelectEmbed] = [
-            SelectEmbed(
-                embed=alert_embed,
-                name="alert",
-                description="match alert",
-                emoji="🔔",
-            ),
-            SelectEmbed(
-                embed=await self.stats_embed,
-                name="stats",
-                description="match stats",
-                emoji="📊",
-            ),
-        ]
-        return {"embed": alert_embed, "view": PageView(embeds)}
-
     def update_metadata(self, metadata: Dict) -> None:
         """updates mode, map, and game_end from match data metadata
 
@@ -565,18 +533,16 @@ class Match:
         if len(feeders) == 0:
             return
         # default messages and images
-        messages: list[str] = ["lmao", "git gud"]
-        images: list[str] = [
+        messages: List[str] = ["lmao", "git gud"]
+        images: List[str] = [
             "https://i.ytimg.com/vi/PZe1FbclgpM/maxresdefault.jpg"
         ]
         # retrieve guild's custom if set
         guild_id: int = feeders[0].guild_id
-        guild_data: List = await db.get_guild_data(guild_id)
+        guild_data: List[GuildData] = await db.get_guild_data(guild_id)
         if len(guild_data) > 0:
-            _messages = guild_data[0].get("feeder_messages")
-            _images = guild_data[0].get("feeder_images")
-            messages = _messages if _messages else messages
-            images = _images if _images else images
+            messages = guild_data[0]["feeder_messages"] or messages
+            images = guild_data[0]["feeder_images"] or images
         # add feeders to embed
         embed.add_field(
             name=f"feeder alert❗❗ {random.choice(messages)}",
@@ -612,10 +578,9 @@ class Match:
         messages: list[str] = ["wow streak", "damn"]
         # retrieve guild's custom if set
         guild_id: int = streakers[0].guild_id
-        guild_data: List = await db.get_guild_data(guild_id)
+        guild_data: List[GuildData] = await db.get_guild_data(guild_id)
         if len(guild_data) > 0:
-            _messages = guild_data[0].get("streak_messages")
-            messages = _messages if _messages else messages
+            messages = guild_data[0]["streaker_messages"] or messages
         # add streakers to embed
         embed.add_field(
             name=f"streaker alert 👀👀 {random.choice(messages)}",
@@ -665,8 +630,7 @@ class Match:
         Optional[DiscordReturn]
             embed with content if any
         """
-        default: DiscordReturn = await self.default_embeds
-        alert_embed: Embed = default.get("embed", Embed())
+        alert_embed: Embed = await self.alert_embed
         red_players: List["Player"]
         blue_players: List["Player"]
         red_players, blue_players = self.check_players(
@@ -683,9 +647,12 @@ class Match:
                 feeders.append(player)
             if self.game_end >= player.lasttime and player.check_streaking():
                 streakers.append(player)
-            waitlist_data: List = await db.get_waitlist_data(player.player_id)
+            waitlist_data: List[WaitlistData]
+            waitlist_data = await db.get_waitlist_data(player.player_id)
             if len(waitlist_data) > 0:
-                waiters += waitlist_data[0].get("waiting_id", [])
+                _waiters: Optional[List[int]] = waitlist_data[0]["waiting_id"]
+                if _waiters is not None:
+                    waiters += _waiters
                 await db.delete_waitlist_data(player.player_id)
             await player.update_db()
         self.add_players_to_embed(alert_embed, red_players, blue_players)
@@ -693,7 +660,7 @@ class Match:
         await self.add_streakers_to_embed(alert_embed, streakers)
         return {
             "content": self.waiters_to_content(waiters),
-            **default,
+            "embed": alert_embed,
         }
 
 
@@ -722,7 +689,9 @@ class Player(Stats):
         valorant rank of the player
     """
 
-    def __init__(self, *datas: Dict, **kwargs: Dict) -> None:
+    def __init__(
+        self, *datas: Union[Dict, PlayerData], **kwargs: Dict
+    ) -> None:
         """initialises player with player data
 
         multiple datas can be passed in to set the attributes of the player.
@@ -730,7 +699,7 @@ class Player(Stats):
 
         parameters
         ----------
-        datas: Dict
+        datas: Union[Dict, PlayerData]
             player data from database
         kwargs: Dict
             player data from api

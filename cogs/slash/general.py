@@ -45,7 +45,9 @@ class General(commands.Cog):
     async def fubu(self, inter: ApplicationCommandInteraction) -> None:
         """fubu"""
         await inter.response.defer()
-        await inter.edit_original_message(**await general.fubu())
+        await inter.edit_original_message(
+            **await general.fubu(reply=await inter.original_message())
+        )
 
     @commands.slash_command(
         name="holo",
@@ -54,7 +56,9 @@ class General(commands.Cog):
     async def holo(self, inter: ApplicationCommandInteraction) -> None:
         """all live hololive streams"""
         await inter.response.defer()
-        await inter.edit_original_message(**await general.holo())
+        await inter.edit_original_message(
+            **await general.holo(reply=await inter.original_message())
+        )
 
 
 class GeneralAdmin(commands.Cog):

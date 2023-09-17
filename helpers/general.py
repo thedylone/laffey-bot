@@ -6,11 +6,16 @@ from typing import Dict, List, Optional, Union
 
 import aiohttp
 import dateutil.parser as dp
-from disnake import ApplicationCommandInteraction, Embed
+from disnake import (
+    ApplicationCommandInteraction,
+    Embed,
+    InteractionMessage,
+    Message,
+)
 from disnake.ext import commands
 
-from helpers.db import db
-from helpers.helpers import DiscordReturn
+from helpers.db import GuildData, db
+from helpers.helpers import DiscordReturn, use_prefix
 from views.views import Menu, PageView, SelectEmbed
 
 HOLODEX_TOKEN: Optional[str] = os.environ.get("HOLODEX_TOKEN")
@@ -343,11 +348,15 @@ def mention_embed() -> Embed:
     ).set_thumbnail(url=HOLO_IMG)
 
 
-async def holodex(data: Dict) -> DiscordReturn:
+async def holodex(
+    reply: Union[InteractionMessage, Message], data: Dict
+) -> DiscordReturn:
     """create embeds and menu from holodex video data
 
     parameters
     ----------
+    reply: Union[InteractionMessage, Message]
+        the reply message the bot sent in response to the command
     data: Dict
         holodex video data
 
@@ -357,7 +366,7 @@ async def holodex(data: Dict) -> DiscordReturn:
         embed: Embed
             home embed
         view: Menu
-            menu
+            menu with buttons to navigate through the embeds
     """
     if not data:
         # no videos available
@@ -378,15 +387,19 @@ async def holodex(data: Dict) -> DiscordReturn:
         return {"embed": embeds[0]}
     return {
         "embed": embeds[0],
-        "view": Menu(embeds),
+        "view": Menu(reply=reply, embeds=embeds),
     }
 
 
-async def fubudex(data: Dict) -> DiscordReturn:
+async def fubudex(
+    reply: Union[InteractionMessage, Message], data: Dict
+) -> DiscordReturn:
     """create embeds and page view from fubudex video data
 
     parameters
     ----------
+    reply: Union[InteractionMessage, Message]
+        the reply message the bot sent in response to the command
     data: Dict
         fubudex video data
 
@@ -396,7 +409,7 @@ async def fubudex(data: Dict) -> DiscordReturn:
         embed: Embed
             home embed
         view: PageView
-            page view
+            view with dropdown selecter to navigate through the embeds
     """
     # store info for set channels
     focus_channels: Dict[str, Channel] = {
@@ -457,11 +470,24 @@ async def fubudex(data: Dict) -> DiscordReturn:
                 embed=_mention_embed,
             )
         )
-    return {"embed": _home_embed, "view": PageView(embeds)}
+    return {
+        "embed": _home_embed,
+        "view": PageView(
+            reply=reply,
+            embeds=embeds,
+            timeout=60 * 10,
+            reset_to_home=False,
+        ),
+    }
 
 
-async def holo() -> DiscordReturn:
+async def holo(reply: Union[InteractionMessage, Message]) -> DiscordReturn:
     """retrieves all live hololive videos from holodex
+
+    parameters
+    ----------
+    reply: Union[InteractionMessage, Message]
+        the reply message the bot sent in response to the command
 
     returns
     -------
@@ -471,7 +497,7 @@ async def holo() -> DiscordReturn:
         embed: Embed
             embed containing the live videos
         view: Menu
-            menu to navigate through the embeds
+            menu with buttons to navigate through the embeds
     """
     if not HOLODEX_TOKEN:
         return {
@@ -494,11 +520,16 @@ async def holo() -> DiscordReturn:
     if request.status != 200:
         raise ConnectionError("error retrieving info! try again later")
     data: Dict = await request.json()
-    return await holodex(data)
+    return await holodex(reply, data)
 
 
-async def fubu() -> DiscordReturn:
+async def fubu(reply: Union[InteractionMessage, Message]) -> DiscordReturn:
     """retrieves upcoming videos for a selection of channels from holodex
+
+    parameters
+    ----------
+    reply: Union[InteractionMessage, Message]
+        the reply message the bot sent in response to the command
 
     returns
     -------
@@ -508,7 +539,7 @@ async def fubu() -> DiscordReturn:
         embed: Embed
             embed containing the upcoming videos
         view: PageView
-            page view to navigate through the embeds
+            view with dropdown selecter to navigate through the embeds
     """
     if not HOLODEX_TOKEN:
         return {
@@ -527,7 +558,7 @@ async def fubu() -> DiscordReturn:
     if request.status != 200:
         raise ConnectionError("error retrieving info! try again later")
     data: Dict = await request.json()
-    return await fubudex(data)
+    return await fubudex(reply, data)
 
 
 async def set_prefix(
@@ -568,14 +599,9 @@ async def set_prefix(
             content = "error updating prefix! try again later"
         return {"content": content}
 
-    guild_data: List[Dict] = await db.get_guild_data(guild_id)
-    current_prefix: Optional[str] = guild_data[0].get("prefix")
-    use_prefix: Optional[str] = (
-        message.prefix if isinstance(message, commands.Context) else "/"
-    )
-    current_msg: str = f"current prefix: {current_prefix}"
-    use_msg: str = f'use {use_prefix}set-prefix "<new prefix>"'
-    info_msg = '(include "" for multiple worded prefix)'
+    guild_data: List[GuildData] = await db.get_guild_data(guild_id)
     return {
-        "content": f"{current_msg}\n{use_msg} {info_msg}",
+        "content": f"current prefix: {guild_data[0]['prefix']}"
+        + f'\nuse {use_prefix(message)}set-prefix "<new prefix>"'
+        + ' (include "" for multiple worded prefix)',
     }

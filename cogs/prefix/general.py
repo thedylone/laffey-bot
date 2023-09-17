@@ -2,6 +2,7 @@
 import random
 from typing import Optional
 
+from disnake import Message
 from disnake.ext import commands
 
 from helpers import general
@@ -38,8 +39,9 @@ class General(commands.Cog, name="general"):
     )
     async def fubu(self, ctx: commands.Context) -> None:
         """fubu"""
+        reply: Message = await ctx.reply("fetching streams...")
         async with ctx.typing():
-            await ctx.reply(**await general.fubu())
+            await reply.edit(**await general.fubu(reply=reply))
 
     @commands.command(
         name="holo",
@@ -47,8 +49,9 @@ class General(commands.Cog, name="general"):
     )
     async def holo(self, ctx: commands.Context) -> None:
         """all live hololive streams"""
+        reply: Message = await ctx.reply("fetching streams...")
         async with ctx.typing():
-            await ctx.reply(**await general.holo())
+            await reply.edit(**await general.holo(reply=reply))
 
 
 class GeneralAdmin(commands.Cog, name="general admin"):
