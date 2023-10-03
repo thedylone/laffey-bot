@@ -226,6 +226,11 @@ class Match:
         ----------
         match_data: Dict
             match data from api
+
+        raises
+        ------
+        ValueError
+            if match data is None or metadata or players is None
         """
         if match_data is None:
             raise ValueError("match data is None!")
@@ -297,11 +302,13 @@ class Match:
                 "https://valorant-api.com/v1/maps"
             )
             if map_request.status != 200:
-                raise ConnectionError("error retrieving map info!")
+                # raise ConnectionError("error retrieving map info!")
+                return ""
             map_json: Dict[str, List] = await map_request.json()
         map_data: Optional[List[Dict]] = map_json.get("data")
         if map_data is None:
-            raise ConnectionError("error retrieving map info!")
+            # raise ConnectionError("error retrieving map info!")
+            return ""
         for map_info in map_data:
             if map_info.get("displayName") == self.map:
                 self._map_thumbnail = map_info.get("splash", "")
@@ -736,7 +743,13 @@ class Player(Stats):
         return f"{self.name}#{self.tag}"
 
     async def update_puuid_region(self) -> None:
-        """updates puuid and region from api from name and tag"""
+        """updates puuid and region from api from name and tag
+
+        raises
+        ------
+        ConnectionError
+            if error retrieving account info
+        """
         async with aiohttp.ClientSession() as session:
             account_request: aiohttp.ClientResponse = await session.get(
                 f"{API}/v1/account/{self.name}/{self.tag}"
@@ -752,22 +765,28 @@ class Player(Stats):
         self.card = account_data.get("card", {}).get("id") or self.card
 
     async def update_name_tag(self) -> None:
-        """updates name tag and region from api from puuid"""
+        """updates name tag and region from api from puuid
+
+        non-critical and if error, name and tag are not updated
+        """
         async with aiohttp.ClientSession() as session:
             account_request: aiohttp.ClientResponse = await session.get(
                 f"{API}/v1/by-puuid/account/{self.puuid}"
             )
             if account_request.status != 200:
-                raise ConnectionError("error retrieving account info!")
+                # raise ConnectionError("error retrieving account info!")
+                return
             account_json: Dict[str, Dict] = await account_request.json()
         account_data: Optional[Dict] = account_json.get("data")
         if account_data is None:
-            raise ConnectionError("error retrieving account info!")
+            # raise ConnectionError("error retrieving account info!")
+            return
         name: Optional[str] = account_data.get("name")
         tag: Optional[str] = account_data.get("tag")
         region: Optional[str] = account_data.get("region")
         if name is None or tag is None:
-            raise ConnectionError("error retrieving account info!")
+            # raise ConnectionError("error retrieving account info!")
+            return
         self.name = name
         self.tag = tag
         self.region = region or self.region
@@ -780,6 +799,11 @@ class Player(Stats):
         -------
         List[Match]
             list of matches from oldest to newest
+
+        raises
+        ------
+        ConnectionError
+            if error retrieving match history
         """
         async with aiohttp.ClientSession() as session:
             match_request: aiohttp.ClientResponse = await session.get(
@@ -791,7 +815,13 @@ class Player(Stats):
         match_data: Optional[List[Dict]] = match_json.get("data")
         if match_data is None:
             raise ConnectionError("error retrieving match history!")
-        return [Match(data) for data in match_data][::-1]
+        matches: List[Match] = []
+        for match in match_data:
+            try:
+                matches.append(Match(match))
+            except ValueError:
+                continue
+        return matches[::-1]
 
     def process_match(self, match: Match) -> None:
         """process match information and updates player stats and information

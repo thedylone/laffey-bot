@@ -47,7 +47,7 @@ class YoutubeChannel:
 
     attributes
     ----------
-    id: str
+    channel_id: str
         channel id
     name: Optional[str]
         channel name
@@ -57,7 +57,7 @@ class YoutubeChannel:
         channel url
     """
 
-    id: str
+    channel_id: str
     """channel id"""
     name: Optional[str]
     """channel name"""
@@ -73,7 +73,7 @@ class YoutubeChannel:
         str
             channel url
         """
-        return f"https://www.youtube.com/channel/{self.id}"
+        return f"https://www.youtube.com/channel/{self.channel_id}"
 
     @staticmethod
     def from_dict(data: Dict) -> "YoutubeChannel":
@@ -88,12 +88,17 @@ class YoutubeChannel:
         -------
         YoutubeChannel
             YoutubeChannel created from data
+
+        raises
+        ------
+        ValueError
+            if channel id is not found in data
         """
-        id: Optional[str] = data.get("id")
-        if not id:
+        channel_id: Optional[str] = data.get("id")
+        if not channel_id:
             raise ValueError("channel id not found!")
         return YoutubeChannel(
-            id=id,
+            channel_id=channel_id,
             name=data.get("name"),
             photo=data.get("photo"),
         )
@@ -118,7 +123,7 @@ class Video:
 
     attributes
     ----------
-    id: str
+    video_id: str
         video id
     channel: YoutubeChannel
         video channel
@@ -134,7 +139,7 @@ class Video:
         video POSIX timestamp from scheduled start time
     """
 
-    id: str
+    video_id: str
     """video id"""
     channel: YoutubeChannel
     """video channel"""
@@ -154,7 +159,7 @@ class Video:
         str
             video url
         """
-        return f"https://www.youtube.com/watch?v={self.id}"
+        return f"https://www.youtube.com/watch?v={self.video_id}"
 
     @property
     def timestamp(self) -> float:
@@ -189,15 +194,20 @@ class Video:
         -------
         Video
             Video created from data
+
+        raises
+        ------
+        ValueError
+            if video id or channel data or channel id is not found in data
         """
-        id: Optional[str] = data.get("id")
-        if not id:
+        video_id: Optional[str] = data.get("id")
+        if not video_id:
             raise ValueError("video id not found!")
         channel_data: Optional[Dict] = data.get("channel")
         if not channel_data:
             raise ValueError("channel data not found!")
         return Video(
-            id=id,
+            video_id=video_id,
             channel=YoutubeChannel.from_dict(channel_data),
             title=data.get("title"),
             status=data.get("status"),
@@ -376,12 +386,15 @@ async def holodex(
     for i in range(0, len(data), step):
         embed: Embed = home_embed()
         for vid in data[i : i + step]:
-            video: Video = Video.from_dict(vid)
-            embed.add_field(
-                name=video.channel.name,
-                value=str(video),
-                inline=False,
-            )
+            try:
+                video: Video = Video.from_dict(vid)
+                embed.add_field(
+                    name=video.channel.name,
+                    value=str(video),
+                    inline=False,
+                )
+            except ValueError:
+                continue
         embeds.append(embed)
     if len(embeds) == 1:
         return {"embed": embeds[0]}
@@ -431,7 +444,7 @@ async def fubudex(
     ]
     for vid in data:
         video: Video = Video.from_dict(vid)
-        channel_id: str = video.channel.id
+        channel_id: str = video.channel.channel_id
         if channel_id in focus_channels:
             focus_channels[channel_id].videos.append(video)
         else:
@@ -498,6 +511,11 @@ async def holo(reply: Union[InteractionMessage, Message]) -> DiscordReturn:
             embed containing the live videos
         view: Menu
             menu with buttons to navigate through the embeds
+
+    raises
+    ------
+    ConnectionError
+        if the request status is not 200
     """
     if not HOLODEX_TOKEN:
         return {
@@ -540,6 +558,11 @@ async def fubu(reply: Union[InteractionMessage, Message]) -> DiscordReturn:
             embed containing the upcoming videos
         view: PageView
             view with dropdown selecter to navigate through the embeds
+
+    raises
+    ------
+    ConnectionError
+        if the request status is not 200
     """
     if not HOLODEX_TOKEN:
         return {

@@ -94,7 +94,7 @@ async def check_guild_channel(
         await db.update_player_data(discord_id, guild_id=0)
 
 
-async def wait_until_db_ready(db: Database) -> None:
+async def wait_until_db_ready(database: Database) -> None:
     """waits until the database is ready
 
     this is to avoid the bot starting the cycle tasks before the database
@@ -105,7 +105,7 @@ async def wait_until_db_ready(db: Database) -> None:
     db: helpers.db.Database
         database instance
     """
-    while not db.loaded:
+    while not database.loaded:
         await asyncio.sleep(0.5)
 
 
@@ -134,6 +134,9 @@ class Background(Cog):
         self.bot: Bot = bot
         """bot instance"""
         self.valorant_players: List[Player] = []
+        self.valorant_watch_cycle.add_exception_type(
+            ConnectionError, ValueError
+        )
         self.valorant_watch_cycle.start()
 
     async def init_valorant_players(self) -> None:

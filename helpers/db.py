@@ -159,8 +159,6 @@ class PlayerWaitlistData(PlayerData, WaitlistData):
         list of discord ids of players who are waiting for the player
     """
 
-    ...
-
 
 class Database:
     """postgres database to access and store data
@@ -175,7 +173,7 @@ class Database:
 
     def __init__(self) -> None:
         """initialises the class with loaded set to False"""
-        self.db: Pool
+        self.database: Pool
         """database pool"""
         self.loaded: bool = False
         """whether database is loaded"""
@@ -187,11 +185,16 @@ class Database:
         ----------
         url: str
             url to connect to database
+
+        raises
+        ------
+        ConnectionError
+            if database could not be connected to
         """
-        db: Optional[Pool] = await create_pool(url)
-        if db is None:
-            raise Exception("Database not initialized")
-        self.db = db
+        _db: Optional[Pool] = await create_pool(url)
+        if _db is None:
+            raise ConnectionError("could not connect to database")
+        self.database = _db
 
     async def create_guilds_table(self) -> str:
         """attempts to create guilds table
@@ -201,7 +204,7 @@ class Database:
         str
             output of the query
         """
-        return await self.db.execute(
+        return await self.database.execute(
             """CREATE TABLE IF NOT EXISTS public.guilds(
             guild_id bigint NOT NULL,
             prefix text COLLATE pg_catalog."default",
@@ -222,7 +225,7 @@ class Database:
         str
             output of the query
         """
-        return await self.db.execute(
+        return await self.database.execute(
             """CREATE TABLE IF NOT EXISTS public.players(
             player_id bigint NOT NULL,
             guild_id bigint,
@@ -248,7 +251,7 @@ class Database:
         str
             output of the query
         """
-        return await self.db.execute(
+        return await self.database.execute(
             """CREATE TABLE IF NOT EXISTS public.waitlist(
             player_id bigint NOT NULL,
             waiting_id bigint[]
@@ -263,6 +266,11 @@ class Database:
         ----------
         url: str
             url to connect to database
+
+        raises
+        ------
+        ConnectionError
+            if database could not be connected to
         """
         await self.create_db_pool(url)
         await self.create_guilds_table()
@@ -283,7 +291,7 @@ class Database:
         List[GuildData]
             data for specified guild
         """
-        return await self.db.fetch(
+        return await self.database.fetch(
             "select * from guilds where guild_id = $1", guild_id
         )
 
@@ -300,7 +308,7 @@ class Database:
         str
             output of the query
         """
-        return await self.db.execute(
+        return await self.database.execute(
             "delete from guilds where guild_id = $1", guild_id
         )
 
@@ -326,7 +334,7 @@ class Database:
             # if guild does not exist, insert
             cols: str = ", ".join(fields.keys())
             vals: str = ", ".join([f"${i+2}" for i in range(len(fields))])
-            out: str = await self.db.execute(
+            out: str = await self.database.execute(
                 f"insert into guilds (guild_id, {cols}) values ($1, {vals})",
                 guild_id,
                 *fields.values(),
@@ -337,7 +345,7 @@ class Database:
                 f"{v} = ${i+2}" for i, v in enumerate(fields.keys())
             ]
             vals = ", ".join(list_of_vals)
-            out: str = await self.db.execute(
+            out: str = await self.database.execute(
                 f"update guilds set {vals} where guild_id = $1",
                 guild_id,
                 *fields.values(),
@@ -352,7 +360,7 @@ class Database:
         List[PlayerData]
             all players in database
         """
-        return await self.db.fetch("select * from players")
+        return await self.database.fetch("select * from players")
 
     async def get_players_ids(self) -> List[int]:
         """returns all player ids in database
@@ -362,7 +370,7 @@ class Database:
         List[int]
             all player ids in database
         """
-        players: List[PlayerData] = await self.db.fetch(
+        players: List[PlayerData] = await self.database.fetch(
             "select player_id from players"
         )
         return [player["player_id"] for player in players]
@@ -380,7 +388,7 @@ class Database:
         List[PlayerData]
             data for specified player
         """
-        return await self.db.fetch(
+        return await self.database.fetch(
             "select * from players where player_id = $1", player_id
         )
 
@@ -397,7 +405,7 @@ class Database:
         List[PlayerData]
             data for specified player
         """
-        return await self.db.fetch(
+        return await self.database.fetch(
             "select * from players where puuid = $1", puuid
         )
 
@@ -414,7 +422,7 @@ class Database:
         str
             output of the query
         """
-        return await self.db.execute(
+        return await self.database.execute(
             "delete from players where player_id = $1", player_id
         )
 
@@ -433,7 +441,7 @@ class Database:
         if len(data) == 0:
             cols: str = ", ".join(fields.keys())
             vals: str = ", ".join([f"${i+2}" for i in range(len(fields))])
-            out: str = await self.db.execute(
+            out: str = await self.database.execute(
                 f"insert into players (player_id, {cols}) values ($1, {vals})",
                 player_id,
                 *fields.values(),
@@ -443,7 +451,7 @@ class Database:
                 f"{v} = ${i+2}" for i, v in enumerate(fields.keys())
             ]
             vals = ", ".join(list_of_vals)
-            out: str = await self.db.execute(
+            out: str = await self.database.execute(
                 f"update players set {vals} where player_id = $1",
                 player_id,
                 *fields.values(),
@@ -463,7 +471,7 @@ class Database:
         List[WaitlistData]
             data for specified waitlisted player
         """
-        return await self.db.fetch(
+        return await self.database.fetch(
             "select * from waitlist where player_id = $1", player_id
         )
 
@@ -480,7 +488,7 @@ class Database:
         str
             output of the query
         """
-        return await self.db.execute(
+        return await self.database.execute(
             "delete from waitlist where player_id = $1", player_id
         )
 
@@ -500,17 +508,17 @@ class Database:
         str
             output of the query
         """
-        data: List[WaitlistData] = await self.db.fetch(
+        data: List[WaitlistData] = await self.database.fetch(
             "select * from waitlist where player_id = $1", player_id
         )
         if len(data) == 0:
-            out: str = await self.db.execute(
+            out: str = await self.database.execute(
                 "insert into waitlist (player_id, waiting_id) values ($1, $2)",
                 player_id,
                 waiting_id,
             )
         else:
-            out: str = await self.db.execute(
+            out: str = await self.database.execute(
                 "update waitlist set waiting_id = $2 where player_id = $1",
                 player_id,
                 waiting_id,
@@ -536,7 +544,7 @@ class Database:
         left_join = "players left join waitlist"
         on_str = "on waitlist.player_id = players.player_id"
         where = "where players.player_id = $1"
-        return await self.db.fetch(
+        return await self.database.fetch(
             f"select * from {left_join} {on_str} {where}",
             player_id,
         )
@@ -553,7 +561,9 @@ class Database:
         """
         inner_join = "waitlist inner join players"
         on_str = "on waitlist.player_id = players.player_id"
-        return await self.db.fetch(f"select * from {inner_join} {on_str}")
+        return await self.database.fetch(
+            f"select * from {inner_join} {on_str}"
+        )
 
 
 db = Database()
