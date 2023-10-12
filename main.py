@@ -99,7 +99,11 @@ async def on_ready() -> None:
     await bot.change_presence(
         activity=Game(f"with lolis | {DEFAULT_PREFIX}help")
     )
-    await db.load_db(DATABASE_URL)
+    try:
+        await db.load_db(DATABASE_URL)
+    except ConnectionError as err:
+        print("could not connect to database: ", err)
+        sys.exit(1)
 
 
 def autoload(command_type: str) -> None:
