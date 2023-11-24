@@ -826,8 +826,8 @@ class Player(Stats):
     def process_match(self, match: Match) -> None:
         """process match information and updates player stats and information
 
-        skips match if match is Deathmatch or Team Deathmatch, or if player is
-        not in the match.
+        skips match if match is not Unrated/Competitive/Custom Game, or if
+        player is not in the match.
         sets kills, deaths, assists and prev_acs to the player's stats in the
         match. actual stats are only updated if match is competitive/unrated
         and game_end is after lasttime.
@@ -837,8 +837,8 @@ class Player(Stats):
         match: Match
             match to process
         """
-        # update lasttime
-        if match.mode in ["Deathmatch", "Team Deathmatch"]:
+        # only add stats for competitive/unrated/custom games
+        if match.mode not in ("Competitive", "Unrated", "Custom Game"):
             return
         check: Optional[
             Tuple[Dict, Literal["red", "blue"]]
@@ -865,9 +865,6 @@ class Player(Stats):
             self.streak = min(self.streak - 1, -1)
         else:
             self.streak = max(self.streak + 1, 1)
-        # only add stats for competitive/unrated
-        if match.mode not in ("Competitive", "Unrated"):
-            return
         if match.mode == "Competitive":
             self.rank = player.get("currenttier_patched", self.rank)
         self.update_stats(
