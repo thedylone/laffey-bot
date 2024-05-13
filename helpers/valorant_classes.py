@@ -1,6 +1,7 @@
 """classes for valorant watch"""
 
 import random
+import re
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
 import aiohttp
@@ -11,31 +12,6 @@ from helpers.db import GuildData, PlayerData, WaitlistData, db
 from helpers.helpers import DiscordReturn
 
 API = "https://api.henrikdev.xyz/valorant"
-
-AGENT_EMOJIS: Dict[str, str] = {
-    "Astra": "<:Astra:1151750182594158683>",
-    "Breach": "<:Breach:1151750197563625552>",
-    "Brimstone": "<:Brimstone:1151750210347880488>",
-    "Chamber": "<:Chamber:1151750241016614973>",
-    "Cypher": "<:Cypher:1151750244795691048>",
-    "Deadlock": "<:Deadlock:1151750250520907837>",
-    "Fade": "<:Fade:1151750255851876402>",
-    "Gekko": "<:Gekko:1151750262013313116>",
-    "Harbor": "<:Harbor:1151750266018877440>",
-    "Jett": "<:Jett:1151750270905233449>",
-    "KAY/O": "<:KAYO:1151750276416548926>",
-    "Killjoy": "<:Killjoy:1151750281336463391>",
-    "Neon": "<:Neon:1151750288743596042>",
-    "Omen": "<:Omen:1151750293604810783>",
-    "Phoenix": "<:Phoenix:1151750298512150528>",
-    "Raze": "<:Raze:1151750304270917673>",
-    "Reyna": "<:Reyna:1151750307940945930>",
-    "Sage": "<:Sage:1151750313120890931>",
-    "Skye": "<:Skye:1151750320280584202>",
-    "Sova": "<:Sova:1151750325917728789>",
-    "Viper": "<:Viper:1151750330778923039>",
-    "Yoru": "<:Yoru:1151750334327296071>",
-}
 
 
 class Stats:
@@ -370,7 +346,8 @@ class Match:
             emojis: list = [
                 emoji
                 for emoji in bot.emojis
-                if emoji.name == player.get("character", "")
+                if emoji.name
+                == re.sub(r"[^a-zA-Z0-9]", "", player.get("character", ""))
             ]
             emoji: str = emojis[0] if len(emojis) > 0 else ""
             stats_embed.add_field(
