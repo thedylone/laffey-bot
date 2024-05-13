@@ -1,9 +1,11 @@
 """classes for valorant watch"""
+
 import random
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
 import aiohttp
 from disnake import Embed
+from disnake.ext.commands import Bot
 
 from helpers.db import GuildData, PlayerData, WaitlistData, db
 from helpers.helpers import DiscordReturn
@@ -328,9 +330,14 @@ class Match:
             title="valorant watch",
         ).set_thumbnail(await self.map_thumbnail)
 
-    @property
-    async def stats_embed(self) -> Embed:
+    async def stats_embed(self, bot: Bot) -> Embed:
         """creates a stats embed containing map thumbnail if any
+
+        parameters
+        ----------
+        bot: Bot
+            bot instance
+            bot instance is used to retrieve emojis
 
         returns
         -------
@@ -360,7 +367,12 @@ class Match:
                 ]
             )
             acs: float = stats.get("score", 0) / self.rounds_played
-            emoji: str = AGENT_EMOJIS.get(player.get("character", ""), "")
+            emojis: list = [
+                emoji
+                for emoji in bot.emojis
+                if emoji.name == player.get("character", "")
+            ]
+            emoji: str = emojis[0] if len(emojis) > 0 else ""
             stats_embed.add_field(
                 name=f"{team} {player.get('name')}#{player.get('tag')}",
                 value=f"{emoji} {kda}  |  {int(acs)} ACS"
@@ -372,6 +384,16 @@ class Match:
                 inline=False,
             )
         return stats_embed
+
+    def check_mode(self) -> bool:
+        """checks if match is competitive/unrated/custom game
+
+        returns
+        -------
+        bool
+            True if match is competitive/unrated/custom game, False otherwise
+        """
+        return self.mode in ("Competitive", "Unrated", "Custom Game")
 
     def update_metadata(self, metadata: Dict) -> None:
         """updates mode, map, and game_end from match data metadata
@@ -650,10 +672,7 @@ class Match:
         waiters: list[int] = []
         for player in red_players + blue_players:
             player.process_match(self)
-            if player.check_feeding():
-                feeders.append(player)
-            if self.game_end >= player.lasttime and player.check_streaking():
-                streakers.append(player)
+            await player.update_db()
             waitlist_data: List[WaitlistData]
             waitlist_data = await db.get_waitlist_data(player.player_id)
             if len(waitlist_data) > 0:
@@ -661,7 +680,14 @@ class Match:
                 if _waiters is not None:
                     waiters += _waiters
                 await db.delete_waitlist_data(player.player_id)
-            await player.update_db()
+            if not self.check_mode():
+                continue
+            if player.check_feeding():
+                feeders.append(player)
+            if self.game_end >= player.lasttime and player.check_streaking():
+                streakers.append(player)
+        if not self.check_mode():
+            return
         self.add_players_to_embed(alert_embed, red_players, blue_players)
         await self.add_feeders_to_embed(alert_embed, feeders)
         await self.add_streakers_to_embed(alert_embed, streakers)
@@ -838,11 +864,14 @@ class Player(Stats):
             match to process
         """
         # only add stats for competitive/unrated/custom games
-        if match.mode not in ("Competitive", "Unrated", "Custom Game"):
+        if self.lasttime >= match.game_end:
             return
-        check: Optional[
-            Tuple[Dict, Literal["red", "blue"]]
-        ] = match.get_player_data(self)
+        self.lasttime = match.game_end
+        if not match.check_mode():
+            return
+        check: Optional[Tuple[Dict, Literal["red", "blue"]]] = (
+            match.get_player_data(self)
+        )
         if check is None:
             return
         player: Dict
@@ -855,9 +884,6 @@ class Player(Stats):
         self.deaths = player_stats.get("deaths")
         self.assists = player_stats.get("assists")
         self.prev_acs = player_stats.get("score") / match.rounds_played
-        if self.lasttime >= match.game_end:
-            return
-        self.lasttime = match.game_end
         # update streak
         if match.red_win == 0:
             pass

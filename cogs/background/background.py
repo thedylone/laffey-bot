@@ -186,7 +186,7 @@ class Background(Cog):
                         emoji="🔔",
                     ),
                     SelectEmbed(
-                        embed=await match.stats_embed,
+                        embed=await match.stats_embed(self.bot),
                         name="stats",
                         description="match stats",
                         emoji="📊",
