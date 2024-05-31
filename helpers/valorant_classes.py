@@ -1,5 +1,6 @@
 """classes for valorant watch"""
 
+import os
 import random
 import re
 from typing import Dict, List, Literal, Optional, Tuple, Union
@@ -12,6 +13,7 @@ from helpers.db import GuildData, PlayerData, WaitlistData, db
 from helpers.helpers import DiscordReturn
 
 API = "https://api.henrikdev.xyz/valorant"
+HEADERS = {"Authorization": os.environ.get("VALORANT_TOKEN")}
 
 
 class Stats:
@@ -755,7 +757,8 @@ class Player(Stats):
         """
         async with aiohttp.ClientSession() as session:
             account_request: aiohttp.ClientResponse = await session.get(
-                f"{API}/v1/account/{self.name}/{self.tag}"
+                f"{API}/v1/account/{self.name}/{self.tag}",
+                headers=HEADERS,
             )
             if account_request.status != 200:
                 raise ConnectionError("error retrieving account info!")
@@ -774,7 +777,8 @@ class Player(Stats):
         """
         async with aiohttp.ClientSession() as session:
             account_request: aiohttp.ClientResponse = await session.get(
-                f"{API}/v1/by-puuid/account/{self.puuid}"
+                f"{API}/v1/by-puuid/account/{self.puuid}",
+                headers=HEADERS,
             )
             if account_request.status != 200:
                 # raise ConnectionError("error retrieving account info!")
@@ -810,7 +814,8 @@ class Player(Stats):
         """
         async with aiohttp.ClientSession() as session:
             match_request: aiohttp.ClientResponse = await session.get(
-                f"{API}/v3/by-puuid/matches/{self.region}/{self.puuid}"
+                f"{API}/v3/by-puuid/matches/{self.region}/{self.puuid}",
+                headers=HEADERS,
             )
             if match_request.status != 200:
                 raise ConnectionError("error retrieving match history!")
