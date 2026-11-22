@@ -20,7 +20,10 @@ function autocomplete(input, arr) {
                         .attr("class", "autocomplete-item js-anchor")
                         .attr("href", "#" + a)
                         .html(a)
-                        .on("click", function () {var e; if (location.pathname.replace(/^\//, "") === this.pathname.replace(/^\//, "") && location.hostname === this.hostname && (e = (e = $(this.hash)).length ? e : $("[name=" + this.hash.slice(1) + "]")).length) return $("html,body").animate({scrollTop: e.offset().top - $('.first-nav').height() - $(".js-nav").show().height()}, 1000), !1;})
+                        .on("click", function () {
+                            // Let the browser scroll to the anchor; scroll-padding-top in site.css clears the sticky header.
+                            $("#autocomplete-list").hide();
+                        })
                     );
             });
             $("#autocomplete-list").css("display", "inline-block");
@@ -83,3 +86,27 @@ function imagesOpenModal() {
         });
     }
 }
+
+// Fade sections in as they scroll into view. This used to be wired up by the
+// shared body.js on the old root site, which no longer exists.
+function initScrollAnimate() {
+    scrollanimate();
+    $(window).on("scroll resize", scrollanimate);
+}
+
+function closeModal(modal) {
+    $(modal).hide();
+    const body = document.body;
+    const scrollY = body.style.top;
+    body.style.position = '';
+    body.style.top = '';
+    window.scrollTo(0, parseInt(scrollY || '0') * -1);
+}
+
+// Close a modal by clicking its backdrop or pressing Escape.
+$(document).on("click", ".modal", function (e) {
+    if (e.target === this) closeModal(this);
+});
+$(document).on("keydown", function (e) {
+    if (e.key === "Escape") $(".modal:visible").each(function () { closeModal(this); });
+});
