@@ -1,115 +1,50 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>page not found · laffey bot</title>
-    <meta name="robots" content="noindex">
-    <link rel="icon" type="image/png" href="/laffey-bot/static/images/avatar.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500&family=IBM+Plex+Sans:wght@400&family=IBM+Plex+Mono:wght@400&display=swap"
-        rel="stylesheet">
-    <!-- Styles are inline: this page is served at arbitrary paths, so relative links would break. -->
-    <style>
-        :root {
-            --color-bg: #f9f9f6;
-            --color-text: #0f172a;
-            --color-text-muted: rgba(15, 23, 42, 0.64);
-            --color-navy: #1e2f4d;
-            --color-gold: #b8860b;
-            --color-hairline-strong: rgba(15, 23, 42, 0.2);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: grid;
-            place-items: center;
-            padding: 2rem 1rem;
-            background: var(--color-bg);
-            color: var(--color-text);
-            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            line-height: 1.6;
-        }
-
-        main {
-            max-width: 36rem;
-        }
-
-        img {
-            display: block;
-            width: 4rem;
-            height: 4rem;
-            border-radius: 50%;
-            margin-bottom: 1.5rem;
-        }
-
-        .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6em;
-            margin: 0 0 1rem;
-            font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
-            font-size: 0.75rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--color-navy);
-        }
-
-        .eyebrow::before {
-            content: '';
-            width: 1.75rem;
-            height: 1px;
-            background: var(--color-gold);
-        }
-
-        h1 {
-            margin: 0 0 1rem;
-            font-family: 'Newsreader', Georgia, serif;
-            font-weight: 500;
-            font-size: clamp(2.6rem, 8vw, 4.6rem);
-            letter-spacing: -0.03em;
-            line-height: 1.1;
-        }
-
-        p {
-            margin: 0 0 1.5rem;
-            color: var(--color-text-muted);
-        }
-
-        a {
-            font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
-            font-size: 0.85rem;
-            color: var(--color-navy);
-            text-decoration: none;
-            border-bottom: 1px solid var(--color-hairline-strong);
-            margin-right: 1.25rem;
-        }
-
-        a:hover,
-        a:focus-visible {
-            color: var(--color-gold);
-            border-color: var(--color-gold);
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Page not found | Dylan Chua</title>
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#f9f9f6" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💫</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <!-- Absolute path: GitHub Pages serves this page at whatever URL was missing. -->
+  <link rel="stylesheet" href="/laffey-bot/project-kit.css" />
 </head>
-
 <body>
-    <main>
-        <img src="/laffey-bot/static/images/smh.gif" alt="">
-        <p class="eyebrow">404 | laffey bot</p>
-        <h1>how did you get here?</h1>
-        <p>This page doesn't exist. Head back to the bot's page for its commands.</p>
-        <a href="/laffey-bot/">back to laffey bot</a>
-        <a href="https://thedylone.pages.dev/">thedylone</a>
-    </main>
-</body>
+  <header class="pk-header">
+    <div class="pk-header-inner">
+      <a class="pk-brand" href="https://projects.thedylone.com/">Dylan Chua</a>
+      <ul class="pk-nav">
+        <li><a href="https://projects.thedylone.com/">Projects</a></li>
+        <li><a href="https://github.com/thedylone/laffey-bot" target="_blank" rel="noreferrer">Source</a></li>
+      </ul>
+    </div>
+  </header>
 
+  <main class="pk-main">
+    <section class="pk-hero pk-container">
+      <p class="pk-eyebrow">404 · Laffey Bot</p>
+      <h1 class="pk-title">How did you get here?</h1>
+      <p class="pk-lede">This page doesn't exist. The bot's commands and setup guide are one click away.</p>
+      <div class="pk-actions">
+        <a class="pk-btn" href="/laffey-bot/">Back to Laffey Bot <span aria-hidden="true">→</span></a>
+        <a class="pk-btn pk-btn-secondary" href="https://projects.thedylone.com/">All projects <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pk-footer">
+    <div class="pk-footer-inner">
+      <span>© 2026 Dylan Chua</span>
+      <div class="pk-footer-links">
+        <a href="https://projects.thedylone.com/">All projects</a>
+        <a href="https://thedylone.pages.dev">Portfolio</a>
+        <a href="https://github.com/thedylone" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</body>
 </html>

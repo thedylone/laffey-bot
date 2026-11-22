@@ -21,7 +21,7 @@ function autocomplete(input, arr) {
                         .attr("href", "#" + a)
                         .html(a)
                         .on("click", function () {
-                            // Let the browser scroll to the anchor; scroll-padding-top in site.css clears the sticky header.
+                            // Let the browser scroll to the anchor; project-kit.css sets scroll-padding-top to clear the header and section bar.
                             $("#autocomplete-list").hide();
                         })
                     );
@@ -78,7 +78,7 @@ function openModal(modal, src = null) {
 }
 
 function imagesOpenModal() {
-    imgs = $(".discord-section img");
+    imgs = $(".discord-window img");
     for (var img of imgs) {
         $(img).on("click", (e) => {
             src = e.target.getAttribute("src");
