@@ -13,70 +13,53 @@
 }
 
 
-/* Page layout around the Discord mock-ups. Base styles are in site.css. */
-.hero__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    gap: clamp(1.5rem, 5vw, 4rem);
-    align-items: center;
-}
+/*
+ * Laffey Bot page styles. Loaded after project-kit.css. Kit tokens are used for
+ * the page; the Discord mock-ups below keep Discord's own colours on purpose.
+ */
 
-.hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem 1rem;
-    margin-top: 1.75rem;
-}
-
-.hero__figure {
-    margin: 0;
-    justify-self: center;
-    width: min(100%, 22rem);
-}
-
-.hero__figure img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 50%;
-    border: 1px solid var(--color-card-border);
-    box-shadow: 0 0 0 0.6rem var(--color-gold-soft);
-}
-
-.hero__banner {
-    margin: clamp(2rem, 6vw, 3.5rem) 0 0;
-}
-
-.hero__banner img {
-    display: block;
-    width: 100%;
-    height: clamp(9rem, 26vw, 18rem);
+/* Hero media: the map screenshot, cropped to a banner. */
+.hero-banner > img {
+    aspect-ratio: 16 / 6;
     object-fit: cover;
     object-position: center 60%;
-    border-radius: 0.9rem;
-    border: 1px solid var(--color-card-border);
 }
 
-@media screen and (max-width: 720px) {
-    .hero__grid {
+/* About: prose beside the bot's avatar. */
+.about-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 18rem);
+    gap: clamp(1.5rem, 5vw, 4rem);
+    align-items: start;
+}
+
+.about-figure > img {
+    border-radius: 50%;
+}
+
+@media (max-width: 720px) {
+    .about-grid {
         grid-template-columns: 1fr;
     }
 
-    .hero__figure {
+    .about-figure {
         order: -1;
-        width: min(11rem, 50%);
+        width: min(10rem, 45%);
     }
 }
 
-.section-intro .lede code {
-    font-family: var(--font-mono);
-    font-size: 0.9em;
-    color: var(--color-navy);
-    background: var(--color-gold-soft);
-    border: none;
-    border-radius: 0.3rem;
-    padding: 0.05em 0.35em;
+/* Get started: numbered cards. */
+.steps {
+    list-style: none;
+    padding: 0;
+}
+
+.steps li + li {
+    margin-top: 0;
+}
+
+.steps .pk-h3 {
+    margin: 0.35rem 0 0.5rem;
 }
 
 /* Scroll-in animations (keyframes match the animate.css names used in the markup). */
@@ -650,7 +633,7 @@ body[style*="fixed"] {
     height: auto;
 }
 
-code.inline {
+.discord-window code.inline {
     width: auto;
     height: auto;
     padding: .2em;
@@ -663,7 +646,7 @@ code.inline {
     white-space: pre-wrap;
 }
 
-code {
+.discord-window code {
     font-size: 0.875rem;
     line-height: 1.125rem;
     text-indent: 0;

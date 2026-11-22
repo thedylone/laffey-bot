@@ -1,1169 +1,1189 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>laffey bot</title>
-    <meta name="description"
-        content="a discord bot with valorant commands, sending updates by watching users in the database.">
-    <meta property="og:title" content="laffey bot" />
-    <meta property="og:description"
-        content="a discord bot with valorant commands, sending updates by watching users in the database." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://projects.thedylone.com/laffey-bot/" />
-    <meta property="og:image" content="https://projects.thedylone.com/laffey-bot/static/images/bg.png" />
-    <meta property="twitter:card" content="summary" />
-    <meta property="twitter:creator" content="@thedylone" />
-    <meta property="twitter:image" content="https://projects.thedylone.com/laffey-bot/static/images/laffey-bot.png" />
-    <link rel="icon" type="image/png" href="static/images/avatar.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="static/css/site.css">
-    <link rel="stylesheet" href="static/css/custom.css">
-    <script>document.documentElement.classList.add('js');</script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="static/js/body.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Laffey Bot | Dylan Chua</title>
+  <meta name="description" content="A Discord bot that watches Valorant players and posts match updates to your server." />
+  <meta name="theme-color" content="#f9f9f6" />
+  <meta property="og:title" content="Laffey Bot | Dylan Chua" />
+  <meta property="og:description" content="A Discord bot that watches Valorant players and posts match updates to your server." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://projects.thedylone.com/laffey-bot/" />
+  <meta property="og:image" content="https://projects.thedylone.com/laffey-bot/gallery-cover.webp" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💫</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://projects.thedylone.com/style/v1/project-kit.css" />
+  <link rel="stylesheet" href="./static/css/custom.css" />
+  <script src="https://projects.thedylone.com/style/v1/project-kit.js" defer></script>
+  <script>document.documentElement.classList.add('js');</script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="./static/js/body.js"></script>
 </head>
-
 <body>
-    <a class="skip-link" href="#main">skip to content</a>
-    <header class="site-header">
-        <div class="container">
-            <a class="site-header__home" href="https://thedylone.com/">thedylone</a>
-            <nav class="site-nav" aria-label="page">
-                <ul>
-                    <li><a href="#about">about</a></li>
-                    <li><a href="#commands">commands</a></li>
-                    <li><a href="#notifs">notifs</a></li>
-                    <li><a href="https://github.com/thedylone/laffey-bot">source</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <main id="main">
-        <!-- intro -->
-        <section class="section hero" id="home">
-            <div class="container">
-                <div class="hero__grid">
-                    <div class="hero__text" id="about">
-                        <p class="eyebrow">project | discord bot</p>
-                        <h1 class="heading-xl">laffey bot</h1>
-                        <p class="lede">a discord bot with valorant commands, sending updates by watching users in
-                            the database. inspired by <a href="https://spycambot.net/" target="_blank"
-                                rel="noreferrer">spycambot</a>.</p>
-                        <div class="hero__actions">
-                            <a class="button button--primary"
-                                href="https://discord.com/api/oauth2/authorize?client_id=946660168123445328&permissions=414464855104&scope=applications.commands%20bot">invite
-                                to server</a>
-                            <a class="button" href="#commands">view commands</a>
-                            <a class="link" href="https://ko-fi.com/thedylone" target="_blank"
-                                rel="noreferrer">support on ko-fi</a>
-                        </div>
-                        <ul class="tag-row">
-                            <li class="tag">python</li>
-                            <li class="tag">disnake</li>
-                            <li class="tag">postgres</li>
-                            <li class="tag">valorant api</li>
-                        </ul>
-                    </div>
-                    <figure class="hero__figure">
-                        <img src="static/images/laffey-bot.png" width="838" height="838"
-                            alt="laffey bot logo: the discord mascot wearing white bunny-eared pigtails">
-                    </figure>
-                </div>
-                <figure class="hero__banner">
-                    <img src="static/images/bg.png" width="1920" height="1080" alt="">
-                </figure>
-            </div>
-        </section>
-
-    <!-- commands section -->
-    <section class="section commands-section discord-section" id="commands">
-        <div class="container">
-            <div class="section-intro">
-                <p class="eyebrow">commands | slash &amp; prefix</p>
-                <h2 class="heading">Commands</h2>
-                <p class="lede">every command works as a slash command or with the <code>?</code> prefix. search below to jump to one.</p>
-            </div>
-            <div class="discord-window">
-            <header class="commands-section__header discord-section__header animate__animated" animation-style="fadeIn"
-                animation-duration="0.5s" animation-delay="0s">
-                <p class="discord-channel-name">commands</p>
-                <div class="search-wrapper">
-                    <form autocomplete="off">
-                        <div class="autocomplete">
-                            <input id="search-bar" type="search" name="search-bar" placeholder="search a command..." aria-label="search commands">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="magnifying-glass"
-                                role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
-                                class="svg-inline--fa fa-magnifying-glass">
-                                <path fill="currentColor"
-                                    d="M500.3 443.7l-119.7-119.7c27.22-40.41 40.65-90.9 33.46-144.7C401.8 87.79 326.8 13.32 235.2 1.723C99.01-15.51-15.51 99.01 1.724 235.2c11.6 91.64 86.08 166.7 177.6 178.9c53.8 7.189 104.3-6.236 144.7-33.46l119.7 119.7c15.62 15.62 40.95 15.62 56.57 0C515.9 484.7 515.9 459.3 500.3 443.7zM79.1 208c0-70.58 57.42-128 128-128s128 57.42 128 128c0 70.58-57.42 128-128 128S79.1 278.6 79.1 208z"
-                                    class=""></path>
-                            </svg>
-                            <div id="autocomplete-list"></div>
-                        </div>
-                    </form>
-                </div>
-            </header>
-            <div class="discord-messages">
-                <!-- valorant-watch -->
-                <div id="valorant-watch" class="discord-command-group animate__animated" animation-style="fadeIn"
-                    animation-duration="0.5s" animation-delay="0s">
-                    <div class="discord-title">
-                        <div class="discord-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
-                                aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>valorant-watch</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/smh.gif">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">thedylone</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    use <span
-                                        class="discord-interaction-command-name discord-interactive">/valorant-watch</span>
-                                    or prefix command
-                                    <span class="discord-interaction-command-name discord-interactive">?valorant-watch
-                                        &lt;name&gt; &lt;tag without #&gt;</span>. the bot will automatically retrieve
-                                    your
-                                    information and store in the database. you will be able to receive updates from the
-                                    bot,
-                                    <a class="search-anchor js-anchor" href="#valorant-info">view your info</a>, and <a
-                                        class="search-anchor js-anchor" href="#valorant-wait">allow others to wait for
-                                        you</a>. note
-                                    that <a class="search-anchor js-anchor" href="#set-channel">the watch channel for
-                                        the server must
-                                        be set first</a> if used in a server. if used
-                                    in private messages, the bot will send updates to you directly instead.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="discord-message discord-mentioned">
-                        <div class="discord-interaction">
-                            <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
-                            <span class="discord-interaction-info">
-                                <span class="discord-message-username discord-interactive">thedylone</span>
-                            </span>
-                            <span class="discord-interaction-command"> used
-                                <span
-                                    class="discord-interaction-command-name discord-interactive">/valorant-watch</span>
-                            </span>
-                        </div>
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    <span class="discord-mention-wrapper discord-interactive">@thedylone</span> database
-                                    updated, user added. remove
-                                    using /valorant-unwatch
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- valorant-unwatch -->
-                <div id="valorant-unwatch" class="discord-command-group animate__animated" animation-style="fadeIn"
-                    animation-duration="0.5s" animation-delay="0s">
-                    <div class="discord-title">
-                        <div class="discord-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
-                                aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>valorant-unwatch</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/smh.gif">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">thedylone</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    use <span
-                                        class="discord-interaction-command-name discord-interactive">/valorant-unwatch</span>
-                                    or prefix command
-                                    <span
-                                        class="discord-interaction-command-name discord-interactive">?valorant-unwatch</span>.
-                                    your information will be removed and you will no longer receive updates from the
-                                    bot,
-                                    and others can no longer wait for you.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="discord-message discord-mentioned">
-                        <div class="discord-interaction">
-                            <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
-                            <span class="discord-interaction-info">
-                                <span class="discord-message-username discord-interactive">thedylone</span>
-                            </span>
-                            <span class="discord-interaction-command"> used
-                                <span
-                                    class="discord-interaction-command-name discord-interactive">/valorant-unwatch</span>
-                            </span>
-                        </div>
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    <span class="discord-mention-wrapper discord-interactive">@thedylone</span> database
-                                    updated, user removed. add again using /valorant-watch
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- valorant-info -->
-                <div id="valorant-info" class="discord-command-group animate__animated" animation-style="fadeIn"
-                    animation-duration="0.5s" animation-delay="0s">
-                    <div class="discord-title">
-                        <div class="discord-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
-                                aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>valorant-info</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/smh.gif">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">thedylone</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    use <span
-                                        class="discord-interaction-command-name discord-interactive">/valorant-info</span>
-                                    or prefix command
-                                    <span
-                                        class="discord-interaction-command-name discord-interactive">?valorant-info</span>.
-                                    view your information stored in the database, and stats from your recently played
-                                    competitve and unrated games.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-interaction">
-                            <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
-                            <span class="discord-interaction-info">
-                                <span class="discord-message-username discord-interactive">thedylone</span>
-                            </span>
-                            <span class="discord-interaction-command"> used
-                                <span class="discord-interaction-command-name discord-interactive">/valorant-info</span>
-                            </span>
-                        </div>
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-embed">
-                                    <div class="discord-embed-left-border"></div>
-                                    <div class="discord-embed-container">
-                                        <div class="discord-embed-content">
-                                            <div>
-                                                <div class="discord-embed-title">valorant info</div>
-                                                <div class="discord-embed-description">
-                                                    <span
-                                                        class="discord-mention-wrapper discord-interactive">@thedylone</span>
-                                                    saved info
-                                                </div>
-                                                <div class="discord-embed-fields">
-                                                    <div class="discord-embed-field discord-embed-field-inline">
-                                                        <div class="discord-embed-field-title">username</div>
-                                                        GuessJewels#peko
-                                                    </div>
-                                                    <div class="discord-embed-field discord-embed-field-inline">
-                                                        <div class="discord-embed-field-title">last updated</div>
-                                                        <span class="discord-inline-timestamp">Today at 12:34 PM</span>
-                                                    </div>
-                                                    <div class="discord-embed-field">
-                                                        <div class="discord-embed-field-title">headshot %</div>
-                                                        100%
-                                                    </div>
-                                                    <div class="discord-embed-field">
-                                                        <div class="discord-embed-field-title">acs</div>
-                                                        750
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <img class="discord-embed-thumbnail" src="static/images/smh.gif" alt="">
-                                        </div>
-                                        <div class="discord-embed-footer">
-                                            <span>
-                                                <span>stats from last 5 recorded comp/unrated games</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- valorant-wait -->
-                <div id="valorant-wait" class="discord-command-group animate__animated" animation-style="fadeIn"
-                    animation-duration="0.5s" animation-delay="0s">
-                    <div class="discord-title">
-                        <div class="discord-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
-                                aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>valorant-wait</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/smh.gif">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">thedylone</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    use <span
-                                        class="discord-interaction-command-name discord-interactive">/valorant-wait
-                                        &lt;user&gt;</span>
-                                    or prefix command
-                                    <span class="discord-interaction-command-name discord-interactive">?valorant-wait
-                                        &lt;user&gt;</span>.
-                                    the bot will ping you when the user you are waiting for has finished the match. the
-                                    user must be in a database and being watched by the bot.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="discord-message discord-mentioned">
-                        <div class="discord-interaction">
-                            <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
-                            <span class="discord-interaction-info">
-                                <span class="discord-message-username discord-interactive">thedylone</span>
-                            </span>
-                            <span class="discord-interaction-command"> used
-                                <span class="discord-interaction-command-name discord-interactive">/valorant-wait</span>
-                            </span>
-                        </div>
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    <span class="discord-mention-wrapper discord-interactive">@thedylone</span> success,
-                                    will notify when <span class="discord-mention-wrapper discord-interactive">@laffey
-                                        bot</span> is done.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- valorant-waitlist -->
-                <div id="valorant-waitlist" class="discord-command-group animate__animated" animation-style="fadeIn"
-                    animation-duration="0.5s" animation-delay="0s">
-                    <div class="discord-title">
-                        <div class="discord-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
-                                aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>valorant-waitlist</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/smh.gif">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">thedylone</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    use <span
-                                        class="discord-interaction-command-name discord-interactive">/valorant-waitlist</span>
-                                    or prefix command
-                                    <span
-                                        class="discord-interaction-command-name discord-interactive">?valorant-waitlist</span>.
-                                    view the current waitlist. for privacy reasons, when used in a server, will only
-                                    show watched users who are in the server. when used in private message, will only
-                                    show users you are waiting for and users waiting for you.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-interaction">
-                            <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
-                            <span class="discord-interaction-info">
-                                <span class="discord-message-username discord-interactive">thedylone</span>
-                            </span>
-                            <span class="discord-interaction-command"> used
-                                <span
-                                    class="discord-interaction-command-name discord-interactive">/valorant-waitlist</span>
-                            </span>
-                        </div>
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-embed">
-                                    <div class="discord-embed-left-border"></div>
-                                    <div class="discord-embed-container">
-                                        <div class="discord-embed-content">
-                                            <div>
-                                                <div class="discord-embed-title">valorant waitlist</div>
-                                                <div class="discord-embed-description">
-                                                    waitlist of watched users
-                                                </div>
-                                                <div class="discord-embed-fields">
-                                                    <div class="discord-embed-field">
-                                                        <div class="discord-embed-field-title">user</div>
-                                                        <span
-                                                            class="discord-mention-wrapper discord-interactive">@laffey
-                                                            bot</span>
-                                                    </div>
-                                                    <div class="discord-embed-field">
-                                                        <div class="discord-embed-field-title">waiters</div>
-                                                        <span
-                                                            class="discord-mention-wrapper discord-interactive">@thedylone</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <img class="discord-embed-thumbnail"
-                                                src="https://i.redd.it/pxwk9pc6q9n91.jpg" alt="">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- valorant-ping -->
-                <div id="valorant-ping" class="discord-command-group animate__animated" animation-style="fadeIn"
-                    animation-duration="0.5s" animation-delay="0s">
-                    <div class="discord-title">
-                        <div class="discord-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
-                                aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>valorant-ping</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/smh.gif">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">thedylone</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    use prefix command
-                                    <span
-                                        class="discord-interaction-command-name discord-interactive">?valorant-ping</span>.
-                                    the bot will ping the set role for the server. note that the role has to be set
-                                    first with <a class="search-anchor js-anchor" href="#set-role">set-role</a>.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="discord-message discord-mentioned">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    <span class="discord-role-wrapper">@Jewels</span>
-                                </div>
-                                <div class="discord-message-image">
-                                    <img src="static/images/jewelsignal.jpg">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- set-channel -->
-                <div id="set-channel" class="discord-command-group animate__animated" animation-style="fadeIn"
-                    animation-duration="0.5s" animation-delay="0s">
-                    <div class="discord-title">
-                        <div class="discord-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
-                                aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>set-channel</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/smh.gif">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">thedylone</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    use <span class="discord-interaction-command-name discord-interactive">/set-channel
-                                        &lt;channel&gt;</span>
-                                    or prefix command
-                                    <span class="discord-interaction-command-name discord-interactive">?set-channel
-                                        &lt;channel&gt;</span>.
-                                    set the channel the bot will send updates to in the server. only members with
-                                    permissions to manage messages can use this. this command has to be run first before
-                                    <a class="search-anchor js-anchor" href="#valorant-watch">valorant-watch</a> can be
-                                    used in the
-                                    server.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-interaction">
-                            <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
-                            <span class="discord-interaction-info">
-                                <span class="discord-message-username discord-interactive">thedylone</span>
-                            </span>
-                            <span class="discord-interaction-command"> used
-                                <span class="discord-interaction-command-name discord-interactive">/set-channel</span>
-                            </span>
-                        </div>
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    successfully set <code class="inline">#bot-channel</code> as watch channel for <code
-                                        class="inline">laffey's server</code>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- set-role -->
-                <div id="set-role" class="discord-command-group animate__animated" animation-style="fadeIn"
-                    animation-duration="0.5s" animation-delay="0s">
-                    <div class="discord-title">
-                        <div class="discord-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
-                                aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>set-role</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/smh.gif">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">thedylone</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    use <span class="discord-interaction-command-name discord-interactive">/set-role
-                                        &lt;role&gt;</span>
-                                    or prefix command
-                                    <span class="discord-interaction-command-name discord-interactive">?set-role
-                                        &lt;role&gt;</span>.
-                                    set the role the bot will ping. only members with
-                                    permissions to manage messages can use this. this command has to be run first before
-                                    <a class="search-anchor js-anchor" href="#valorant-ping">valorant-ping</a> can be
-                                    used in the
-                                    server.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-interaction">
-                            <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
-                            <span class="discord-interaction-info">
-                                <span class="discord-message-username discord-interactive">thedylone</span>
-                            </span>
-                            <span class="discord-interaction-command"> used
-                                <span class="discord-interaction-command-name discord-interactive">/set-role</span>
-                            </span>
-                        </div>
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    successfully set role <code class="inline">@Jewels</code> as ping role for <code
-                                        class="inline">laffey's server</code>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- feeder-message -->
-                <div id="feeder-message" class="discord-command-group animate__animated" animation-style="fadeIn"
-                    animation-duration="0.5s" animation-delay="0s">
-                    <div class="discord-title">
-                        <div class="discord-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
-                                aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>feeder-message &lt; add | show | delete &gt;</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/smh.gif">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">thedylone</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    use <span
-                                        class="discord-interaction-command-name discord-interactive">/feeder-message
-                                    </span>
-                                    or prefix command
-                                    <span class="discord-interaction-command-name discord-interactive">?feeder-message
-                                    </span>.
-                                    set custom messages for the feeder alert (max: 25, max length: 100 characters). the
-                                    bot will randomly choose 1 from the list of messages. only members with
-                                    permissions to manage messages can use this. if no custom message is set, the
-                                    default messages will be used.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-interaction">
-                            <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
-                            <span class="discord-interaction-info">
-                                <span class="discord-message-username discord-interactive">thedylone</span>
-                            </span>
-                            <span class="discord-interaction-command"> used
-                                <span
-                                    class="discord-interaction-command-name discord-interactive">/feeder-message</span>
-                            </span>
-                        </div>
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    successfully added custom feeder message for <code
-                                        class="inline">laffey's server</code>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- feeder-image -->
-                <div id="feeder-image" class="discord-command-group animate__animated" animation-style="fadeIn"
-                    animation-duration="0.5s" animation-delay="0s">
-                    <div class="discord-title">
-                        <div class="discord-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
-                                aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>feeder-image &lt; add | show | delete &gt;</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/smh.gif">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">thedylone</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    use <span class="discord-interaction-command-name discord-interactive">/feeder-image
-                                    </span>
-                                    or prefix command
-                                    <span class="discord-interaction-command-name discord-interactive">?feeder-image
-                                    </span>.
-                                    set custom images for the feeder alert (max: 10, max url length: 100 characters).
-                                    the bot will randomly choose 1 from the list of image. only members with
-                                    permissions to manage messages can use this. if no custom image is set, the default
-                                    images will be used.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-interaction">
-                            <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
-                            <span class="discord-interaction-info">
-                                <span class="discord-message-username discord-interactive">thedylone</span>
-                            </span>
-                            <span class="discord-interaction-command"> used
-                                <span class="discord-interaction-command-name discord-interactive">/feeder-image</span>
-                            </span>
-                        </div>
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    successfully added custom feeder image for <code
-                                        class="inline">laffey's server</code>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- streaker-message -->
-                <div id="streaker-message" class="discord-command-group animate__animated" animation-style="fadeIn"
-                    animation-duration="0.5s" animation-delay="0s">
-                    <div class="discord-title">
-                        <div class="discord-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
-                                aria-hidden="true">
-                                <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h3>streaker-message &lt; add | show | delete &gt;</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/smh.gif">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">thedylone</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    use <span
-                                        class="discord-interaction-command-name discord-interactive">/streaker-message
-                                    </span>
-                                    or prefix command
-                                    <span class="discord-interaction-command-name discord-interactive">?streaker-message
-                                    </span>.
-                                    set custom messages for the streaker alert (max: 25, max length: 100 characters).
-                                    the
-                                    bot will randomly choose 1 from the list of messages. only members with
-                                    permissions to manage messages can use this. if no custom message is set, the
-                                    default messages will be used.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-interaction">
-                            <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
-                            <span class="discord-interaction-info">
-                                <span class="discord-message-username discord-interactive">thedylone</span>
-                            </span>
-                            <span class="discord-interaction-command"> used
-                                <span
-                                    class="discord-interaction-command-name discord-interactive">/streaker-message</span>
-                            </span>
-                        </div>
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    successfully added custom streaker message for <code
-                                        class="inline">laffey's server</code>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </section>
-    <!-- notifs section -->
-    <section class="section notifs-section discord-section" id="notifs">
-        <div class="container">
-            <div class="section-intro">
-                <p class="eyebrow">notifs | match updates</p>
-                <h2 class="heading">Notifications</h2>
-                <p class="lede">once you are watched, the bot posts to your server's watch channel after each match.</p>
-            </div>
-            <div class="discord-window">
-            <header class="notifs-section__header discord-section__header animate__animated" animation-style="fadeIn"
-                animation-duration="0.5s" animation-delay="0s">
-                <p class="discord-channel-name">notifs</p>
-            </header>
-            <div class="discord-messages">
-                <!-- win-notif -->
-                <div id="win-notif" class="animate__animated" animation-style="fadeIn" animation-duration="0.5s"
-                    animation-delay="0s">
-                    <div class="discord-title">
-                        <h3>get notified when you and your friends play together</h3>
-                    </div>
-                    <div class="discord-message discord-mentioned">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-message-text">
-                                    removing <span class="discord-mention-wrapper discord-interactive">@thedylone</span>
-                                    from waitlist
-                                </div>
-                                <div class="discord-embed">
-                                    <div class="discord-embed-left-border" style="background: #17DC33;"></div>
-                                    <div class="discord-embed-container">
-                                        <div class="discord-embed-content">
-                                            <div>
-                                                <div class="discord-embed-title">valorant watch</div>
-                                                <div class="discord-embed-description">
-                                                    <span
-                                                        class="discord-mention-wrapper discord-interactive">@thedylone</span>
-                                                    and <span
-                                                        class="discord-mention-wrapper discord-interactive">@laffey
-                                                        bot</span> just wonnered a Unrated game <b><u>13 - 8</u></b> on
-                                                    <b>Breeze</b> <span class="discord-fake-timestamp">30 minutes
-                                                        ago</span>!
-                                                </div>
-                                                <div class="discord-embed-fields">
-                                                    <div class="discord-embed-field">
-                                                        <div class="discord-embed-field-title">streaker alert 👀👀 <a
-                                                                class="search-anchor js-anchor"
-                                                                href="#streaker-message">set your own
-                                                                custom message</a>
-                                                        </div>
-                                                    </div>
-                                                    <span>
-                                                        <span
-                                                            class="discord-mention-wrapper discord-interactive">@thedylone</span>
-                                                        is on a 3-game winning streak!<br>
-                                                        <span
-                                                            class="discord-mention-wrapper discord-interactive">@laffey
-                                                            bot</span> is on a 5-game winning streak!
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <img class="discord-embed-thumbnail"
-                                                src="https://media.valorant-api.com/maps/2FB9A4FD-47B8-4E7D-A969-74B4046EBD53/splash.png"
-                                                alt="">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- loss-notif -->
-                <div id="loss-notif" class="animate__animated" animation-style="fadeIn" animation-duration="0.5s"
-                    animation-delay="0s">
-                    <div class="discord-title">
-                        <h3>customise the feeder alert for your server</h3>
-                    </div>
-                    <div class="discord-message">
-                        <div class="discord-message-content">
-                            <div class="discord-message-avatar">
-                                <img src="static/images/avatar.png">
-                            </div>
-                            <div class="discord-message-body">
-                                <div class="discord-message-header">
-                                    <span class="discord-message-info">
-                                        <span class="discord-message-username discord-interactive">laffey bot</span>
-                                        <span class="discord-message-bottag">BOT</span>
-                                    </span>
-                                    <span class="discord-message-timestamp">
-                                        Today at 12:34 PM
-                                    </span>
-                                </div>
-                                <div class="discord-embed">
-                                    <div class="discord-embed-left-border" style="background: #FC2828;"></div>
-                                    <div class="discord-embed-container">
-                                        <div class="discord-embed-content">
-                                            <div>
-                                                <div class="discord-embed-title">valorant watch</div>
-                                                <div class="discord-embed-description">
-                                                    <span
-                                                        class="discord-mention-wrapper discord-interactive">@thedylone</span>
-                                                    just losted a competitve game <b><u>4 - 13</u></b> (surrendered) on
-                                                    <b>Icebox</b> <span class="discord-fake-timestamp">a few seconds
-                                                        ago</span>!
-                                                </div>
-                                                <div class="discord-embed-fields">
-                                                    <div class="discord-embed-field">
-                                                        <div class="discord-embed-field-title">feeder alert❗❗ <a
-                                                                class="search-anchor js-anchor"
-                                                                href="#feeder-message">set your own
-                                                                custom message</a></div>
-                                                        <span
-                                                            class="discord-mention-wrapper discord-interactive">@thedylone</span>
-                                                        finished 2/10/1 with an ACS of 56.
-                                                    </div>
-                                                </div>
-                                                <img class="discord-embed-image"
-                                                    src="https://images-ext-2.discordapp.net/external/9F8b4U2-44i6TksQuy47x0LXRI4Xj1MhrNM_qf72JTo/https/c.tenor.com/kHcmsxlKHEAAAAAC/rock-one-eyebrow-raised-rock-staring.gif"
-                                                    alt="">
-                                            </div>
-                                            <img class="discord-embed-thumbnail"
-                                                src="https://media.valorant-api.com/maps/E2AD5C54-4114-A870-9641-8EA21279579A/splash.png"
-                                                alt="">
-                                        </div>
-                                        <div class="discord-embed-footer"><a class="search-anchor js-anchor"
-                                                href="#feeder-image">set
-                                                your own custom image</a></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </section>
-    </main>
-
-    <footer class="site-footer">
-        <div class="container">
-            <p class="site-footer__credit">made by thedylone</p>
-            <ul>
-                <li><a class="link" href="https://thedylone.com/">homepage</a></li>
-                <li><a class="link" href="https://github.com/thedylone" target="_blank" rel="noreferrer">github</a></li>
-                <li><a class="link" href="https://twitter.com/thedylone" target="_blank" rel="noreferrer">twitter</a></li>
-                <li><a class="link" href="https://www.linkedin.com/in/thedylone" target="_blank" rel="noreferrer">linkedin</a></li>
-                <li><a class="link" href="https://www.youtube.com/playlist?list=PLNoXhhzDZRr-eVYWu7YmfvaUN9AgfAedn" target="_blank" rel="noreferrer">youtube</a></li>
-            </ul>
-        </div>
-    </footer>
-    <!-- image modal -->
-    <div id="modal-image" class="modal">
-        <img class="modal-content__image" alt="">
+  <header class="pk-header">
+    <div class="pk-header-inner">
+      <a class="pk-brand" href="https://projects.thedylone.com/">Dylan Chua</a>
+      <ul class="pk-nav">
+        <li><a href="https://projects.thedylone.com/">Projects</a></li>
+        <li><a href="https://github.com/thedylone/laffey-bot" target="_blank" rel="noreferrer">Source</a></li>
+      </ul>
     </div>
-    <script>
-        discordTime();
-        const COMMANDS = Array.from(document.querySelectorAll(".discord-command-group")).map(x => x.id);
-        autocomplete($("#search-bar"), COMMANDS);
-        searchAnchor();
-        imagesOpenModal();
-        initScrollAnimate();
-    </script>
-</body>
+  </header>
 
+  <main class="pk-main">
+    <section class="pk-hero pk-container">
+      <p class="pk-eyebrow">Project · Tools</p>
+      <h1 class="pk-title">Laffey Bot</h1>
+      <p class="pk-lede">A Discord bot with Valorant commands. It watches the players you add and posts an update to your server after every match they finish.</p>
+      <div class="pk-actions">
+        <a class="pk-btn" href="https://discord.com/api/oauth2/authorize?client_id=946660168123445328&amp;permissions=414464855104&amp;scope=applications.commands%20bot" target="_blank" rel="noreferrer">Invite to server <span aria-hidden="true">↗</span></a>
+        <a class="pk-btn pk-btn-secondary" href="https://github.com/thedylone/laffey-bot" target="_blank" rel="noreferrer">View code <span aria-hidden="true">→</span></a>
+      </div>
+      <ul class="pk-tags">
+        <li class="pk-tag">Python</li>
+        <li class="pk-tag">disnake</li>
+        <li class="pk-tag">PostgreSQL</li>
+        <li class="pk-tag">Valorant API</li>
+      </ul>
+      <figure class="pk-figure pk-hero-media hero-banner">
+        <img src="static/images/bg.png" width="1920" height="1080" alt="A Valorant map in daylight, with Laffey peeking out of an archway">
+      </figure>
+    </section>
+
+    <nav class="pk-subnav" aria-label="On this page">
+      <div class="pk-subnav-inner">
+        <ul>
+          <li><a href="#about">About</a></li>
+          <li><a href="#get-started">Get started</a></li>
+          <li><a href="#commands">Commands</a></li>
+          <li><a href="#notifications">Notifications</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <section id="about" class="pk-section">
+      <div class="pk-container">
+        <p class="pk-eyebrow">01 — About</p>
+        <h2 class="pk-h2">Match updates for you and your friends</h2>
+        <div class="about-grid">
+          <div class="pk-prose">
+            <p>Add your Riot ID and the bot stores it in its database, then checks for new matches in the background. When a watched player finishes a game, it posts the result to your server: who played together, the score, the map, and any win or loss streaks.</p>
+            <p>Friends can ask to be pinged when you finish your match, and server admins can set custom messages and images for the feeder and streaker alerts. It was inspired by <a href="https://spycambot.net/" target="_blank" rel="noreferrer">spycambot</a>.</p>
+            <p>If you find it useful, you can <a href="https://ko-fi.com/thedylone" target="_blank" rel="noreferrer">support the project on Ko-fi</a>.</p>
+          </div>
+          <figure class="pk-figure about-figure">
+            <img src="static/images/laffey-bot.png" width="838" height="838" alt="Laffey Bot's avatar: the Discord mascot wearing white bunny-eared pigtails">
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="get-started" class="pk-section">
+      <div class="pk-container">
+        <p class="pk-eyebrow">02 — Get started</p>
+        <h2 class="pk-h2">Set it up in three steps</h2>
+        <ol class="steps pk-grid">
+          <li class="pk-card">
+            <span class="pk-label">Step 1</span>
+            <h3 class="pk-h3">Invite the bot</h3>
+            <p class="pk-muted">Use the invite button above to add Laffey Bot to a server you manage.</p>
+          </li>
+          <li class="pk-card">
+            <span class="pk-label">Step 2</span>
+            <h3 class="pk-h3">Pick a watch channel</h3>
+            <p class="pk-muted">Run <code>/set-channel</code> with the channel the bot should post updates to. This needs the manage messages permission.</p>
+          </li>
+          <li class="pk-card">
+            <span class="pk-label">Step 3</span>
+            <h3 class="pk-h3">Watch your account</h3>
+            <p class="pk-muted">Run <code>/valorant-watch</code> with your name and tag. Your next match result will show up in the channel.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="commands" class="pk-section">
+      <div class="pk-container">
+        <p class="pk-eyebrow">03 — Commands</p>
+        <h2 class="pk-h2">Every command, as a slash or prefix command</h2>
+        <div class="pk-prose">
+          <p class="pk-muted">Each command works as <code>/command</code> or with the <code>?</code> prefix. Search to jump to one.</p>
+        </div>
+        <div class="discord-window">
+        <header class="commands-section__header discord-section__header animate__animated" animation-style="fadeIn"
+            animation-duration="0.5s" animation-delay="0s">
+            <p class="discord-channel-name">commands</p>
+            <div class="search-wrapper">
+                <form autocomplete="off">
+                    <div class="autocomplete">
+                        <input id="search-bar" type="search" name="search-bar" placeholder="search a command..." aria-label="search commands">
+                        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="magnifying-glass"
+                            role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+                            class="svg-inline--fa fa-magnifying-glass">
+                            <path fill="currentColor"
+                                d="M500.3 443.7l-119.7-119.7c27.22-40.41 40.65-90.9 33.46-144.7C401.8 87.79 326.8 13.32 235.2 1.723C99.01-15.51-15.51 99.01 1.724 235.2c11.6 91.64 86.08 166.7 177.6 178.9c53.8 7.189 104.3-6.236 144.7-33.46l119.7 119.7c15.62 15.62 40.95 15.62 56.57 0C515.9 484.7 515.9 459.3 500.3 443.7zM79.1 208c0-70.58 57.42-128 128-128s128 57.42 128 128c0 70.58-57.42 128-128 128S79.1 278.6 79.1 208z"
+                                class=""></path>
+                        </svg>
+                        <div id="autocomplete-list"></div>
+                    </div>
+                </form>
+            </div>
+        </header>
+        <div class="discord-messages">
+            <!-- valorant-watch -->
+            <div id="valorant-watch" class="discord-command-group animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
+                <div class="discord-title">
+                    <div class="discord-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
+                            aria-hidden="true">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>valorant-watch</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/smh.gif">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">thedylone</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                use <span
+                                    class="discord-interaction-command-name discord-interactive">/valorant-watch</span>
+                                or prefix command
+                                <span class="discord-interaction-command-name discord-interactive">?valorant-watch
+                                    &lt;name&gt; &lt;tag without #&gt;</span>. the bot will automatically retrieve
+                                your
+                                information and store in the database. you will be able to receive updates from the
+                                bot,
+                                <a class="search-anchor js-anchor" href="#valorant-info">view your info</a>, and <a
+                                    class="search-anchor js-anchor" href="#valorant-wait">allow others to wait for
+                                    you</a>. note
+                                that <a class="search-anchor js-anchor" href="#set-channel">the watch channel for
+                                    the server must
+                                    be set first</a> if used in a server. if used
+                                in private messages, the bot will send updates to you directly instead.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="discord-message discord-mentioned">
+                    <div class="discord-interaction">
+                        <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
+                        <span class="discord-interaction-info">
+                            <span class="discord-message-username discord-interactive">thedylone</span>
+                        </span>
+                        <span class="discord-interaction-command"> used
+                            <span
+                                class="discord-interaction-command-name discord-interactive">/valorant-watch</span>
+                        </span>
+                    </div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                <span class="discord-mention-wrapper discord-interactive">@thedylone</span> database
+                                updated, user added. remove
+                                using /valorant-unwatch
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- valorant-unwatch -->
+            <div id="valorant-unwatch" class="discord-command-group animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
+                <div class="discord-title">
+                    <div class="discord-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
+                            aria-hidden="true">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>valorant-unwatch</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/smh.gif">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">thedylone</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                use <span
+                                    class="discord-interaction-command-name discord-interactive">/valorant-unwatch</span>
+                                or prefix command
+                                <span
+                                    class="discord-interaction-command-name discord-interactive">?valorant-unwatch</span>.
+                                your information will be removed and you will no longer receive updates from the
+                                bot,
+                                and others can no longer wait for you.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="discord-message discord-mentioned">
+                    <div class="discord-interaction">
+                        <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
+                        <span class="discord-interaction-info">
+                            <span class="discord-message-username discord-interactive">thedylone</span>
+                        </span>
+                        <span class="discord-interaction-command"> used
+                            <span
+                                class="discord-interaction-command-name discord-interactive">/valorant-unwatch</span>
+                        </span>
+                    </div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                <span class="discord-mention-wrapper discord-interactive">@thedylone</span> database
+                                updated, user removed. add again using /valorant-watch
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- valorant-info -->
+            <div id="valorant-info" class="discord-command-group animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
+                <div class="discord-title">
+                    <div class="discord-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
+                            aria-hidden="true">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>valorant-info</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/smh.gif">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">thedylone</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                use <span
+                                    class="discord-interaction-command-name discord-interactive">/valorant-info</span>
+                                or prefix command
+                                <span
+                                    class="discord-interaction-command-name discord-interactive">?valorant-info</span>.
+                                view your information stored in the database, and stats from your recently played
+                                competitve and unrated games.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-interaction">
+                        <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
+                        <span class="discord-interaction-info">
+                            <span class="discord-message-username discord-interactive">thedylone</span>
+                        </span>
+                        <span class="discord-interaction-command"> used
+                            <span class="discord-interaction-command-name discord-interactive">/valorant-info</span>
+                        </span>
+                    </div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-embed">
+                                <div class="discord-embed-left-border"></div>
+                                <div class="discord-embed-container">
+                                    <div class="discord-embed-content">
+                                        <div>
+                                            <div class="discord-embed-title">valorant info</div>
+                                            <div class="discord-embed-description">
+                                                <span
+                                                    class="discord-mention-wrapper discord-interactive">@thedylone</span>
+                                                saved info
+                                            </div>
+                                            <div class="discord-embed-fields">
+                                                <div class="discord-embed-field discord-embed-field-inline">
+                                                    <div class="discord-embed-field-title">username</div>
+                                                    GuessJewels#peko
+                                                </div>
+                                                <div class="discord-embed-field discord-embed-field-inline">
+                                                    <div class="discord-embed-field-title">last updated</div>
+                                                    <span class="discord-inline-timestamp">Today at 12:34 PM</span>
+                                                </div>
+                                                <div class="discord-embed-field">
+                                                    <div class="discord-embed-field-title">headshot %</div>
+                                                    100%
+                                                </div>
+                                                <div class="discord-embed-field">
+                                                    <div class="discord-embed-field-title">acs</div>
+                                                    750
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <img class="discord-embed-thumbnail" src="static/images/smh.gif" alt="">
+                                    </div>
+                                    <div class="discord-embed-footer">
+                                        <span>
+                                            <span>stats from last 5 recorded comp/unrated games</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- valorant-wait -->
+            <div id="valorant-wait" class="discord-command-group animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
+                <div class="discord-title">
+                    <div class="discord-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
+                            aria-hidden="true">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>valorant-wait</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/smh.gif">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">thedylone</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                use <span
+                                    class="discord-interaction-command-name discord-interactive">/valorant-wait
+                                    &lt;user&gt;</span>
+                                or prefix command
+                                <span class="discord-interaction-command-name discord-interactive">?valorant-wait
+                                    &lt;user&gt;</span>.
+                                the bot will ping you when the user you are waiting for has finished the match. the
+                                user must be in a database and being watched by the bot.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="discord-message discord-mentioned">
+                    <div class="discord-interaction">
+                        <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
+                        <span class="discord-interaction-info">
+                            <span class="discord-message-username discord-interactive">thedylone</span>
+                        </span>
+                        <span class="discord-interaction-command"> used
+                            <span class="discord-interaction-command-name discord-interactive">/valorant-wait</span>
+                        </span>
+                    </div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                <span class="discord-mention-wrapper discord-interactive">@thedylone</span> success,
+                                will notify when <span class="discord-mention-wrapper discord-interactive">@laffey
+                                    bot</span> is done.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- valorant-waitlist -->
+            <div id="valorant-waitlist" class="discord-command-group animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
+                <div class="discord-title">
+                    <div class="discord-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
+                            aria-hidden="true">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>valorant-waitlist</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/smh.gif">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">thedylone</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                use <span
+                                    class="discord-interaction-command-name discord-interactive">/valorant-waitlist</span>
+                                or prefix command
+                                <span
+                                    class="discord-interaction-command-name discord-interactive">?valorant-waitlist</span>.
+                                view the current waitlist. for privacy reasons, when used in a server, will only
+                                show watched users who are in the server. when used in private message, will only
+                                show users you are waiting for and users waiting for you.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-interaction">
+                        <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
+                        <span class="discord-interaction-info">
+                            <span class="discord-message-username discord-interactive">thedylone</span>
+                        </span>
+                        <span class="discord-interaction-command"> used
+                            <span
+                                class="discord-interaction-command-name discord-interactive">/valorant-waitlist</span>
+                        </span>
+                    </div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-embed">
+                                <div class="discord-embed-left-border"></div>
+                                <div class="discord-embed-container">
+                                    <div class="discord-embed-content">
+                                        <div>
+                                            <div class="discord-embed-title">valorant waitlist</div>
+                                            <div class="discord-embed-description">
+                                                waitlist of watched users
+                                            </div>
+                                            <div class="discord-embed-fields">
+                                                <div class="discord-embed-field">
+                                                    <div class="discord-embed-field-title">user</div>
+                                                    <span
+                                                        class="discord-mention-wrapper discord-interactive">@laffey
+                                                        bot</span>
+                                                </div>
+                                                <div class="discord-embed-field">
+                                                    <div class="discord-embed-field-title">waiters</div>
+                                                    <span
+                                                        class="discord-mention-wrapper discord-interactive">@thedylone</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <img class="discord-embed-thumbnail"
+                                            src="https://i.redd.it/pxwk9pc6q9n91.jpg" alt="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- valorant-ping -->
+            <div id="valorant-ping" class="discord-command-group animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
+                <div class="discord-title">
+                    <div class="discord-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
+                            aria-hidden="true">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>valorant-ping</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/smh.gif">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">thedylone</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                use prefix command
+                                <span
+                                    class="discord-interaction-command-name discord-interactive">?valorant-ping</span>.
+                                the bot will ping the set role for the server. note that the role has to be set
+                                first with <a class="search-anchor js-anchor" href="#set-role">set-role</a>.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="discord-message discord-mentioned">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                <span class="discord-role-wrapper">@Jewels</span>
+                            </div>
+                            <div class="discord-message-image">
+                                <img src="static/images/jewelsignal.jpg">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- set-channel -->
+            <div id="set-channel" class="discord-command-group animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
+                <div class="discord-title">
+                    <div class="discord-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
+                            aria-hidden="true">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>set-channel</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/smh.gif">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">thedylone</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                use <span class="discord-interaction-command-name discord-interactive">/set-channel
+                                    &lt;channel&gt;</span>
+                                or prefix command
+                                <span class="discord-interaction-command-name discord-interactive">?set-channel
+                                    &lt;channel&gt;</span>.
+                                set the channel the bot will send updates to in the server. only members with
+                                permissions to manage messages can use this. this command has to be run first before
+                                <a class="search-anchor js-anchor" href="#valorant-watch">valorant-watch</a> can be
+                                used in the
+                                server.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-interaction">
+                        <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
+                        <span class="discord-interaction-info">
+                            <span class="discord-message-username discord-interactive">thedylone</span>
+                        </span>
+                        <span class="discord-interaction-command"> used
+                            <span class="discord-interaction-command-name discord-interactive">/set-channel</span>
+                        </span>
+                    </div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                successfully set <code class="inline">#bot-channel</code> as watch channel for <code
+                                    class="inline">laffey's server</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- set-role -->
+            <div id="set-role" class="discord-command-group animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
+                <div class="discord-title">
+                    <div class="discord-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
+                            aria-hidden="true">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>set-role</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/smh.gif">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">thedylone</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                use <span class="discord-interaction-command-name discord-interactive">/set-role
+                                    &lt;role&gt;</span>
+                                or prefix command
+                                <span class="discord-interaction-command-name discord-interactive">?set-role
+                                    &lt;role&gt;</span>.
+                                set the role the bot will ping. only members with
+                                permissions to manage messages can use this. this command has to be run first before
+                                <a class="search-anchor js-anchor" href="#valorant-ping">valorant-ping</a> can be
+                                used in the
+                                server.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-interaction">
+                        <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
+                        <span class="discord-interaction-info">
+                            <span class="discord-message-username discord-interactive">thedylone</span>
+                        </span>
+                        <span class="discord-interaction-command"> used
+                            <span class="discord-interaction-command-name discord-interactive">/set-role</span>
+                        </span>
+                    </div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                successfully set role <code class="inline">@Jewels</code> as ping role for <code
+                                    class="inline">laffey's server</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- feeder-message -->
+            <div id="feeder-message" class="discord-command-group animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
+                <div class="discord-title">
+                    <div class="discord-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
+                            aria-hidden="true">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>feeder-message &lt; add | show | delete &gt;</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/smh.gif">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">thedylone</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                use <span
+                                    class="discord-interaction-command-name discord-interactive">/feeder-message
+                                </span>
+                                or prefix command
+                                <span class="discord-interaction-command-name discord-interactive">?feeder-message
+                                </span>.
+                                set custom messages for the feeder alert (max: 25, max length: 100 characters). the
+                                bot will randomly choose 1 from the list of messages. only members with
+                                permissions to manage messages can use this. if no custom message is set, the
+                                default messages will be used.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-interaction">
+                        <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
+                        <span class="discord-interaction-info">
+                            <span class="discord-message-username discord-interactive">thedylone</span>
+                        </span>
+                        <span class="discord-interaction-command"> used
+                            <span
+                                class="discord-interaction-command-name discord-interactive">/feeder-message</span>
+                        </span>
+                    </div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                successfully added custom feeder message for <code
+                                    class="inline">laffey's server</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- feeder-image -->
+            <div id="feeder-image" class="discord-command-group animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
+                <div class="discord-title">
+                    <div class="discord-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
+                            aria-hidden="true">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>feeder-image &lt; add | show | delete &gt;</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/smh.gif">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">thedylone</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                use <span class="discord-interaction-command-name discord-interactive">/feeder-image
+                                </span>
+                                or prefix command
+                                <span class="discord-interaction-command-name discord-interactive">?feeder-image
+                                </span>.
+                                set custom images for the feeder alert (max: 10, max url length: 100 characters).
+                                the bot will randomly choose 1 from the list of image. only members with
+                                permissions to manage messages can use this. if no custom image is set, the default
+                                images will be used.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-interaction">
+                        <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
+                        <span class="discord-interaction-info">
+                            <span class="discord-message-username discord-interactive">thedylone</span>
+                        </span>
+                        <span class="discord-interaction-command"> used
+                            <span class="discord-interaction-command-name discord-interactive">/feeder-image</span>
+                        </span>
+                    </div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                successfully added custom feeder image for <code
+                                    class="inline">laffey's server</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- streaker-message -->
+            <div id="streaker-message" class="discord-command-group animate__animated" animation-style="fadeIn"
+                animation-duration="0.5s" animation-delay="0s">
+                <div class="discord-title">
+                    <div class="discord-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" class="discord-icon" x="0" y="0"
+                            aria-hidden="true">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>streaker-message &lt; add | show | delete &gt;</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/smh.gif">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">thedylone</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                use <span
+                                    class="discord-interaction-command-name discord-interactive">/streaker-message
+                                </span>
+                                or prefix command
+                                <span class="discord-interaction-command-name discord-interactive">?streaker-message
+                                </span>.
+                                set custom messages for the streaker alert (max: 25, max length: 100 characters).
+                                the
+                                bot will randomly choose 1 from the list of messages. only members with
+                                permissions to manage messages can use this. if no custom message is set, the
+                                default messages will be used.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-interaction">
+                        <img class="discord-interaction-avatar" src="static/images/smh.gif" alt="">
+                        <span class="discord-interaction-info">
+                            <span class="discord-message-username discord-interactive">thedylone</span>
+                        </span>
+                        <span class="discord-interaction-command"> used
+                            <span
+                                class="discord-interaction-command-name discord-interactive">/streaker-message</span>
+                        </span>
+                    </div>
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                successfully added custom streaker message for <code
+                                    class="inline">laffey's server</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="notifications" class="pk-section">
+      <div class="pk-container">
+        <p class="pk-eyebrow">04 — Notifications</p>
+        <h2 class="pk-h2">What lands in your server after a match</h2>
+        <div class="pk-prose">
+          <p class="pk-muted">Once you're watched, the bot posts to your server's watch channel after each match. Winning streaks and losses get their own alerts.</p>
+        </div>
+        <div class="discord-window">
+        <header class="notifs-section__header discord-section__header animate__animated" animation-style="fadeIn"
+            animation-duration="0.5s" animation-delay="0s">
+            <p class="discord-channel-name">notifs</p>
+        </header>
+        <div class="discord-messages">
+            <!-- win-notif -->
+            <div id="win-notif" class="animate__animated" animation-style="fadeIn" animation-duration="0.5s"
+                animation-delay="0s">
+                <div class="discord-title">
+                    <h3>get notified when you and your friends play together</h3>
+                </div>
+                <div class="discord-message discord-mentioned">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-message-text">
+                                removing <span class="discord-mention-wrapper discord-interactive">@thedylone</span>
+                                from waitlist
+                            </div>
+                            <div class="discord-embed">
+                                <div class="discord-embed-left-border" style="background: #17DC33;"></div>
+                                <div class="discord-embed-container">
+                                    <div class="discord-embed-content">
+                                        <div>
+                                            <div class="discord-embed-title">valorant watch</div>
+                                            <div class="discord-embed-description">
+                                                <span
+                                                    class="discord-mention-wrapper discord-interactive">@thedylone</span>
+                                                and <span
+                                                    class="discord-mention-wrapper discord-interactive">@laffey
+                                                    bot</span> just wonnered a Unrated game <b><u>13 - 8</u></b> on
+                                                <b>Breeze</b> <span class="discord-fake-timestamp">30 minutes
+                                                    ago</span>!
+                                            </div>
+                                            <div class="discord-embed-fields">
+                                                <div class="discord-embed-field">
+                                                    <div class="discord-embed-field-title">streaker alert 👀👀 <a
+                                                            class="search-anchor js-anchor"
+                                                            href="#streaker-message">set your own
+                                                            custom message</a>
+                                                    </div>
+                                                </div>
+                                                <span>
+                                                    <span
+                                                        class="discord-mention-wrapper discord-interactive">@thedylone</span>
+                                                    is on a 3-game winning streak!<br>
+                                                    <span
+                                                        class="discord-mention-wrapper discord-interactive">@laffey
+                                                        bot</span> is on a 5-game winning streak!
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <img class="discord-embed-thumbnail"
+                                            src="https://media.valorant-api.com/maps/2FB9A4FD-47B8-4E7D-A969-74B4046EBD53/splash.png"
+                                            alt="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- loss-notif -->
+            <div id="loss-notif" class="animate__animated" animation-style="fadeIn" animation-duration="0.5s"
+                animation-delay="0s">
+                <div class="discord-title">
+                    <h3>customise the feeder alert for your server</h3>
+                </div>
+                <div class="discord-message">
+                    <div class="discord-message-content">
+                        <div class="discord-message-avatar">
+                            <img src="static/images/avatar.png">
+                        </div>
+                        <div class="discord-message-body">
+                            <div class="discord-message-header">
+                                <span class="discord-message-info">
+                                    <span class="discord-message-username discord-interactive">laffey bot</span>
+                                    <span class="discord-message-bottag">BOT</span>
+                                </span>
+                                <span class="discord-message-timestamp">
+                                    Today at 12:34 PM
+                                </span>
+                            </div>
+                            <div class="discord-embed">
+                                <div class="discord-embed-left-border" style="background: #FC2828;"></div>
+                                <div class="discord-embed-container">
+                                    <div class="discord-embed-content">
+                                        <div>
+                                            <div class="discord-embed-title">valorant watch</div>
+                                            <div class="discord-embed-description">
+                                                <span
+                                                    class="discord-mention-wrapper discord-interactive">@thedylone</span>
+                                                just losted a competitve game <b><u>4 - 13</u></b> (surrendered) on
+                                                <b>Icebox</b> <span class="discord-fake-timestamp">a few seconds
+                                                    ago</span>!
+                                            </div>
+                                            <div class="discord-embed-fields">
+                                                <div class="discord-embed-field">
+                                                    <div class="discord-embed-field-title">feeder alert❗❗ <a
+                                                            class="search-anchor js-anchor"
+                                                            href="#feeder-message">set your own
+                                                            custom message</a></div>
+                                                    <span
+                                                        class="discord-mention-wrapper discord-interactive">@thedylone</span>
+                                                    finished 2/10/1 with an ACS of 56.
+                                                </div>
+                                            </div>
+                                            <img class="discord-embed-image"
+                                                src="https://images-ext-2.discordapp.net/external/9F8b4U2-44i6TksQuy47x0LXRI4Xj1MhrNM_qf72JTo/https/c.tenor.com/kHcmsxlKHEAAAAAC/rock-one-eyebrow-raised-rock-staring.gif"
+                                                alt="">
+                                        </div>
+                                        <img class="discord-embed-thumbnail"
+                                            src="https://media.valorant-api.com/maps/E2AD5C54-4114-A870-9641-8EA21279579A/splash.png"
+                                            alt="">
+                                    </div>
+                                    <div class="discord-embed-footer"><a class="search-anchor js-anchor"
+                                            href="#feeder-image">set
+                                            your own custom image</a></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pk-footer">
+    <div class="pk-footer-inner">
+      <span>© 2026 Dylan Chua</span>
+      <div class="pk-footer-links">
+        <a href="https://projects.thedylone.com/">All projects</a>
+        <a href="https://thedylone.com">Portfolio</a>
+        <a href="https://github.com/thedylone" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- image viewer for the mock-up screenshots -->
+  <div id="modal-image" class="modal">
+    <img class="modal-content__image" alt="">
+  </div>
+  <script>
+    discordTime();
+    const COMMANDS = Array.from(document.querySelectorAll(".discord-command-group")).map(x => x.id);
+    autocomplete($("#search-bar"), COMMANDS);
+    searchAnchor();
+    imagesOpenModal();
+    initScrollAnimate();
+  </script>
+</body>
 </html>
