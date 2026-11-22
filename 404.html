@@ -3,129 +3,113 @@
 
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>laffey bot</title>
-    <meta name="description" content="a discord bot with valorant commands, sending updates by watching users in the database.">
-    <meta property="og:title" content="thedylone" />
-    <meta property="og:description" content="a discord bot with valorant commands, sending updates by watching users in the database." />
-    <meta property="twitter:card" content="summary" />
-    <meta property="twitter:creator" content="@thedylone" />
-    <meta property="twitter:image" content="https://thedylone.github.io/laffey-bot/static/images/laffey-bot.png" />
-    <meta property="og:type" content="article" />
-    <meta property="og:url" content="https://thedylone.github.io/laffey-bot/" />
-    <meta property="og:image" content="https://thedylone.github.io/laffey-bot/static/images/bg.png" />
-    <link rel="shortcut icon" href="https://thedylone.github.io/static/favicon/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://thedylone.github.io/static/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="https://thedylone.github.io/static/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://thedylone.github.io/static/favicon/favicon-16x16.png">
-    <link rel="manifest" href="https://thedylone.github.io/static/favicon/site.webmanifest">
+    <title>page not found · laffey bot</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/png" href="/laffey-bot/static/images/avatar.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,300,400,600,700,800%7COpen+Sans+Condensed:300&amp;subset=latin,cyrillic"
-        rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="https://thedylone.github.io/static/css/screen.css">
-    <link rel="stylesheet" href="https://thedylone.github.io/static/css/error.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://thedylone.github.io/static/js/body.js"></script>
-    <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
-    <script src="https://kit.fontawesome.com/3bcd4a3e8d.js" crossorigin="anonymous"></script>
-    <noscript>
-        <style>
-            [class*="fa-"]:before {
-                content: "♥";
-            }
-        </style>
-    </noscript>
+        href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500&family=IBM+Plex+Sans:wght@400&family=IBM+Plex+Mono:wght@400&display=swap"
+        rel="stylesheet">
+    <!-- Styles are inline: this page is served at arbitrary paths, so relative links would break. -->
+    <style>
+        :root {
+            --color-bg: #f9f9f6;
+            --color-text: #0f172a;
+            --color-text-muted: rgba(15, 23, 42, 0.64);
+            --color-navy: #1e2f4d;
+            --color-gold: #b8860b;
+            --color-hairline-strong: rgba(15, 23, 42, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 2rem 1rem;
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+        }
+
+        main {
+            max-width: 36rem;
+        }
+
+        img {
+            display: block;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6em;
+            margin: 0 0 1rem;
+            font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--color-navy);
+        }
+
+        .eyebrow::before {
+            content: '';
+            width: 1.75rem;
+            height: 1px;
+            background: var(--color-gold);
+        }
+
+        h1 {
+            margin: 0 0 1rem;
+            font-family: 'Newsreader', Georgia, serif;
+            font-weight: 500;
+            font-size: clamp(2.6rem, 8vw, 4.6rem);
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+
+        p {
+            margin: 0 0 1.5rem;
+            color: var(--color-text-muted);
+        }
+
+        a {
+            font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+            font-size: 0.85rem;
+            color: var(--color-navy);
+            text-decoration: none;
+            border-bottom: 1px solid var(--color-hairline-strong);
+            margin-right: 1.25rem;
+        }
+
+        a:hover,
+        a:focus-visible {
+            color: var(--color-gold);
+            border-color: var(--color-gold);
+        }
+    </style>
 </head>
 
-<body class="no-js">
-    <script>
-        $('body').removeClass('no-js');
-    </script>
-    <div id="loader-wrapper">
-        <div id="loader">
-            <p>loading....</p>
-            <img src="https://thedylone.github.io/static/images/pip.gif">
-        </div>
-    </div>
-    <!-- header-->
-    <header class="main-header">
-        <a class="skip-nav-link" href="#home">skip navigation</a>
-        <div class="first-nav">
-            <div class="container">
-                <nav class="first-nav__links">
-                    <ul>
-                        <li>
-                            <a href="https://thedylone.github.io/">homepage</a>
-                        </li>
-                    </ul>
-                </nav>
-                <a class="first-nav__navcontrol icon icon_menu js-navcontrol" href="#"><i class="fas fa-bars"></i></a>
-            </div>
-        </div>
-        <div class="second-nav js-nav">
-            <div class="container"><a class="second-nav__logo"><span></span></a>
-                <nav class="menu">
-                    <ul>
-                        <li><a class="js-link js-anchor is-selected" href="#home">404</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-    </header>
-    <!-- error section-->
-    <section class="error-section" id="home">
-        <div class="container animate__animated" animation-style="fadeIn" animation-duration="0.5s"
-            animation-delay="0s">
-            <header class="error-section__header">
-                <h2>404</h2>
-                <h4>how did you get here?</h4>
-            </header>
-            <div class="error-section__image">
-                <img src="https://thedylone.github.io/static/images/smh.gif">
-            </div>
-        </div>
-    </section>
-    <!-- footer-->
-    <footer class="main-footer">
-        <div class="container">
-            <p class="main-footer__copyright"><span>made by thedylone</span></p>
-            <a class="main-footer__gotop js-link js-anchor" style="opacity: 1;" href="#home"><i
-                    class="fas fa-arrow-circle-up"></i></a>
-            <p class="main-footer__links"><a onclick="openModal($('#modal-credits'))">credits</a></p>
-        </div>
-    </footer>
-    <!-- modal stuff -->
-    <script>
-        function openModal(modal) {
-            modal.css("display", "block");;
-            const body = document.body;
-            body.style.top = -1 * window.pageYOffset + 'px';
-            body.style.position = 'fixed';
-        }
-        window.onclick = function (e) {
-            modal = document.getElementById("modal-credits")
-            if (e.target == modal) {
-                modal.style.display = "none";
-                const body = document.body;
-                const scrollY = body.style.top;
-                body.style.position = '';
-                body.style.top = '';
-                window.scrollTo(0, parseInt(scrollY || '0') * -1);
-            }
-        }
-    </script>
-    <!-- credits modal -->
-    <div id="modal-credits" class="modal">
-        <div class="modal-content">
-            <ul class="fa-ul">
-                <li><span class="fa-li"><i class="fas fa-check"></i><a href="https://fontawesome.com/"
-                            target="_blank"></span>font awesome</a> for the pretty nice icons</li>
-            </ul>
-
-        </div>
-    </div>
+<body>
+    <main>
+        <img src="/laffey-bot/static/images/smh.gif" alt="">
+        <p class="eyebrow">404 | laffey bot</p>
+        <h1>how did you get here?</h1>
+        <p>This page doesn't exist. Head back to the bot's page for its commands.</p>
+        <a href="/laffey-bot/">back to laffey bot</a>
+        <a href="https://thedylone.pages.dev/">thedylone</a>
+    </main>
 </body>
 
 </html>

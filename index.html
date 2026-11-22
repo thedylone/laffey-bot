@@ -3,148 +3,101 @@
 
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>laffey bot</title>
     <meta name="description"
         content="a discord bot with valorant commands, sending updates by watching users in the database.">
-    <meta property="og:title" content="thedylone" />
+    <meta property="og:title" content="laffey bot" />
     <meta property="og:description"
         content="a discord bot with valorant commands, sending updates by watching users in the database." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://projects.thedylone.com/laffey-bot/" />
+    <meta property="og:image" content="https://projects.thedylone.com/laffey-bot/static/images/bg.png" />
     <meta property="twitter:card" content="summary" />
     <meta property="twitter:creator" content="@thedylone" />
-    <meta property="twitter:image" content="https://thedylone.github.io/laffey-bot/static/images/laffey-bot.png" />
-    <meta property="og:type" content="article" />
-    <meta property="og:url" content="https://thedylone.github.io/laffey-bot/" />
-    <meta property="og:image" content="https://thedylone.github.io/laffey-bot/static/images/bg.png" />
-    <link rel="shortcut icon" href="https://thedylone.github.io/static/favicon/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://thedylone.github.io/static/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="https://thedylone.github.io/static/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://thedylone.github.io/static/favicon/favicon-16x16.png">
-    <link rel="manifest" href="https://thedylone.github.io/static/favicon/site.webmanifest">
+    <meta property="twitter:image" content="https://projects.thedylone.com/laffey-bot/static/images/laffey-bot.png" />
+    <link rel="icon" type="image/png" href="static/images/avatar.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,300,400,600,700,800%7COpen+Sans+Condensed:300&amp;subset=latin,cyrillic"
-        rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="https://thedylone.github.io/static/css/screen.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+        href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="static/css/site.css">
     <link rel="stylesheet" href="static/css/custom.css">
+    <script>document.documentElement.classList.add('js');</script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
-    <script src="https://thedylone.github.io/static/js/body.js"></script>
     <script src="static/js/body.js"></script>
-    <script src="https://kit.fontawesome.com/3bcd4a3e8d.js" crossorigin="anonymous"></script>
-    <noscript>
-        <style>
-            [class*="fa-"]:before {
-                content: "♥";
-            }
-        </style>
-    </noscript>
 </head>
 
-<body class="no-js">
-    <script>
-        $('body').removeClass('no-js');
-    </script>
-    <div id="loader-wrapper">
-        <div id="loader">
-            <p>loading...</p>
-            <img src="https://thedylone.github.io/static/images/pip.gif">
-        </div>
-    </div>
-    <!-- header-->
-    <header class="main-header">
-        <a class="skip-nav-link" href="#home">skip navigation</a>
-        <div class="first-nav">
-            <div class="container">
-                <nav class="first-nav__links">
-                    <ul>
-                        <li>
-                            <a href="https://thedylone.github.io/">homepage</a>
-                        </li>
-                    </ul>
-                </nav>
-                <a class="first-nav__navcontrol icon icon_menu js-navcontrol" href="#"><i class="fas fa-bars"></i></a>
-            </div>
-        </div>
-        <div class="second-nav js-nav">
-            <div class="container"><a class="second-nav__logo"><span></span></a>
-                <nav class="menu">
-                    <ul>
-                        <li><a class="js-link js-anchor is-selected" href="#home">home</a></li>
-                        <li><a class="js-link js-anchor" href="#about">about</a></li>
-                        <li><a class="js-link js-anchor" href="#commands">commands</a></li>
-                        <li><a class="js-link js-anchor" href="#notifs">notifs</a></li>
-                    </ul>
-                </nav>
-            </div>
+<body>
+    <a class="skip-link" href="#main">skip to content</a>
+    <header class="site-header">
+        <div class="container">
+            <a class="site-header__home" href="https://thedylone.pages.dev/">thedylone</a>
+            <nav class="site-nav" aria-label="page">
+                <ul>
+                    <li><a href="#about">about</a></li>
+                    <li><a href="#commands">commands</a></li>
+                    <li><a href="#notifs">notifs</a></li>
+                    <li><a href="https://github.com/thedylone/laffey-bot">source</a></li>
+                </ul>
+            </nav>
         </div>
     </header>
-    <!-- home section-->
-    <section class="home-section" id="home">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/parallax/3.1.0/parallax.min.js"></script>
-        <div class="home-scene" id="scene">
-            <div data-depth="0.4" class="home-section__bg">
-                <img src="static/images/bg.png">
-            </div>
-            <div class="home-section__header-wrapper" data-depth="0.2">
-                <header class="home-section__header">
-                    <h1>laffey bot</h1>
-                    <h2>a <i class="fab fa-discord"></i> discord bot</h2>
-                </header>
-            </div>
-        </div>
-        <!-- parallax js -->
-        <script>
-            var scene = document.getElementById('scene');
-            var parallaxInstance = new Parallax(scene, {
-                relativeInput: true,
-                hoverOnly: true,
-                invertX: true,
-                invertY: true
-            });
-        </script>
-    </section>
-    <!-- about section-->
-    <section class="about-section" id="about">
-        <div class="container">
-            <div class="about-section__card animate__animated" animation-style="fadeInUp" animation-duration="1s"
-                animation-delay="0.5s">
-                <header class="about-section__card-header">
-                    <h2>about</h2>
-                </header>
-                <div class="about-section__card-info">
-                    <p>a discord bot with valorant commands, sending updates by watching users in the database. inspired
-                        by <a href="https://spycambot.net/" target="__blank">spycambot</a></p>
+
+    <main id="main">
+        <!-- intro -->
+        <section class="section hero" id="home">
+            <div class="container">
+                <div class="hero__grid">
+                    <div class="hero__text" id="about">
+                        <p class="eyebrow">project | discord bot</p>
+                        <h1 class="heading-xl">laffey bot</h1>
+                        <p class="lede">a discord bot with valorant commands, sending updates by watching users in
+                            the database. inspired by <a href="https://spycambot.net/" target="_blank"
+                                rel="noreferrer">spycambot</a>.</p>
+                        <div class="hero__actions">
+                            <a class="button button--primary"
+                                href="https://discord.com/api/oauth2/authorize?client_id=946660168123445328&permissions=414464855104&scope=applications.commands%20bot">invite
+                                to server</a>
+                            <a class="button" href="#commands">view commands</a>
+                            <a class="link" href="https://ko-fi.com/thedylone" target="_blank"
+                                rel="noreferrer">support on ko-fi</a>
+                        </div>
+                        <ul class="tag-row">
+                            <li class="tag">python</li>
+                            <li class="tag">disnake</li>
+                            <li class="tag">postgres</li>
+                            <li class="tag">valorant api</li>
+                        </ul>
+                    </div>
+                    <figure class="hero__figure">
+                        <img src="static/images/laffey-bot.png" width="838" height="838"
+                            alt="laffey bot logo: the discord mascot wearing white bunny-eared pigtails">
+                    </figure>
                 </div>
-                <div class="about-section__card-buttons">
-                    <a class="discord-button"
-                        href="https://discord.com/api/oauth2/authorize?client_id=946660168123445328&permissions=414464855104&scope=applications.commands%20bot">invite
-                        to server</a>
-                    <a class="js-anchor" href="#commands">view commands</a>
-                </div>
-                <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-                <script type='text/javascript'>
-                    kofiwidget2.init('Support Me on Ko-fi', '#29abe0', 'thedylone');
-                    kofiwidget2.draw();
-                </script>
+                <figure class="hero__banner">
+                    <img src="static/images/bg.png" width="1920" height="1080" alt="">
+                </figure>
             </div>
-            <figure class="about-section__figure animate__animated" animation-style="fadeInRight"
-                animation-duration="1s" animation-delay="0.5s">
-                <img src="static/images/laffey-bot.png">
-            </figure>
-        </div>
-    </section>
+        </section>
+
     <!-- commands section -->
-    <section class="commands-section discord-section" id="commands">
+    <section class="section commands-section discord-section" id="commands">
         <div class="container">
+            <div class="section-intro">
+                <p class="eyebrow">commands | slash &amp; prefix</p>
+                <h2 class="heading">Commands</h2>
+                <p class="lede">every command works as a slash command or with the <code>?</code> prefix. search below to jump to one.</p>
+            </div>
+            <div class="discord-window">
             <header class="commands-section__header discord-section__header animate__animated" animation-style="fadeIn"
                 animation-duration="0.5s" animation-delay="0s">
-                <h2>commands</h2>
+                <p class="discord-channel-name">commands</p>
                 <div class="search-wrapper">
                     <form autocomplete="off">
                         <div class="autocomplete">
-                            <input id="search-bar" type="text" name="search-bar" placeholder="search a command...">
+                            <input id="search-bar" type="search" name="search-bar" placeholder="search a command..." aria-label="search commands">
                             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="magnifying-glass"
                                 role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
                                 class="svg-inline--fa fa-magnifying-glass">
@@ -1034,14 +987,21 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
     </section>
     <!-- notifs section -->
-    <section class="notifs-section discord-section" id="notifs">
+    <section class="section notifs-section discord-section" id="notifs">
         <div class="container">
+            <div class="section-intro">
+                <p class="eyebrow">notifs | match updates</p>
+                <h2 class="heading">Notifications</h2>
+                <p class="lede">once you are watched, the bot posts to your server's watch channel after each match.</p>
+            </div>
+            <div class="discord-window">
             <header class="notifs-section__header discord-section__header animate__animated" animation-style="fadeIn"
                 animation-duration="0.5s" animation-delay="0s">
-                <h2>notifs</h2>
+                <p class="discord-channel-name">notifs</p>
             </header>
             <div class="discord-messages">
                 <!-- win-notif -->
@@ -1175,77 +1135,34 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
     </section>
-    <!-- discord messages js -->
-    <script>
-        discordTime()
-    </script>
-    <!-- social section-->
-    <div class="contacts-section" id="socials">
-        <div class="card-frame">
-            <section data-tilt data-tilt-scale="1.2" data-tilt-glare="true" data-tilt-maxglare=".2" class="contact-card"
-                id="card">
-                <div class="contact-info">
-                    <h1>thedylone</h1>
-                    <div class="contact-socials">
-                        <a href="https://twitter.com/thedylone" target="_blank"><i class="fab fa-twitter"></i></a>
-                        <a href="https://github.com/thedylone" target="_blank"><i class="fab fa-github"></i></a>
-                        <a href="https://www.linkedin.com/in/thedylone" target="_blank"><i
-                                class="fab fa-linkedin"></i></a>
-                        <a href="https://www.instagram.com/lan_dy_lan/" target="_blank"><i
-                                class="fab fa-instagram"></i></a>
-                        <a href="https://www.youtube.com/playlist?list=PLNoXhhzDZRr-eVYWu7YmfvaUN9AgfAedn"
-                            target="_blank"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <!-- card js -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tilt.js/1.2.1/tilt.jquery.min.js"></script>
-    </div>
-    <!-- footer-->
-    <footer class="main-footer">
+    </main>
+
+    <footer class="site-footer">
         <div class="container">
-            <p class="main-footer__copyright"><span>made by thedylone</span></p>
-            <a class="main-footer__gotop js-link js-anchor" style="opacity: 1;" href="#home"><i
-                    class="fas fa-arrow-circle-up"></i></a>
-            <p class="main-footer__links"><a onclick="openModal($('#modal-credits'))">credits</a></p>
+            <p class="site-footer__credit">made by thedylone</p>
+            <ul>
+                <li><a class="link" href="https://thedylone.pages.dev/">homepage</a></li>
+                <li><a class="link" href="https://github.com/thedylone" target="_blank" rel="noreferrer">github</a></li>
+                <li><a class="link" href="https://twitter.com/thedylone" target="_blank" rel="noreferrer">twitter</a></li>
+                <li><a class="link" href="https://www.linkedin.com/in/thedylone" target="_blank" rel="noreferrer">linkedin</a></li>
+                <li><a class="link" href="https://www.youtube.com/playlist?list=PLNoXhhzDZRr-eVYWu7YmfvaUN9AgfAedn" target="_blank" rel="noreferrer">youtube</a></li>
+            </ul>
         </div>
     </footer>
-    <!-- credits modal -->
-    <div id="modal-credits" class="modal">
-        <div class="modal-content">
-            <ul class="fa-ul">
-                <li><span class="fa-li"><i class="fas fa-check"></i><a href="https://fontawesome.com/"
-                            target="_blank"></span>font awesome</a> for the pretty nice icons</li>
-            </ul>
-
-        </div>
-    </div>
     <!-- image modal -->
     <div id="modal-image" class="modal">
-        <img class="modal-content__image">
+        <img class="modal-content__image" alt="">
     </div>
-    <!-- search bar js -->
     <script>
+        discordTime();
         const COMMANDS = Array.from(document.querySelectorAll(".discord-command-group")).map(x => x.id);
         autocomplete($("#search-bar"), COMMANDS);
         searchAnchor();
-    </script>
-    <!-- modal stuff -->
-    <script>
-        window.onclick = function (e) {
-            if ($(e.target).attr("class") == "modal") {
-                e.target.style.display = "none";
-                const body = document.body;
-                const scrollY = body.style.top;
-                body.style.position = '';
-                body.style.top = '';
-                window.scrollTo(0, parseInt(scrollY || '0') * -1);
-            }
-        };
-        imagesOpenModal()
+        imagesOpenModal();
+        initScrollAnimate();
     </script>
 </body>
 

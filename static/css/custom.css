@@ -12,165 +12,171 @@
     font-style: normal;
 }
 
-body {
-    scroll-behavior: smooth;
+
+/* Page layout around the Discord mock-ups. Base styles are in site.css. */
+.hero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: clamp(1.5rem, 5vw, 4rem);
+    align-items: center;
 }
 
-.home-section, .home-scene, .home-section__bg {
-    height: calc(100vh - var(--footer-height));
-    max-height: fit-content;
-    transition: height 1s;
+.hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    margin-top: 1.75rem;
 }
 
-.home-section__bg video, .home-section__bg img {
-    height: 120%;
-    width: auto;
-    min-width: 110%;
-    filter: brightness(50%);
+.hero__figure {
+    margin: 0;
+    justify-self: center;
+    width: min(100%, 22rem);
 }
 
-@media screen and (max-width:1200px) {
-    .home-section, .home-scene, .home-section__bg {
-        height: 80vh;
-    }
-}
-
-@media screen and (max-width:800px) {
-    .home-section, .home-scene, .home-section__bg {
-        height: 60vh;
-    }
-}
-
-@media screen and (max-width:480px) {
-    .home-section, .home-scene, .home-section__bg {
-        height: 40vh;
-    }
-}
-
-/* about css */
-
-.about-section .container {
-    display: table;
-}
-
-.about-section__card {
-    display: table-cell;
-    width: 60%;
-    position: relative;
-    vertical-align: middle;
-    text-align: center;
-    color: rgba(255, 255, 255, .9);
-    transition: 1s ease;
-    padding: 20px;
-}
-
-.about-section__card-header {
-    padding: 20px;
-}
-
-.about-section__card-info {
-    padding: 20px;
-}
-
-.about-section__card-buttons {
-    padding: 10px;
-}
-
-.about-section__card-buttons a {
-    display: inline-block;
+.hero__figure img {
+    display: block;
     width: 100%;
-    max-width: 200px;
-    background-color: #5fddeb;
+    height: auto;
+    border-radius: 50%;
+    border: 1px solid var(--color-card-border);
+    box-shadow: 0 0 0 0.6rem var(--color-gold-soft);
+}
+
+.hero__banner {
+    margin: clamp(2rem, 6vw, 3.5rem) 0 0;
+}
+
+.hero__banner img {
+    display: block;
+    width: 100%;
+    height: clamp(9rem, 26vw, 18rem);
+    object-fit: cover;
+    object-position: center 60%;
+    border-radius: 0.9rem;
+    border: 1px solid var(--color-card-border);
+}
+
+@media screen and (max-width: 720px) {
+    .hero__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero__figure {
+        order: -1;
+        width: min(11rem, 50%);
+    }
+}
+
+.section-intro .lede code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--color-navy);
+    background: var(--color-gold-soft);
     border: none;
-    padding: 10px 0;
-    margin: 8px;
-    border-radius: 50px;
-    position: relative;
-    cursor: pointer;
+    border-radius: 0.3rem;
+    padding: 0.05em 0.35em;
 }
 
-.about-section__card-buttons a:hover {
-    color: inherit;
-    background-color: #47bfed;
+/* Scroll-in animations (keyframes match the animate.css names used in the markup). */
+.js .animate__animated {
+    opacity: 0;
 }
 
-.about-section__card-buttons a:active {
-    background-color: #3aace0;
+@media (prefers-reduced-motion: reduce) {
+    .js .animate__animated {
+        opacity: 1;
+        animation: none !important;
+    }
 }
 
-.about-section__card-buttons .discord-button {
-    background-color: hsl(235, 85.6%, 64.7%);
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.about-section__card-buttons .discord-button:hover {
-    background-color: hsl(235, 51.4%, 52.4%);
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translate3d(0, 1.5rem, 0); }
+    to { opacity: 1; transform: none; }
 }
 
-.about-section__card-buttons .discord-button:active {
-    background-color: hsl(235, 46.7%, 44.1%);
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translate3d(1.5rem, 0, 0); }
+    to { opacity: 1; transform: none; }
 }
 
-.about-section__card-buttons a::after {
-    content: "";
-    position: absolute;
-    right: 1.4em;
-    top: 50%;
-    transform: translateY(-50%);
-    transition: 0.2s ease;
-    background-image: url("../images/arrow.png");
-    background-repeat: no-repeat;
-    background-size: contain;
-    width: 10px;
-    height: 13px;
+/* Full-size image viewer for the mock-up screenshots. */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.82);
+    cursor: zoom-out;
 }
 
-.about-section__card-buttons a:hover:after {
-    right: 1.2em;
+.modal-content__image {
+    max-width: min(90vw, 900px);
+    max-height: 85vh;
+    border-radius: 0.5rem;
 }
 
-.about-section__figure {
-    display: table-cell;
-    width: 40%;
-    position: relative;
-    transition: all 1s ease;
-}
-
-.about-section__figure img {
+body[style*="fixed"] {
     width: 100%;
 }
 
-/* about @media */
 
-@media screen and (max-width:800px) {
-    .about-section__card {
-        display: block;
-        width: 100%;
-    }
-
-    .about-section__figure {
-        display: none;
-    }
+/* Discord mock-ups: kept in Discord's own dark theme, framed as a window on the cream page. */
+.discord-window {
+    margin-top: 2rem;
+    border-radius: 0.9rem;
+    overflow: hidden;
+    background: #36393e;
+    border: 1px solid #202225;
+    box-shadow: 0 18px 40px -24px rgba(15, 23, 42, 0.55);
 }
 
-.discord-section {
-    background: #2f3136;
-    padding-top: 50px;
+.discord-window * {
+    font-family: Whitney, 'IBM Plex Sans', sans-serif;
 }
 
-.discord-section * {
-    font-family: Whitney;
-}
-
-.discord-section img {
+.discord-window img {
     cursor: pointer;
 }
 
 .discord-section__header {
-    padding: 10px;
+    min-height: 3.25rem;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
     position: relative;
     background-color: #36393f;
     box-shadow: 0 2px 2px 0 #202225;
     z-index: 2;
+}
+
+.discord-channel-name {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.discord-channel-name::before {
+    content: "#";
+    margin-right: 0.4em;
+    color: #72767d;
+}
+
+.discord-title h3 {
+    font-family: Whitney, 'IBM Plex Sans', sans-serif;
+    font-weight: bold;
+    font-size: 1.1rem;
+    line-height: 24px;
+    color: #fff;
 }
 
 .search-wrapper {
@@ -199,11 +205,19 @@ body {
     background-color: #202225;
     float: right;
     color: #dcddde;
-    padding: 10px;
+    padding: 10px 32px 10px 10px;
     width: 100%;
     height: 100%;
+    border: none;
     border-radius: 4px;
+    font-size: 0.875rem;
+    -webkit-appearance: none;
+    appearance: none;
     transition: width 0.25s;
+}
+
+.search-wrapper input::placeholder {
+    color: #72767d;
 }
 
 .search-wrapper input:focus {
@@ -213,9 +227,13 @@ body {
 
 .search-wrapper svg {
     position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
     height: 50%;
-    right: 0;
-    max-height: 17.5px;
+    max-height: 16px;
+    color: #72767d;
+    pointer-events: none;
 }
 
 .search-wrapper #autocomplete-list {
@@ -237,6 +255,8 @@ body {
 }
 
 .autocomplete-item {
+    color: #dcddde;
+    text-decoration: none;
     position: relative;
     display: block;
     width: 100%;
@@ -652,4 +672,26 @@ code {
     scrollbar-color: #202225 #2f3136;
     background: #2f3136;
     border: 1px solid #202225;
+}
+/* Narrow screens: put the search box on its own line under the channel name. */
+@media screen and (max-width: 600px) {
+    .discord-section__header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .search-wrapper {
+        position: static;
+        width: 100%;
+        height: 2.25rem;
+    }
+
+    .search-wrapper form {
+        height: 100%;
+    }
+
+    .search-wrapper input:focus,
+    .search-wrapper input:focus ~ #autocomplete-list {
+        width: 100%;
+    }
 }
