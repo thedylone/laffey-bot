@@ -1,0 +1,19 @@
+# This branch holds the project page. The deploy itself runs from .github/workflows/pages.yml
+# on main, which checks this branch out, injects the kit header and footer, and publishes it.
+# Pushes here just start that run.
+name: Start page deploy
+
+on:
+  push:
+    branches: [gh-pages]
+
+permissions:
+  actions: write
+
+jobs:
+  start:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh workflow run pages.yml --repo "$GITHUB_REPOSITORY" --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
